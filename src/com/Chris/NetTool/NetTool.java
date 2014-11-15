@@ -73,14 +73,14 @@ public class NetTool extends Activity {
         LinearLayout layout = new LinearLayout(this);
 
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         setContentView(layout);
 
         LinearLayout lh = new LinearLayout(this);
 
         lh.setOrientation(LinearLayout.HORIZONTAL);
-        lh.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+        lh.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         layout.addView(lh);
 
