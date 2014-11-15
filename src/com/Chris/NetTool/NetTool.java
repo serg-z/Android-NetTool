@@ -20,7 +20,10 @@ import android.net.wifi.WifiInfo;
 
 import android.text.format.Formatter;
 
+import android.util.Pair;
 import android.util.Log;
+
+import java.util.Vector;
 
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
@@ -57,26 +60,6 @@ public class NetTool extends Activity {
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
     }
 
-    void addRow(TableLayout tl, String label, int id) {
-        TableRow tr = new TableRow(this);
-
-        tl.addView(tr);
-
-        TextView tv0 = new TextView(this);
-        TextView tv1 = new TextView(this);
-
-        tv0.setText(label);
-        tv1.setId(id);
-
-        final int p = 5;
-
-        tv0.setPadding(p, 0, p, 0);
-        tv1.setPadding(p, 0, p, 0);
-
-        tr.addView(tv0);
-        tr.addView(tv1);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,21 +77,65 @@ public class NetTool extends Activity {
 
         setContentView(layout);
 
+        LinearLayout lh = new LinearLayout(this);
+
+        lh.setOrientation(LinearLayout.HORIZONTAL);
+        lh.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+
+        layout.addView(lh);
+
         TableLayout tableLayout = new TableLayout(this);
 
-        layout.addView(tableLayout);
+        lh.addView(tableLayout);
 
-        addRow(tableLayout, "MAC", R.id.text_mac);
-        addRow(tableLayout, "Local IP", R.id.text_local_ip);
-        addRow(tableLayout, "SSID", R.id.text_ssid);
-        addRow(tableLayout, "BSSID", R.id.text_bssid);
-        addRow(tableLayout, "DNS 1", R.id.text_dns1);
-        addRow(tableLayout, "DNS 2", R.id.text_dns2);
-        addRow(tableLayout, "Gateway", R.id.text_gateway);
-        addRow(tableLayout, "Netmask", R.id.text_netmask);
-        addRow(tableLayout, "Server Address", R.id.text_server_address);
-        addRow(tableLayout, "RSSI", R.id.text_rssi);
-        addRow(tableLayout, "Link Speed", R.id.text_link_speed);
+        Vector<Pair<String, Integer>> fields = new Vector<Pair<String, Integer>>();
+
+        fields.add(Pair.create("MAC", R.id.text_mac));
+        fields.add(Pair.create("Local IP", R.id.text_local_ip));
+        fields.add(Pair.create("SSID", R.id.text_ssid));
+        fields.add(Pair.create("BSSID", R.id.text_bssid));
+        fields.add(Pair.create("DNS 1", R.id.text_dns1));
+        fields.add(Pair.create("DNS 2", R.id.text_dns2));
+        fields.add(Pair.create("Gateway", R.id.text_gateway));
+        fields.add(Pair.create("Netmask", R.id.text_netmask));
+        fields.add(Pair.create("Server Address", R.id.text_server_address));
+        fields.add(Pair.create("RSSI", R.id.text_rssi));
+        fields.add(Pair.create("Link Speed", R.id.text_link_speed));
+
+        int j = 0;
+
+        TableRow tr = null;
+
+        final int pairColumns = 2;
+
+        for (Pair<String, Integer> f : fields) {
+            if (j % pairColumns == 0) {
+                tr = new TableRow(this);
+
+                tableLayout.addView(tr);
+            }
+
+            TextView tv0 = new TextView(this);
+            TextView tv1 = new TextView(this);
+
+            tv0.setText(f.first);
+            tv1.setId(f.second);
+
+            final int p0 = 5;
+            final int p1 = 30;
+
+            tv0.setPadding(p1, 0, p0, 0);
+            tv1.setPadding(p0, 0, p1, 0);
+
+            tr.addView(tv0);
+            tr.addView(tv1);
+
+            ++j;
+        }
+
+        for (int i = 1; i < pairColumns * 2; i += 2) {
+            tableLayout.setColumnStretchable(i, true);
+        }
     }
 
     @Override
