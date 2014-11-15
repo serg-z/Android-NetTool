@@ -24,9 +24,13 @@ import android.text.format.Formatter;
 import android.util.Pair;
 import android.util.Log;
 
-import java.util.Vector;
+import android.graphics.Color;
+
+import java.util.ArrayList;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
@@ -44,6 +48,7 @@ public class NetTool extends Activity {
     WifiManager mWifiManager;
 
     LineChart mChartRssi, mChartLinkSpeed, mChartRx, mChartTx;
+    ArrayList<Integer> mChartDataRssi = new ArrayList<Integer>();
 
     void updateUI() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
@@ -93,7 +98,7 @@ public class NetTool extends Activity {
 
         lh.addView(tableLayout);
 
-        Vector<Pair<String, Integer>> fields = new Vector<Pair<String, Integer>>();
+        ArrayList<Pair<String, Integer>> fields = new ArrayList<Pair<String, Integer>>();
 
         fields.add(Pair.create("MAC", R.id.text_mac));
         fields.add(Pair.create("Local IP", R.id.text_local_ip));
@@ -166,11 +171,9 @@ public class NetTool extends Activity {
 
         mChartRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartRssi.setDescription("RSSI");
         mChartRssi.setUnit(" dBm");
-        mChartRssi.setDrawUnitsInChart(true);
-        mChartRssi.setStartAtZero(false);
 
+        setupChart(mChartRssi, "RSSI");
 
         // link speed
 
@@ -180,10 +183,9 @@ public class NetTool extends Activity {
 
         mChartLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartLinkSpeed.setDescription("Link Speed");
         mChartLinkSpeed.setUnit(" " + WifiInfo.LINK_SPEED_UNITS);
-        mChartLinkSpeed.setDrawUnitsInChart(true);
-        mChartLinkSpeed.setStartAtZero(false);
+
+        setupChart(mChartLinkSpeed, "Link Speed");
 
         // Rx and Tx
 
@@ -201,10 +203,9 @@ public class NetTool extends Activity {
 
         mChartRx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartRx.setDescription("Rx");
         mChartRx.setUnit("");
-        mChartRx.setDrawUnitsInChart(true);
-        mChartRx.setStartAtZero(false);
+
+        setupChart(mChartRx, "Rx");
 
         // Tx
 
@@ -214,10 +215,48 @@ public class NetTool extends Activity {
 
         mChartTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartTx.setDescription("Tx");
         mChartTx.setUnit("");
-        mChartTx.setDrawUnitsInChart(true);
-        mChartTx.setStartAtZero(false);
+
+        setupChart(mChartTx, "Tx");
+    }
+
+    private void setupChart(LineChart chart, String description) {
+        chart.setDescription(description);
+        chart.setDrawUnitsInChart(true);
+        chart.setStartAtZero(false);
+        chart.setDrawGridBackground(true);
+        chart.setDrawBorder(true);
+        chart.setDrawXLabels(true);
+        chart.setDrawYValues(false);
+        chart.setHighlightIndicatorEnabled(false);
+
+        addEmptyData(chart, description);
+
+        chart.getLegend().setTextColor(Color.WHITE);
+        chart.getXLabels().setTextColor(Color.WHITE);
+        chart.getYLabels().setTextColor(Color.WHITE);
+    }
+
+    private void addEmptyData(LineChart chart, String name) {
+        String[] xVals = new String[10];
+
+        for (int i = 0; i < 10; i++)
+            xVals[i] = "" + i;
+
+        LineDataSet set = new LineDataSet(null, name);
+
+        set.setLineWidth(1.0f);
+        set.setDrawCircles(false);
+        set.setDrawCubic(true);
+        set.setCubicIntensity(0.05f);
+        set.setColor(Color.RED);
+
+        LineData data = new LineData(xVals);
+
+        data.addDataSet(set);
+
+        chart.setData(data);
+        chart.invalidate();
     }
 
     @Override
