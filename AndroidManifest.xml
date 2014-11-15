@@ -21,4 +21,8 @@
         android:smallScreens="true"
         android:anyDensity="true"
         android:normalScreens="true"/>
+
+    <uses-feature android:name="android.hardware.wifi" />
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
 </manifest>

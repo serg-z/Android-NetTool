@@ -11,6 +11,15 @@ import android.widget.TextView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+import android.content.Context;
+
+import android.net.DhcpInfo;
+
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiInfo;
+
+import android.text.format.Formatter;
+
 import android.util.Log;
 
 public class NetTool extends Activity {
@@ -26,8 +35,26 @@ public class NetTool extends Activity {
         }
     };
 
+    WifiManager mWifiManager;
+
     void updateUI() {
-        Log.d(TAG, "tick");
+        WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+        DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
+
+        int rssi = wifiInfo.getRssi();
+        int linkSpeed = wifiInfo.getLinkSpeed();
+
+        ((TextView)findViewById(R.id.text_mac)).setText(wifiInfo.getMacAddress());
+        ((TextView)findViewById(R.id.text_local_ip)).setText(Formatter.formatIpAddress(wifiInfo.getIpAddress()));
+        ((TextView)findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
+        ((TextView)findViewById(R.id.text_bssid)).setText(wifiInfo.getBSSID());
+        ((TextView)findViewById(R.id.text_dns1)).setText(Formatter.formatIpAddress(dhcpInfo.dns1));
+        ((TextView)findViewById(R.id.text_dns2)).setText(Formatter.formatIpAddress(dhcpInfo.dns2));
+        ((TextView)findViewById(R.id.text_gateway)).setText(Formatter.formatIpAddress(dhcpInfo.gateway));
+        ((TextView)findViewById(R.id.text_netmask)).setText(Formatter.formatIpAddress(dhcpInfo.netmask));
+        ((TextView)findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(dhcpInfo.serverAddress));
+        ((TextView)findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
+        ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
     }
 
     void addRow(TableLayout tl, String label, int id) {
@@ -55,6 +82,8 @@ public class NetTool extends Activity {
         super.onCreate(savedInstanceState);
 
         Log.d(TAG, "Created");
+
+        mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 
         // create ui
 
