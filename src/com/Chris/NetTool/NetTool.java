@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.os.Handler;
 
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+
+import android.view.ViewGroup.LayoutParams;
 
 import android.content.Context;
 
@@ -25,6 +26,8 @@ import android.util.Log;
 
 import java.util.Vector;
 
+import com.github.mikephil.charting.charts.LineChart;
+
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
 
@@ -39,6 +42,8 @@ public class NetTool extends Activity {
     };
 
     WifiManager mWifiManager;
+
+    LineChart mChartRssi, mChartLinkSpeed, mChartRx, mChartTx;
 
     void updateUI() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
@@ -73,14 +78,14 @@ public class NetTool extends Activity {
         LinearLayout layout = new LinearLayout(this);
 
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         setContentView(layout);
 
         LinearLayout lh = new LinearLayout(this);
 
         lh.setOrientation(LinearLayout.HORIZONTAL);
-        lh.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        lh.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
 
         layout.addView(lh);
 
@@ -136,6 +141,83 @@ public class NetTool extends Activity {
         for (int i = 1; i < pairColumns * 2; i += 2) {
             tableLayout.setColumnStretchable(i, true);
         }
+
+        // create charts
+
+        LinearLayout chartsLayoutV = new LinearLayout(this);
+
+        layout.addView(chartsLayoutV);
+
+        chartsLayoutV.setOrientation(LinearLayout.VERTICAL);
+
+        // rssi and link speed
+
+        LinearLayout chartsLayoutH = new LinearLayout(this);
+
+        chartsLayoutV.addView(chartsLayoutH);
+
+        chartsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        // rssi
+
+        mChartRssi = new LineChart(this);
+
+        chartsLayoutH.addView(mChartRssi);
+
+        mChartRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        mChartRssi.setDescription("RSSI");
+        mChartRssi.setUnit(" dBm");
+        mChartRssi.setDrawUnitsInChart(true);
+        mChartRssi.setStartAtZero(false);
+
+
+        // link speed
+
+        mChartLinkSpeed = new LineChart(this);
+
+        chartsLayoutH.addView(mChartLinkSpeed);
+
+        mChartLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        mChartLinkSpeed.setDescription("Link Speed");
+        mChartLinkSpeed.setUnit(" " + WifiInfo.LINK_SPEED_UNITS);
+        mChartLinkSpeed.setDrawUnitsInChart(true);
+        mChartLinkSpeed.setStartAtZero(false);
+
+        // Rx and Tx
+
+        chartsLayoutH = new LinearLayout(this);
+
+        chartsLayoutV.addView(chartsLayoutH);
+
+        chartsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        // Rx
+
+        mChartRx = new LineChart(this);
+
+        chartsLayoutH.addView(mChartRx);
+
+        mChartRx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        mChartRx.setDescription("Rx");
+        mChartRx.setUnit("");
+        mChartRx.setDrawUnitsInChart(true);
+        mChartRx.setStartAtZero(false);
+
+        // Tx
+
+        mChartTx = new LineChart(this);
+
+        chartsLayoutH.addView(mChartTx);
+
+        mChartTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        mChartTx.setDescription("Tx");
+        mChartTx.setUnit("");
+        mChartTx.setDrawUnitsInChart(true);
+        mChartTx.setStartAtZero(false);
     }
 
     @Override
