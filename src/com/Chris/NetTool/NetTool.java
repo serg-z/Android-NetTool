@@ -11,6 +11,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 
 import android.content.Context;
 
@@ -91,6 +92,8 @@ public class NetTool extends Activity {
         super.onCreate(savedInstanceState);
 
         Log.d(TAG, "Created");
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         mWifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
 
