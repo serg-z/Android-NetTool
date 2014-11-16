@@ -7,4 +7,5 @@
     <item name="text_server_address" type="id"/>
     <item name="text_rssi" type="id"/>
     <item name="text_link_speed" type="id"/>
+    <item name="text_frequency" type="id"/>
 </resources>

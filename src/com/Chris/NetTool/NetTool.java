@@ -19,6 +19,7 @@ import android.net.DhcpInfo;
 
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
+import android.net.wifi.ScanResult;
 
 import android.text.format.Formatter;
 
@@ -55,13 +56,21 @@ public class NetTool extends Activity {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
 
+        String bssid = wifiInfo.getBSSID();
+
+        for (ScanResult r : mWifiManager.getScanResults()) {
+            if (r.BSSID.equals(bssid)) {
+                ((TextView)findViewById(R.id.text_frequency)).setText(r.frequency + " MHz");
+            }
+        }
+
         int rssi = wifiInfo.getRssi();
         int linkSpeed = wifiInfo.getLinkSpeed();
 
         ((TextView)findViewById(R.id.text_mac)).setText(wifiInfo.getMacAddress());
         ((TextView)findViewById(R.id.text_local_ip)).setText(Formatter.formatIpAddress(wifiInfo.getIpAddress()));
         ((TextView)findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
-        ((TextView)findViewById(R.id.text_bssid)).setText(wifiInfo.getBSSID());
+        ((TextView)findViewById(R.id.text_bssid)).setText(bssid);
         ((TextView)findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(dhcpInfo.serverAddress));
         ((TextView)findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
@@ -150,6 +159,7 @@ public class NetTool extends Activity {
         addRow(tableLayout1, "MAC", R.id.text_mac);
         addRow(tableLayout1, "BSSID", R.id.text_bssid);
         addRow(tableLayout1, "RSSI", R.id.text_rssi);
+        addRow(tableLayout1, "Frequency", R.id.text_frequency);
 
         // create plots
 
