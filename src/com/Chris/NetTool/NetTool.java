@@ -66,6 +66,26 @@ public class NetTool extends Activity {
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
     }
 
+    void addRow(TableLayout table, String label, int id) {
+        TableRow tr = new TableRow(this);
+
+        table.addView(tr);
+
+        TextView tv0 = new TextView(this);
+        TextView tv1 = new TextView(this);
+
+        tv0.setText(label);
+        tv1.setId(id);
+
+        final int p = 5;
+
+        tv0.setPadding(p, 0, p, 0);
+        tv1.setPadding(p, 0, p, 0);
+
+        tr.addView(tv0);
+        tr.addView(tv1);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,54 +110,26 @@ public class NetTool extends Activity {
 
         layout.addView(lh);
 
-        TableLayout tableLayout = new TableLayout(this);
+        TableLayout tableLayout0 = new TableLayout(this);
+        TableLayout tableLayout1 = new TableLayout(this);
 
-        lh.addView(tableLayout);
+        lh.addView(tableLayout0);
+        lh.addView(tableLayout1);
 
-        ArrayList<Pair<String, Integer>> fields = new ArrayList<Pair<String, Integer>>();
+        tableLayout0.setColumnStretchable(1, true);
+        tableLayout1.setColumnStretchable(1, true);
 
-        fields.add(Pair.create("MAC", R.id.text_mac));
-        fields.add(Pair.create("Local IP", R.id.text_local_ip));
-        fields.add(Pair.create("SSID", R.id.text_ssid));
-        fields.add(Pair.create("BSSID", R.id.text_bssid));
-        fields.add(Pair.create("Server Address", R.id.text_server_address));
-        fields.add(Pair.create("RSSI", R.id.text_rssi));
-        fields.add(Pair.create("Link Speed", R.id.text_link_speed));
+        tableLayout0.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        tableLayout1.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        int j = 0;
+        addRow(tableLayout0, "Local IP", R.id.text_local_ip);
+        addRow(tableLayout0, "SSID", R.id.text_ssid);
+        addRow(tableLayout0, "Server IP", R.id.text_server_address);
+        addRow(tableLayout0, "Link Speed", R.id.text_link_speed);
 
-        TableRow tr = null;
-
-        final int pairColumns = 2;
-
-        for (Pair<String, Integer> f : fields) {
-            if (j % pairColumns == 0) {
-                tr = new TableRow(this);
-
-                tableLayout.addView(tr);
-            }
-
-            TextView tv0 = new TextView(this);
-            TextView tv1 = new TextView(this);
-
-            tv0.setText(f.first);
-            tv1.setId(f.second);
-
-            final int p0 = 5;
-            final int p1 = 30;
-
-            tv0.setPadding(p1, 0, p0, 0);
-            tv1.setPadding(p0, 0, p1, 0);
-
-            tr.addView(tv0);
-            tr.addView(tv1);
-
-            ++j;
-        }
-
-        for (int i = 1; i < pairColumns * 2; i += 2) {
-            tableLayout.setColumnStretchable(i, true);
-        }
+        addRow(tableLayout1, "MAC", R.id.text_mac);
+        addRow(tableLayout1, "BSSID", R.id.text_bssid);
+        addRow(tableLayout1, "RSSI", R.id.text_rssi);
 
         // create charts
 
