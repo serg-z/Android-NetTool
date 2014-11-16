@@ -31,6 +31,7 @@ import com.androidplot.Plot;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.BoundaryMode;
 
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
@@ -174,9 +175,10 @@ public class NetTool extends Activity {
 
         mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mPlotRssi.setRangeLabel("dBm");
-
         setupPlot(mPlotRssi);
+
+        mPlotRssi.setRangeLabel("dBm");
+        mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
 
         // link speed
 
@@ -186,9 +188,10 @@ public class NetTool extends Activity {
 
         mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
-
         setupPlot(mPlotLinkSpeed);
+
+        mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
+        mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
 
         // Rx and Tx
 
@@ -208,6 +211,8 @@ public class NetTool extends Activity {
 
         setupPlot(mPlotRx);
 
+        mPlotRx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
+
         // Tx
 
         mPlotTx = new XYPlot(this, "Tx");
@@ -217,6 +222,8 @@ public class NetTool extends Activity {
         mPlotTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
         setupPlot(mPlotTx);
+
+        mPlotTx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
     }
 
     private void setupPlot(XYPlot plot) {
