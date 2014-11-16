@@ -153,7 +153,7 @@ public class GraphsFragment extends Fragment {
 
         series.useImplicitXVals();
 
-        plot.addSeries(series, new LineAndPointFormatter(Color.rgb(100, 100, 200), null, null, null));
+        plot.addSeries(series, new LineAndPointFormatter(Color.BLUE, null, Color.rgb(100, 100, 200), null));
     }
 
     void addRow(TableLayout table, String label, int id) {
