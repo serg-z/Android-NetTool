@@ -16,6 +16,7 @@ import android.view.Window;
 import android.content.Context;
 
 import android.net.DhcpInfo;
+import android.net.TrafficStats;
 
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
@@ -52,6 +53,8 @@ public class NetTool extends Activity {
 
     XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRx, mPlotTx;
 
+    long mLastRx = -1, mLastTx = -1;
+
     void updateUI() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
@@ -75,8 +78,31 @@ public class NetTool extends Activity {
         ((TextView)findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
 
+        // get rx & tx, exclude mobile data
+
+        long rx = TrafficStats.getTotalRxBytes() - TrafficStats.getMobileRxBytes();
+        long tx = TrafficStats.getTotalTxBytes() - TrafficStats.getMobileTxBytes();
+
+        long rxPerSec = 0, txPerSec = 0;
+
+        if (mLastRx != -1) {
+            rxPerSec = rx - mLastRx;
+        }
+
+        if (mLastTx != -1) {
+            txPerSec = tx - mLastTx;
+        }
+
+        mLastRx = rx;
+        mLastTx = tx;
+
+        rxPerSec /= 1024;
+        txPerSec /= 1024;
+
         addValueToSeries(mPlotRssi, rssi);
         addValueToSeries(mPlotLinkSpeed, linkSpeed);
+        addValueToSeries(mPlotRx, rxPerSec);
+        addValueToSeries(mPlotTx, txPerSec);
     }
 
     void addValueToSeries(XYPlot plot, float value) {
@@ -221,6 +247,7 @@ public class NetTool extends Activity {
 
         setupPlot(mPlotRx);
 
+        mPlotRx.setRangeLabel("KiB/s");
         mPlotRx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
 
         // Tx
@@ -233,6 +260,7 @@ public class NetTool extends Activity {
 
         setupPlot(mPlotTx);
 
+        mPlotTx.setRangeLabel("KiB/s");
         mPlotTx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
     }
 
@@ -269,6 +297,9 @@ public class NetTool extends Activity {
         Log.d(TAG, "Pause");
 
         mTimerHandler.removeCallbacks(mTimerRunnable);
+
+        mLastRx = -1;
+        mLastTx = -1;
     }
 
     @Override
