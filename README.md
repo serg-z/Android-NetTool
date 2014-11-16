@@ -2,6 +2,10 @@
 
 ## Getting libraries and SDKs
 
+Create "libs" dir
+
+    mkdir libs
+
 * Get JDK from Oracle's website, tar.gz version will work fine
 * Get Android SDK (stand-alone Android SDK Tools)
 * Get AndroidPlot library's JAR file from [it's site](http://androidplot.com/download/), put it into project's "libs" directory
@@ -16,6 +20,10 @@ export ANDROID_HOME="/home/zhur/Dev/android-sdk_r23.0.2-linux/android-sdk-linux/
 Update PATH variable before working with Android SDK calling this command:
 
     source android_paths
+
+Copy Android support library
+
+    cp $ANDROID_HOME/../extras/android/support/v4/android-support-v4.jar libs/
 
 # Android SDK Manager
 

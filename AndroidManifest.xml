@@ -7,7 +7,7 @@
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="13" />
 
     <application android:label="@string/app_name">
-        <activity android:name=".NetTool"
+        <activity android:name=".NetToolActivity"
             android:label="@string/app_name">
 
             <intent-filter>
@@ -21,6 +21,8 @@
         android:smallScreens="true"
         android:anyDensity="true"
         android:normalScreens="true"/>
+
+    <uses-library android:name="android.support.v4" android:required="true" />
 
     <uses-feature android:name="android.hardware.wifi" />
 

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <item name="view_pager" type="id"/>
+
     <item name="text_mac" type="id"/>
     <item name="text_local_ip" type="id"/>
     <item name="text_ssid" type="id"/>
