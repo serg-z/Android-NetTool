@@ -1,0 +1,8 @@
+*.properties
+*.swp
+
+bin
+gen
+libs
+
+proguard-project.txt
