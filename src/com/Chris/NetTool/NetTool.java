@@ -27,11 +27,10 @@ import android.util.Log;
 
 import android.graphics.Color;
 
-import java.util.ArrayList;
-
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
+import com.androidplot.Plot;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.LineAndPointFormatter;
 
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
@@ -48,8 +47,7 @@ public class NetTool extends Activity {
 
     WifiManager mWifiManager;
 
-    LineChart mChartRssi, mChartLinkSpeed, mChartRx, mChartTx;
-    ArrayList<Integer> mChartDataRssi = new ArrayList<Integer>();
+    XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRx, mPlotTx;
 
     void updateUI() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
@@ -134,116 +132,84 @@ public class NetTool extends Activity {
         addRow(tableLayout1, "BSSID", R.id.text_bssid);
         addRow(tableLayout1, "RSSI", R.id.text_rssi);
 
-        // create charts
+        // create plots
 
-        LinearLayout chartsLayoutV = new LinearLayout(this);
+        LinearLayout plotsLayoutV = new LinearLayout(this);
 
-        layout.addView(chartsLayoutV);
+        layout.addView(plotsLayoutV);
 
-        chartsLayoutV.setOrientation(LinearLayout.VERTICAL);
+        plotsLayoutV.setOrientation(LinearLayout.VERTICAL);
 
         // rssi and link speed
 
-        LinearLayout chartsLayoutH = new LinearLayout(this);
+        LinearLayout plotsLayoutH = new LinearLayout(this);
 
-        chartsLayoutV.addView(chartsLayoutH);
+        plotsLayoutV.addView(plotsLayoutH);
 
-        chartsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
         // rssi
 
-        mChartRssi = new LineChart(this);
+        mPlotRssi = new XYPlot(this, "RSSI");
 
-        chartsLayoutH.addView(mChartRssi);
+        plotsLayoutH.addView(mPlotRssi);
 
-        mChartRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartRssi.setUnit(" dBm");
+        mPlotRssi.setRangeLabel("dBm");
 
-        setupChart(mChartRssi, "RSSI");
+        setupPlot(mPlotRssi);
 
         // link speed
 
-        mChartLinkSpeed = new LineChart(this);
+        mPlotLinkSpeed = new XYPlot(this, "Link Speed");
 
-        chartsLayoutH.addView(mChartLinkSpeed);
+        plotsLayoutH.addView(mPlotLinkSpeed);
 
-        mChartLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartLinkSpeed.setUnit(" " + WifiInfo.LINK_SPEED_UNITS);
+        mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
 
-        setupChart(mChartLinkSpeed, "Link Speed");
+        setupPlot(mPlotLinkSpeed);
 
         // Rx and Tx
 
-        chartsLayoutH = new LinearLayout(this);
+        plotsLayoutH = new LinearLayout(this);
 
-        chartsLayoutV.addView(chartsLayoutH);
+        plotsLayoutV.addView(plotsLayoutH);
 
-        chartsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
         // Rx
 
-        mChartRx = new LineChart(this);
+        mPlotRx = new XYPlot(this, "Rx");
 
-        chartsLayoutH.addView(mChartRx);
+        plotsLayoutH.addView(mPlotRx);
 
-        mChartRx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotRx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartRx.setUnit("");
-
-        setupChart(mChartRx, "Rx");
+        setupPlot(mPlotRx);
 
         // Tx
 
-        mChartTx = new LineChart(this);
+        mPlotTx = new XYPlot(this, "Tx");
 
-        chartsLayoutH.addView(mChartTx);
+        plotsLayoutH.addView(mPlotTx);
 
-        mChartTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        mChartTx.setUnit("");
-
-        setupChart(mChartTx, "Tx");
+        setupPlot(mPlotTx);
     }
 
-    private void setupChart(LineChart chart, String description) {
-        chart.setDescription(description);
-        chart.setDrawUnitsInChart(true);
-        chart.setStartAtZero(false);
-        chart.setDrawGridBackground(true);
-        chart.setDrawBorder(true);
-        chart.setDrawXLabels(true);
-        chart.setDrawYValues(false);
-        chart.setHighlightIndicatorEnabled(false);
+    private void setupPlot(XYPlot plot) {
+        plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
+        plot.setPlotPadding(0.0f, 0.0f, 0.0f, 0.0f);
+        plot.setPlotMargins(0.0f, 0.0f, 3.0f, 0.0f);
 
-        addEmptyData(chart, description);
+        plot.getLayoutManager().remove(plot.getLegendWidget());
+        plot.getLayoutManager().remove(plot.getDomainLabelWidget());
 
-        chart.getLegend().setTextColor(Color.WHITE);
-        chart.getXLabels().setTextColor(Color.WHITE);
-        chart.getYLabels().setTextColor(Color.WHITE);
-    }
-
-    private void addEmptyData(LineChart chart, String name) {
-        String[] xVals = new String[10];
-
-        for (int i = 0; i < 10; i++)
-            xVals[i] = "" + i;
-
-        LineDataSet set = new LineDataSet(null, name);
-
-        set.setLineWidth(1.0f);
-        set.setDrawCircles(false);
-        set.setDrawCubic(true);
-        set.setCubicIntensity(0.05f);
-        set.setColor(Color.RED);
-
-        LineData data = new LineData(xVals);
-
-        data.addDataSet(set);
-
-        chart.setData(data);
-        chart.invalidate();
+        plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
     }
 
     @Override
