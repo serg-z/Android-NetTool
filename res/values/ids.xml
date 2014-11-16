@@ -4,10 +4,6 @@
     <item name="text_local_ip" type="id"/>
     <item name="text_ssid" type="id"/>
     <item name="text_bssid" type="id"/>
-    <item name="text_dns1" type="id"/>
-    <item name="text_dns2" type="id"/>
-    <item name="text_gateway" type="id"/>
-    <item name="text_netmask" type="id"/>
     <item name="text_server_address" type="id"/>
     <item name="text_rssi" type="id"/>
     <item name="text_link_speed" type="id"/>

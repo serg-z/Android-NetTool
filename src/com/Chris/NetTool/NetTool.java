@@ -61,10 +61,6 @@ public class NetTool extends Activity {
         ((TextView)findViewById(R.id.text_local_ip)).setText(Formatter.formatIpAddress(wifiInfo.getIpAddress()));
         ((TextView)findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
         ((TextView)findViewById(R.id.text_bssid)).setText(wifiInfo.getBSSID());
-        ((TextView)findViewById(R.id.text_dns1)).setText(Formatter.formatIpAddress(dhcpInfo.dns1));
-        ((TextView)findViewById(R.id.text_dns2)).setText(Formatter.formatIpAddress(dhcpInfo.dns2));
-        ((TextView)findViewById(R.id.text_gateway)).setText(Formatter.formatIpAddress(dhcpInfo.gateway));
-        ((TextView)findViewById(R.id.text_netmask)).setText(Formatter.formatIpAddress(dhcpInfo.netmask));
         ((TextView)findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(dhcpInfo.serverAddress));
         ((TextView)findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
@@ -104,10 +100,6 @@ public class NetTool extends Activity {
         fields.add(Pair.create("Local IP", R.id.text_local_ip));
         fields.add(Pair.create("SSID", R.id.text_ssid));
         fields.add(Pair.create("BSSID", R.id.text_bssid));
-        fields.add(Pair.create("DNS 1", R.id.text_dns1));
-        fields.add(Pair.create("DNS 2", R.id.text_dns2));
-        fields.add(Pair.create("Gateway", R.id.text_gateway));
-        fields.add(Pair.create("Netmask", R.id.text_netmask));
         fields.add(Pair.create("Server Address", R.id.text_server_address));
         fields.add(Pair.create("RSSI", R.id.text_rssi));
         fields.add(Pair.create("Link Speed", R.id.text_link_speed));
