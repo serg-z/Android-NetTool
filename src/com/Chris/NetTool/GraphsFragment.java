@@ -41,7 +41,7 @@ import com.androidplot.xy.BoundaryMode;
 import android.support.v4.app.Fragment;
 
 public class GraphsFragment extends Fragment {
-    private static final int HISTORY_SIZE = 10;
+    private static final int HISTORY_SIZE = 120;
 
     Handler mTimerHandler = new Handler();
 
