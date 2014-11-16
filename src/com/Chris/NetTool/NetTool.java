@@ -34,6 +34,7 @@ import com.androidplot.xy.LineAndPointFormatter;
 
 public class NetTool extends Activity {
     private static final String TAG = "NetTool";
+    private static final int HISTORY_SIZE = 10;
 
     Handler mTimerHandler = new Handler();
     Runnable mTimerRunnable = new Runnable() {
@@ -63,6 +64,23 @@ public class NetTool extends Activity {
         ((TextView)findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(dhcpInfo.serverAddress));
         ((TextView)findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
+
+        addValueToSeries(mPlotRssi, rssi);
+        addValueToSeries(mPlotLinkSpeed, linkSpeed);
+    }
+
+    void addValueToSeries(XYPlot plot, float value) {
+        if (plot != null) {
+            SimpleXYSeries series = (SimpleXYSeries)plot.getSeriesSet().iterator().next();
+
+            if (series.size() > HISTORY_SIZE) {
+                series.removeFirst();
+            }
+
+            series.addLast(null, value);
+
+            plot.redraw();
+        }
     }
 
     void addRow(TableLayout table, String label, int id) {
@@ -210,6 +228,14 @@ public class NetTool extends Activity {
         plot.getLayoutManager().remove(plot.getDomainLabelWidget());
 
         plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
+
+        // add series
+
+        SimpleXYSeries series = new SimpleXYSeries("");
+
+        series.useImplicitXVals();
+
+        plot.addSeries(series, new LineAndPointFormatter(Color.rgb(100, 100, 200), null, null, null));
     }
 
     @Override
