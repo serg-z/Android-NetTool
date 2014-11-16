@@ -4,7 +4,7 @@
 
 * Get JDK from Oracle's website, tar.gz version will work fine
 * Get Android SDK (stand-alone Android SDK Tools)
-* Get MPAndroidChart library JAR file from [it's releases on GitHub](https://github.com/PhilJay/MPAndroidChart/releases), put it into project's "libs" directory
+* Get AndroidPlot library's JAR file from [it's site](http://androidplot.com/download/), put it into project's "libs" directory
 
 Unpack JDK and Android SDK
 Copy path to root JDK directory and Android SDK's "tools" directory into android_paths script, it should look something like that:
