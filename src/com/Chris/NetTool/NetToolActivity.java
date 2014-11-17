@@ -1,8 +1,11 @@
 package com.Chris.NetTool;
 
 import android.os.Bundle;
+import android.os.PowerManager;
 
 import android.widget.LinearLayout;
+
+import android.content.Context;
 
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -20,6 +23,7 @@ public class NetToolActivity extends FragmentActivity {
 
     NetToolFragmentPagerAdapter mAdapter;
     ViewPager mViewPager;
+    PowerManager.WakeLock mWakeLock = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,11 @@ public class NetToolActivity extends FragmentActivity {
         Log.d(TAG, "Created");
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        mWakeLock = ((PowerManager)getSystemService(Context.POWER_SERVICE))
+            .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
+
+        mWakeLock.acquire();
 
         mAdapter = new NetToolFragmentPagerAdapter(getSupportFragmentManager());
 
