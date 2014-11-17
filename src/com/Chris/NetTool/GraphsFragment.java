@@ -98,14 +98,17 @@ public class GraphsFragment extends Fragment {
 
         int rssi = wifiInfo.getRssi();
         int linkSpeed = wifiInfo.getLinkSpeed();
+        int serverAddress = dhcpInfo.serverAddress;
 
         ((TextView)mActivity.findViewById(R.id.text_mac)).setText(wifiInfo.getMacAddress());
         ((TextView)mActivity.findViewById(R.id.text_local_ip)).setText(Formatter.formatIpAddress(wifiInfo.getIpAddress()));
         ((TextView)mActivity.findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
         ((TextView)mActivity.findViewById(R.id.text_bssid)).setText(bssid);
-        ((TextView)mActivity.findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(dhcpInfo.serverAddress));
+        ((TextView)mActivity.findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(serverAddress));
         ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
+
+        ((NetToolActivity)mActivity).setServerAddress(serverAddress);
 
         // get rx & tx, exclude mobile data
 

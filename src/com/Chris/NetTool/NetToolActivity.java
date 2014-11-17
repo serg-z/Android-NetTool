@@ -25,6 +25,12 @@ public class NetToolActivity extends FragmentActivity {
     ViewPager mViewPager;
     PowerManager.WakeLock mWakeLock = null;
 
+    public void setServerAddress(int address) {
+        if (address != 0 && mAdapter != null && mAdapter.mFragmentPing != null) {
+            mAdapter.mFragmentPing.setServerAddress(address);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +59,7 @@ public class NetToolActivity extends FragmentActivity {
         layout.addView(mViewPager);
 
         mViewPager.setId(R.id.view_pager);
+        mViewPager.setOffscreenPageLimit(2);
 
         mViewPager.setAdapter(mAdapter);
     }

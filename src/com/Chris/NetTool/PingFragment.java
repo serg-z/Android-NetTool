@@ -13,12 +13,23 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.View;
 
+import android.text.format.Formatter;
+
 import android.support.v4.app.Fragment;
 
 public class PingFragment extends Fragment {
     Activity mActivity;
     Button mButtonStart, mButtonStop;
     EditText mAddress;
+    int mServerAddress = 0;
+
+    public void setServerAddress(int address) {
+        if (mServerAddress != address) {
+            mServerAddress = address;
+
+            mAddress.setText(Formatter.formatIpAddress(mServerAddress));
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
