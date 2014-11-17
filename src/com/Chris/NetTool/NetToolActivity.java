@@ -9,6 +9,7 @@ import android.content.Context;
 
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.WindowManager;
 
 import android.util.Log;
 
@@ -43,6 +44,8 @@ public class NetToolActivity extends FragmentActivity {
             .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
 
         mWakeLock.acquire();
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         mAdapter = new NetToolFragmentPagerAdapter(getSupportFragmentManager());
 
