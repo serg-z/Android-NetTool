@@ -153,6 +153,8 @@ public class GraphsFragment extends Fragment {
         plot.setDomainValueFormat(new DecimalFormat("#"));
         plot.setRangeValueFormat(new DecimalFormat("#"));
 
+        plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+
         // add series
 
         SimpleXYSeries series = new SimpleXYSeries("");
