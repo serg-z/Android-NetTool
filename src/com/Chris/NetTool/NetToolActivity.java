@@ -60,6 +60,7 @@ public class NetToolActivity extends FragmentActivity {
     public static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
         GraphsFragment mFragmentGraphs = null;
         StreamFragment mFragmentStream = null;
+        PingFragment mFragmentPing = null;
 
         public NetToolFragmentPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -67,7 +68,7 @@ public class NetToolActivity extends FragmentActivity {
 
         @Override
         public int getCount() {
-            return 2;
+            return 3;
         }
 
         @Override
@@ -78,12 +79,18 @@ public class NetToolActivity extends FragmentActivity {
                 }
 
                 return mFragmentGraphs;
-            } else {
+            } else if (position == 1) {
                 if (mFragmentStream == null) {
                     mFragmentStream = new StreamFragment();
                 }
 
                 return mFragmentStream;
+            } else  {
+                if (mFragmentPing == null) {
+                    mFragmentPing = new PingFragment();
+                }
+
+                return mFragmentPing;
             }
         }
     }
