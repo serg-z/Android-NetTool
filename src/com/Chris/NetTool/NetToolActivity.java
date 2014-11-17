@@ -16,7 +16,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
 public class NetToolActivity extends FragmentActivity {
-    public static final String TAG = "NetTool";
+    private static final String TAG = "NetToolActivity";
 
     NetToolFragmentPagerAdapter mAdapter;
     ViewPager mViewPager;
@@ -24,6 +24,8 @@ public class NetToolActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "Created");
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 

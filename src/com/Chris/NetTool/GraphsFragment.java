@@ -41,6 +41,7 @@ import com.androidplot.xy.BoundaryMode;
 import android.support.v4.app.Fragment;
 
 public class GraphsFragment extends Fragment {
+    private static final String TAG = "GraphsFragment";
     private static final int HISTORY_SIZE = 120;
 
     Handler mTimerHandler = new Handler();
@@ -180,7 +181,7 @@ public class GraphsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.d(NetToolActivity.TAG, "Created");
+        Log.d(TAG, "Created");
 
         mActivity = getActivity();
 
@@ -189,6 +190,8 @@ public class GraphsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "View Created");
+
         LinearLayout layout = new LinearLayout(mActivity);
 
         layout.setOrientation(LinearLayout.VERTICAL);
