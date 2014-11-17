@@ -189,6 +189,24 @@ public class GraphsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        Log.d(TAG, "Destroy");
+
+        pause();
+
+        mWifiManager = null;
+
+        mPlotRssi = null;
+        mPlotLinkSpeed = null;
+        mPlotRx = null;
+        mPlotTx = null;
+
+        mActivity = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "View Created");
 
@@ -303,5 +321,23 @@ public class GraphsFragment extends Fragment {
         mPlotTx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
 
         return layout;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        Log.d(TAG, "Pause");
+
+        pause();
+    }
+
+    @Override
+    public void onResume () {
+        super.onResume();
+
+        Log.d(TAG, "Resume");
+
+        resume();
     }
 }

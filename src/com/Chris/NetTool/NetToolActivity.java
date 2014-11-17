@@ -46,14 +46,11 @@ public class NetToolActivity extends FragmentActivity {
         mViewPager.setId(R.id.view_pager);
 
         mViewPager.setAdapter(mAdapter);
-
-        mAdapter.mFragmentGraphs = new GraphsFragment();
-        mAdapter.mFragmentStream = new StreamFragment();
     }
 
     public static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
-        GraphsFragment mFragmentGraphs;
-        StreamFragment mFragmentStream;
+        GraphsFragment mFragmentGraphs = null;
+        StreamFragment mFragmentStream = null;
 
         public NetToolFragmentPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
@@ -67,8 +64,16 @@ public class NetToolActivity extends FragmentActivity {
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
+                if (mFragmentGraphs == null) {
+                    mFragmentGraphs = new GraphsFragment();
+                }
+
                 return mFragmentGraphs;
             } else {
+                if (mFragmentStream == null) {
+                    mFragmentStream = new StreamFragment();
+                }
+
                 return mFragmentStream;
             }
         }
@@ -85,14 +90,14 @@ public class NetToolActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
 
-        mAdapter.mFragmentGraphs.pause();
+        Log.d(TAG, "Pause");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        mAdapter.mFragmentGraphs.resume();
+        Log.d(TAG, "Resume");
     }
 
     @Override
