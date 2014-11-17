@@ -73,7 +73,7 @@ public class GraphsFragment extends Fragment {
     }
 
     public void resume() {
-        mTimerHandler.postDelayed(mTimerRunnable, 1000);
+        mTimerHandler.postDelayed(mTimerRunnable, 0);
     }
 
     void updateUI() {
