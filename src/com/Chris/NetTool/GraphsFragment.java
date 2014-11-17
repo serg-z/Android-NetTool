@@ -84,7 +84,15 @@ public class GraphsFragment extends Fragment {
 
         for (ScanResult r : mWifiManager.getScanResults()) {
             if (r.BSSID.equals(bssid)) {
-                ((TextView)mActivity.findViewById(R.id.text_frequency)).setText(r.frequency + " MHz");
+                String text = r.frequency + " MHz";
+
+                Integer channel = Frequencies.sChannels.get(r.frequency);
+
+                if (channel != null) {
+                    text += " (ch " + channel + ")";
+                }
+
+                ((TextView)mActivity.findViewById(R.id.text_frequency)).setText(text);
             }
         }
 
