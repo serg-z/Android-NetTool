@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.widget.LinearLayout;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -37,7 +36,6 @@ public class PingFragment extends Fragment implements View.OnClickListener {
     EditText mAddress;
     int mServerAddress = 0;
     PingTask mPingTask;
-    TextView mPingLog;
 
     public void setServerAddress(int address) {
         if (mServerAddress != address) {
@@ -47,10 +45,7 @@ public class PingFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void appendPingLog(String line) {
-        if (mPingLog != null) {
-            mPingLog.setText(line + "\n" + mPingLog.getText());
-        }
+    public void parsePingLog(String line) {
     }
 
     @Override
@@ -94,9 +89,7 @@ public class PingFragment extends Fragment implements View.OnClickListener {
         mButtonStop.setText("Stop");
         mButtonStop.setOnClickListener(this);
 
-        mPingLog = new TextView(mActivity);
 
-        layout.addView(mPingLog);
 
         return layout;
     }
@@ -226,7 +219,7 @@ public class PingFragment extends Fragment implements View.OnClickListener {
                     String line = mReader.readLine();
 
                     if (mPingFragment != null) {
-                        mPingFragment.appendPingLog(line);
+                        mPingFragment.parsePingLog(line);
                     }
 
                     Log.d(TAG, "OUTPUT: " + line);
