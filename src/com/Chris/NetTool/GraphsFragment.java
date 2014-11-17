@@ -40,6 +40,8 @@ import com.androidplot.xy.BoundaryMode;
 
 import android.support.v4.app.Fragment;
 
+import java.text.DecimalFormat;
+
 public class GraphsFragment extends Fragment {
     private static final String TAG = "GraphsFragment";
     private static final int HISTORY_SIZE = 120;
@@ -147,6 +149,9 @@ public class GraphsFragment extends Fragment {
         plot.getLayoutManager().remove(plot.getDomainLabelWidget());
 
         plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
+
+        plot.setDomainValueFormat(new DecimalFormat("#"));
+        plot.setRangeValueFormat(new DecimalFormat("#"));
 
         // add series
 
