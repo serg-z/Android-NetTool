@@ -16,6 +16,8 @@ import android.view.View;
 
 import android.text.format.Formatter;
 
+import android.graphics.Color;
+
 import android.util.Log;
 
 import android.support.v4.app.Fragment;
@@ -28,14 +30,27 @@ import java.io.LineNumberReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
+import java.text.DecimalFormat;
+
+import com.androidplot.Plot;
+import com.androidplot.xy.XYPlot;
+import com.androidplot.xy.SimpleXYSeries;
+import com.androidplot.xy.StepFormatter;
+import com.androidplot.xy.BoundaryMode;
+import com.androidplot.xy.XYStepMode;
+
 public class PingFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "PingFragment";
+    private static final int HISTORY_SIZE = 120;
 
     Activity mActivity;
     Button mButtonStart, mButtonStop;
     EditText mAddress;
     int mServerAddress = 0;
     PingTask mPingTask;
+
+    XYPlot mPlotPing;
+    SimpleXYSeries mSeriesPingSuccess, mSeriesPingFail;
 
     public void setServerAddress(int address) {
         if (mServerAddress != address) {
@@ -89,9 +104,63 @@ public class PingFragment extends Fragment implements View.OnClickListener {
         mButtonStop.setText("Stop");
         mButtonStop.setOnClickListener(this);
 
+        mPlotPing = new XYPlot(mActivity, "Ping");
 
+        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layout.addView(mPlotPing);
+
+        setupPlot(mPlotPing);
+
+        mSeriesPingSuccess = new SimpleXYSeries("Success");
+
+        mSeriesPingSuccess.useImplicitXVals();
+
+        StepFormatter stepFormatter = new StepFormatter(Color.RED, Color.RED);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingSuccess, stepFormatter);
+
+        mSeriesPingFail = new SimpleXYSeries("Fail");
+
+        mSeriesPingFail.useImplicitXVals();
+
+        stepFormatter = new StepFormatter(Color.BLACK, Color.BLACK);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
 
         return layout;
+    }
+
+    private void setupPlot(XYPlot plot) {
+        plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
+        plot.setPlotPadding(0.0f, 0.0f, 0.0f, 0.0f);
+        plot.setPlotMargins(0.0f, 0.0f, 3.0f, 0.0f);
+
+        plot.getLayoutManager().remove(plot.getLegendWidget());
+        plot.getLayoutManager().remove(plot.getDomainLabelWidget());
+        plot.getLayoutManager().remove(plot.getRangeLabelWidget());
+
+        plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
+
+        plot.setDomainValueFormat(new DecimalFormat("#"));
+        plot.setRangeValueFormat(new DecimalFormat("#"));
+
+        plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+        plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED);
+
+        plot.setRangeStep(XYStepMode.INCREMENT_BY_VAL, 1);
+        plot.setDomainStep(XYStepMode.INCREMENT_BY_VAL, 1);
+
+        plot.setTicksPerRangeLabel(1);
+        plot.setTicksPerDomainLabel(30);
     }
 
     @Override
