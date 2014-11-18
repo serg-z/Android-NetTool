@@ -22,13 +22,19 @@ import android.support.v4.view.ViewPager;
 public class NetToolActivity extends FragmentActivity {
     private static final String TAG = "NetToolActivity";
 
+    private static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
+    private static final String tag_fragment_stream = "android:switcher:" + R.id.view_pager + ":1";
+    private static final String tag_fragment_ping   = "android:switcher:" + R.id.view_pager + ":2";
+
     NetToolFragmentPagerAdapter mAdapter;
     ViewPager mViewPager;
     PowerManager.WakeLock mWakeLock = null;
 
     public void setServerAddress(int address) {
-        if (address != 0 && mAdapter != null && mAdapter.mFragmentPing != null) {
-            mAdapter.mFragmentPing.setServerAddress(address);
+        PingFragment fragment = (PingFragment)getSupportFragmentManager().findFragmentByTag(tag_fragment_ping);
+
+        if (address != 0 && fragment != null) {
+            fragment.setServerAddress(address);
         }
     }
 
@@ -65,13 +71,21 @@ public class NetToolActivity extends FragmentActivity {
         mViewPager.setOffscreenPageLimit(2);
 
         mViewPager.setAdapter(mAdapter);
+
+        if (savedInstanceState == null) {
+            GraphsFragment fragmentGraphs = new GraphsFragment();
+            StreamFragment fragmentStream = new StreamFragment();
+            PingFragment fragmentPing = new PingFragment();
+
+            getSupportFragmentManager().beginTransaction()
+                .add(R.id.view_pager, fragmentGraphs, tag_fragment_graphs)
+                .add(R.id.view_pager, fragmentStream, tag_fragment_stream)
+                .add(R.id.view_pager, fragmentPing, tag_fragment_ping)
+                .commit();
+        }
     }
 
     public static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
-        GraphsFragment mFragmentGraphs = null;
-        StreamFragment mFragmentStream = null;
-        PingFragment mFragmentPing = null;
-
         public NetToolFragmentPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
@@ -83,25 +97,8 @@ public class NetToolActivity extends FragmentActivity {
 
         @Override
         public Fragment getItem(int position) {
-            if (position == 0) {
-                if (mFragmentGraphs == null) {
-                    mFragmentGraphs = new GraphsFragment();
-                }
-
-                return mFragmentGraphs;
-            } else if (position == 1) {
-                if (mFragmentStream == null) {
-                    mFragmentStream = new StreamFragment();
-                }
-
-                return mFragmentStream;
-            } else  {
-                if (mFragmentPing == null) {
-                    mFragmentPing = new PingFragment();
-                }
-
-                return mFragmentPing;
-            }
+            // fragments should be already in fragment manager
+            return null;
         }
     }
 
