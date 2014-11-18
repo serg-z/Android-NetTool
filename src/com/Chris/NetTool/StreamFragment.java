@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.VideoView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.SeekBar;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,11 +49,27 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         layout.addView(mVideoAddress);
 
+        LinearLayout layoutHorizontal = new LinearLayout(mActivity);
+
+        layoutHorizontal.setOrientation(LinearLayout.HORIZONTAL);
+        layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layout.addView(layoutHorizontal);
+
+        // left
+
+        LinearLayout layoutLeft = new LinearLayout(mActivity);
+
+        layoutLeft.setOrientation(LinearLayout.VERTICAL);
+        layoutLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        layoutHorizontal.addView(layoutLeft);
+
         mVideoView = new VideoView(mActivity);
 
         mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
 
-        layout.addView(mVideoView);
+        layoutLeft.addView(mVideoView);
 
         mVideoView.setVisibility(View.VISIBLE);
 
@@ -63,7 +80,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         layoutH.setOrientation(LinearLayout.HORIZONTAL);
         layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        layout.addView(layoutH);
+        layoutLeft.addView(layoutH);
 
         mButtonPlay = new Button(mActivity);
 
@@ -104,7 +121,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         layoutH.setOrientation(LinearLayout.HORIZONTAL);
         layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        layout.addView(layoutH);
+        layoutLeft.addView(layoutH);
 
         mButtonRandomSeek = new Button(mActivity);
 
@@ -115,6 +132,38 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         mButtonRandomSeek.setText("Random Seek");
 
         mButtonRandomSeek.setEnabled(false);
+
+        //
+
+        SeekBar seekBarStreamRate = new SeekBar(mActivity);
+
+        layoutLeft.addView(seekBarStreamRate);
+
+        SeekBar seekBarTargetBufferDepth = new SeekBar(mActivity);
+
+        layoutLeft.addView(seekBarTargetBufferDepth);
+
+        SeekBar seekBarBlockSize = new SeekBar(mActivity);
+
+        layoutLeft.addView(seekBarBlockSize);
+
+        // right
+
+        LinearLayout layoutRight = new LinearLayout(mActivity);
+
+        layoutRight.setOrientation(LinearLayout.VERTICAL);
+        layoutRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT, 0.5f));
+
+        layoutHorizontal.addView(layoutRight);
+
+        VerticalProgressBar progressBarBufferDepth = new VerticalProgressBar(mActivity, null, android.R.attr.progressBarStyleHorizontal);
+
+        progressBarBufferDepth.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+        layoutRight.addView(progressBarBufferDepth);
+
+        progressBarBufferDepth.setMax(100);
+        progressBarBufferDepth.setProgress(30);
 
         return layout;
     }
