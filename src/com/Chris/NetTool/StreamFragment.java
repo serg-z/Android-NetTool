@@ -47,7 +47,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         mVideoAddress.setSingleLine(true);
 
-        mVideoAddress.setText("http://");
+        mVideoAddress.setText("http://ravewireless.com/content/StandardCycleContent/NewFamily/LATAM_ContentFull/1/2001436/divx_LATAM-MadMenChristmas_eng_video_level4_vbv9600_1200kbps.mkv");
 
         layout.addView(mVideoAddress);
 
