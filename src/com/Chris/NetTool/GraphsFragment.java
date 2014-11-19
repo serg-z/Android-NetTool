@@ -59,7 +59,8 @@ public class GraphsFragment extends Fragment {
 
     WifiManager mWifiManager;
 
-    XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRx, mPlotTx;
+    XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRxTx;
+    SimpleXYSeries mSeriesRx, mSeriesTx;
 
     Activity mActivity;
 
@@ -131,32 +132,50 @@ public class GraphsFragment extends Fragment {
         rxPerSec *= 8e-6;
         txPerSec *= 8e-6;
 
-        addValueToSeries(mPlotRssi, rssi);
-        addValueToSeries(mPlotLinkSpeed, linkSpeed);
-        addValueToSeries(mPlotRx, rxPerSec);
-        addValueToSeries(mPlotTx, txPerSec);
+        addValueToPlotSeries(mPlotRssi, rssi);
+        addValueToPlotSeries(mPlotLinkSpeed, linkSpeed);
+
+        if (mPlotRxTx != null) {
+            addValueToSeries(mSeriesRx, rxPerSec);
+            addValueToSeries(mSeriesTx, txPerSec);
+
+            mPlotRxTx.redraw();
+        }
     }
 
-    void addValueToSeries(XYPlot plot, float value) {
+    void addValueToPlotSeries(XYPlot plot, float value) {
         if (plot != null) {
             SimpleXYSeries series = (SimpleXYSeries)plot.getSeriesSet().iterator().next();
 
-            if (series.size() > HISTORY_SIZE) {
-                series.removeFirst();
-            }
-
-            series.addLast(null, value);
+            addValueToSeries(series, value);
 
             plot.redraw();
         }
     }
 
+    void addValueToSeries(SimpleXYSeries series, float value) {
+        if (series != null) {
+            if (series.size() > HISTORY_SIZE) {
+                series.removeFirst();
+            }
+
+            series.addLast(null, value);
+        }
+    }
+
     private void setupPlot(XYPlot plot) {
+        setupPlot(plot, true);
+    }
+
+    private void setupPlot(XYPlot plot, boolean removeLegend) {
         plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
         plot.setPlotPadding(0.0f, 0.0f, 0.0f, 0.0f);
         plot.setPlotMargins(0.0f, 0.0f, 3.0f, 0.0f);
 
-        plot.getLayoutManager().remove(plot.getLegendWidget());
+        if (removeLegend) {
+            plot.getLayoutManager().remove(plot.getLegendWidget());
+        }
+
         plot.getLayoutManager().remove(plot.getDomainLabelWidget());
 
         plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
@@ -165,14 +184,16 @@ public class GraphsFragment extends Fragment {
         plot.setRangeValueFormat(new DecimalFormat("#"));
 
         plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+    }
 
-        // add series
-
-        SimpleXYSeries series = new SimpleXYSeries("");
+    private SimpleXYSeries addSeries(XYPlot plot, String label, int lineColor, int fillColor) {
+        SimpleXYSeries series = new SimpleXYSeries(label);
 
         series.useImplicitXVals();
 
-        plot.addSeries(series, new LineAndPointFormatter(Color.BLUE, null, Color.rgb(100, 100, 200), null));
+        plot.addSeries(series, new LineAndPointFormatter(lineColor, null, fillColor, null));
+
+        return series;
     }
 
     void addRow(TableLayout table, String label, int id) {
@@ -218,8 +239,7 @@ public class GraphsFragment extends Fragment {
 
         mPlotRssi = null;
         mPlotLinkSpeed = null;
-        mPlotRx = null;
-        mPlotTx = null;
+        mPlotRxTx = null;
 
         mActivity = null;
     }
@@ -287,6 +307,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotRssi);
 
         setupPlot(mPlotRssi);
+        addSeries(mPlotRssi, "", Color.BLUE, Color.rgb(100, 100, 200));
 
         mPlotRssi.setRangeLabel("dBm");
         mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
@@ -300,6 +321,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotLinkSpeed);
 
         setupPlot(mPlotLinkSpeed);
+        addSeries(mPlotLinkSpeed, "", Color.BLUE, Color.rgb(100, 100, 200));
 
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
@@ -312,33 +334,22 @@ public class GraphsFragment extends Fragment {
 
         plotsLayoutV.addView(plotsLayoutH);
 
-        // Rx
+        // Rx / Tx
 
-        mPlotRx = new XYPlot(mActivity, "Rx");
+        mPlotRxTx = new XYPlot(mActivity, "Rx / Tx");
 
-        mPlotRx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotRxTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        plotsLayoutH.addView(mPlotRx);
+        plotsLayoutH.addView(mPlotRxTx);
 
-        setupPlot(mPlotRx);
+        setupPlot(mPlotRxTx, false);
 
-        mPlotRx.setRangeLabel("Mbps");
+        mSeriesRx = addSeries(mPlotRxTx, "Rx", Color.BLUE, Color.rgb(100, 100, 200));
+        mSeriesTx = addSeries(mPlotRxTx, "Tx", Color.RED, Color.rgb(200, 100, 100));
+
+        mPlotRxTx.setRangeLabel("Mbps");
         // TODO: change to 0-40 on logarithmic scale
-        mPlotRx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
-
-        // Tx
-
-        mPlotTx = new XYPlot(mActivity, "Tx");
-
-        mPlotTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
-
-        plotsLayoutH.addView(mPlotTx);
-
-        setupPlot(mPlotTx);
-
-        mPlotTx.setRangeLabel("Mbps");
-        // TODO: change to 0-40 on logarithmic scale
-        mPlotTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
+        mPlotRxTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
         return layout;
     }
