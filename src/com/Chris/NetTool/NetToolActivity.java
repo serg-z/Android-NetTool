@@ -24,19 +24,10 @@ public class NetToolActivity extends FragmentActivity {
 
     private static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
     private static final String tag_fragment_stream = "android:switcher:" + R.id.view_pager + ":1";
-    private static final String tag_fragment_ping   = "android:switcher:" + R.id.view_pager + ":2";
 
     NetToolFragmentPagerAdapter mAdapter;
     ViewPager mViewPager;
     PowerManager.WakeLock mWakeLock = null;
-
-    public void setServerAddress(int address) {
-        PingFragment fragment = (PingFragment)getSupportFragmentManager().findFragmentByTag(tag_fragment_ping);
-
-        if (address != 0 && fragment != null) {
-            fragment.setServerAddress(address);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,12 +66,10 @@ public class NetToolActivity extends FragmentActivity {
         if (savedInstanceState == null) {
             GraphsFragment fragmentGraphs = new GraphsFragment();
             StreamFragment fragmentStream = new StreamFragment();
-            PingFragment fragmentPing = new PingFragment();
 
             getSupportFragmentManager().beginTransaction()
                 .add(R.id.view_pager, fragmentGraphs, tag_fragment_graphs)
                 .add(R.id.view_pager, fragmentStream, tag_fragment_stream)
-                .add(R.id.view_pager, fragmentPing, tag_fragment_ping)
                 .commit();
         }
     }
@@ -92,7 +81,7 @@ public class NetToolActivity extends FragmentActivity {
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
 
         @Override

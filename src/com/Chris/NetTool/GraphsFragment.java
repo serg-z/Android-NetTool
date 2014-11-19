@@ -4,11 +4,14 @@ import android.app.Activity;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.AsyncTask;
 
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.Button;
+import android.widget.EditText;
 
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -37,12 +40,22 @@ import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.BoundaryMode;
+import com.androidplot.xy.StepFormatter;
+import com.androidplot.xy.XYStepMode;
 
 import android.support.v4.app.Fragment;
 
 import java.text.DecimalFormat;
 
-public class GraphsFragment extends Fragment {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+
+public class GraphsFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "GraphsFragment";
     private static final int HISTORY_SIZE = 120;
 
@@ -61,6 +74,13 @@ public class GraphsFragment extends Fragment {
 
     XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRxTx;
     SimpleXYSeries mSeriesRx, mSeriesTx;
+
+    Button mButtonPingStart, mButtonPingStop;
+    EditText mEditPingAddress;
+    int mPingAddress = 0;
+    PingTask mPingTask;
+    XYPlot mPlotPing;
+    SimpleXYSeries mSeriesPingSuccess, mSeriesPingFail;
 
     Activity mActivity;
 
@@ -109,7 +129,7 @@ public class GraphsFragment extends Fragment {
         ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
         ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
 
-        ((NetToolActivity)mActivity).setServerAddress(serverAddress);
+        setPingServerAddress(serverAddress);
 
         // get rx & tx, exclude mobile data
 
@@ -184,6 +204,30 @@ public class GraphsFragment extends Fragment {
         plot.setRangeValueFormat(new DecimalFormat("#"));
 
         plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+    }
+
+    private void setupPlotPing(XYPlot plot) {
+        plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
+        plot.setPlotPadding(0.0f, 0.0f, 0.0f, 0.0f);
+        plot.setPlotMargins(0.0f, 0.0f, 3.0f, 0.0f);
+
+        plot.getLayoutManager().remove(plot.getLegendWidget());
+        plot.getLayoutManager().remove(plot.getDomainLabelWidget());
+        plot.getLayoutManager().remove(plot.getRangeLabelWidget());
+
+        plot.setBorderStyle(Plot.BorderStyle.NONE, 0.0f, 0.0f);
+
+        plot.setDomainValueFormat(new DecimalFormat("#"));
+        plot.setRangeValueFormat(new DecimalFormat("#"));
+
+        plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
+        plot.setRangeBoundaries(0, 1, BoundaryMode.FIXED);
+
+        plot.setRangeStep(XYStepMode.INCREMENT_BY_VAL, 1);
+        plot.setDomainStep(XYStepMode.INCREMENT_BY_VAL, 1);
+
+        plot.setTicksPerRangeLabel(1);
+        plot.setTicksPerDomainLabel(30);
     }
 
     private SimpleXYSeries addSeries(XYPlot plot, String label, int lineColor, int fillColor) {
@@ -351,6 +395,81 @@ public class GraphsFragment extends Fragment {
         // TODO: change to 0-40 on logarithmic scale
         mPlotRxTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
+        // ping
+
+        LinearLayout layoutPing = new LinearLayout(mActivity);
+
+        layoutPing.setOrientation(LinearLayout.VERTICAL);
+        layoutPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+
+        plotsLayoutH.addView(layoutPing);
+
+        mEditPingAddress = new EditText(mActivity);
+
+        mEditPingAddress.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layoutPing.addView(mEditPingAddress);
+
+        mEditPingAddress.setSingleLine(true);
+        mEditPingAddress.setText("localhost");
+
+        // ping buttons
+
+        LinearLayout layoutH = new LinearLayout(mActivity);
+
+        layoutH.setOrientation(LinearLayout.HORIZONTAL);
+        layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layoutPing.addView(layoutH);
+
+        mButtonPingStart = new Button(mActivity);
+
+        layoutH.addView(mButtonPingStart);
+
+        mButtonPingStart.setText("Start");
+        mButtonPingStart.setOnClickListener(this);
+
+        mButtonPingStop = new Button(mActivity);
+
+        layoutH.addView(mButtonPingStop);
+
+        mButtonPingStop.setText("Stop");
+        mButtonPingStop.setOnClickListener(this);
+
+        // ping plot
+
+        mPlotPing = new XYPlot(mActivity, "Ping");
+
+        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layoutPing.addView(mPlotPing);
+
+        setupPlotPing(mPlotPing);
+
+        mSeriesPingSuccess = new SimpleXYSeries("Success");
+
+        mSeriesPingSuccess.useImplicitXVals();
+
+        StepFormatter stepFormatter = new StepFormatter(Color.RED, Color.RED);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingSuccess, stepFormatter);
+
+        mSeriesPingFail = new SimpleXYSeries("Fail");
+
+        mSeriesPingFail.useImplicitXVals();
+
+        stepFormatter = new StepFormatter(Color.BLACK, Color.BLACK);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
+
         return layout;
     }
 
@@ -370,5 +489,137 @@ public class GraphsFragment extends Fragment {
         Log.d(TAG, "Resume");
 
         resume();
+    }
+
+    public void onClick(View view) {
+        if (view == mButtonPingStart) {
+            pingStart();
+        } else if (view == mButtonPingStop) {
+            pingStop();
+        }
+    }
+
+    protected void setPingServerAddress(int address) {
+        if (mPingAddress != address) {
+            mPingAddress = address;
+
+            mEditPingAddress.setText(Formatter.formatIpAddress(mPingAddress));
+        }
+    }
+
+    protected void pingStart() {
+        if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.FINISHED) {
+            mPingTask.stop();
+
+            mPingTask = null;
+        }
+
+        if (mPingTask == null) {
+            mPingTask = new PingTask();
+
+            mPingTask.mFragment = this;
+        }
+
+        if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
+            mPingTask.execute(mEditPingAddress.getText().toString());
+        }
+    }
+
+    protected void pingStop() {
+        if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mPingTask.stop();
+
+            mPingTask = null;
+        }
+    }
+
+    public void parsePingLog(String line) {
+    }
+
+    class PingTask extends AsyncTask<String, Void, Void> {
+        PipedOutputStream mPipedOut;
+        PipedInputStream mPipedIn;
+        LineNumberReader mReader;
+        Process mProcess;
+        GraphsFragment mFragment;
+
+        @Override
+        protected void onPreExecute() {
+            mPipedOut = new PipedOutputStream();
+
+            try {
+                mPipedIn = new PipedInputStream(mPipedOut);
+                mReader = new LineNumberReader(new InputStreamReader(mPipedIn));
+            } catch (IOException e) {
+                cancel(true);
+            }
+        }
+
+        public void stop() {
+            Process p = mProcess;
+
+            if (p != null) {
+                p.destroy();
+            }
+
+            cancel(true);
+        }
+
+        @Override
+        protected Void doInBackground(String... params) {
+            try {
+                mProcess = new ProcessBuilder()
+                    .command("/system/bin/ping", params[0])
+                    .redirectErrorStream(true)
+                    .start();
+
+                try {
+                    InputStream in = mProcess.getInputStream();
+                    OutputStream out = mProcess.getOutputStream();
+
+                    byte[] buffer = new byte[1024];
+                    int count;
+
+                    while ((count = in.read(buffer)) != -1) {
+                        mPipedOut.write(buffer, 0, count);
+                        publishProgress();
+
+                        if (isCancelled()) {
+                            Log.d(TAG, "PingTask cancelled");
+
+                            break;
+                        }
+                    }
+
+                    out.close();
+                    in.close();
+
+                    mPipedOut.close();
+                    mPipedIn.close();
+                } finally {
+                    mProcess.destroy();
+                    mProcess = null;
+                }
+            } catch (IOException e) {
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            try {
+                while (mReader.ready()) {
+                    String line = mReader.readLine();
+
+                    if (mFragment != null) {
+                        mFragment.parsePingLog(line);
+                    }
+
+                    Log.d(TAG, "OUTPUT: " + line);
+                }
+            } catch (IOException t) {
+            }
+        }
     }
 }
