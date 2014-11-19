@@ -128,8 +128,8 @@ public class GraphsFragment extends Fragment {
         mLastRx = rx;
         mLastTx = tx;
 
-        rxPerSec /= 1024;
-        txPerSec /= 1024;
+        rxPerSec *= 8e-6;
+        txPerSec *= 8e-6;
 
         addValueToSeries(mPlotRssi, rssi);
         addValueToSeries(mPlotLinkSpeed, linkSpeed);
@@ -322,8 +322,9 @@ public class GraphsFragment extends Fragment {
 
         setupPlot(mPlotRx);
 
-        mPlotRx.setRangeLabel("KiB/s");
-        mPlotRx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
+        mPlotRx.setRangeLabel("Mbps");
+        // TODO: change to 0-40 on logarithmic scale
+        mPlotRx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
         // Tx
 
@@ -335,8 +336,9 @@ public class GraphsFragment extends Fragment {
 
         setupPlot(mPlotTx);
 
-        mPlotTx.setRangeLabel("KiB/s");
-        mPlotTx.setRangeBoundaries(0, 3000, BoundaryMode.FIXED);
+        mPlotTx.setRangeLabel("Mbps");
+        // TODO: change to 0-40 on logarithmic scale
+        mPlotTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
         return layout;
     }
