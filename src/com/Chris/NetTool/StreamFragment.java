@@ -45,6 +45,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         mVideoAddress = new EditText(mActivity);
 
+        mVideoAddress.setSingleLine(true);
+
         mVideoAddress.setText("http://");
 
         layout.addView(mVideoAddress);
