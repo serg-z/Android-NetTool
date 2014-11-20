@@ -10,8 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.Button;
-import android.widget.EditText;
 
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -55,9 +53,15 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-public class GraphsFragment extends Fragment implements View.OnClickListener {
+public class GraphsFragment extends Fragment {
     private static final String TAG = "GraphsFragment";
     private static final int HISTORY_SIZE = 120;
+
+    public interface OnWifiInfoListener {
+        public void onServerAddressObtained(int address);
+    }
+
+    OnWifiInfoListener mWifiInfoCallback;
 
     Handler mTimerHandler = new Handler();
 
@@ -75,8 +79,6 @@ public class GraphsFragment extends Fragment implements View.OnClickListener {
     XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRxTx;
     SimpleXYSeries mSeriesRx, mSeriesTx;
 
-    Button mButtonPingStart, mButtonPingStop;
-    EditText mEditPingAddress;
     int mPingAddress = 0;
     PingTask mPingTask;
     XYPlot mPlotPing;
@@ -404,38 +406,6 @@ public class GraphsFragment extends Fragment implements View.OnClickListener {
 
         plotsLayoutH.addView(layoutPing);
 
-        mEditPingAddress = new EditText(mActivity);
-
-        mEditPingAddress.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-        layoutPing.addView(mEditPingAddress);
-
-        mEditPingAddress.setSingleLine(true);
-        mEditPingAddress.setText("localhost");
-
-        // ping buttons
-
-        LinearLayout layoutH = new LinearLayout(mActivity);
-
-        layoutH.setOrientation(LinearLayout.HORIZONTAL);
-        layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-        layoutPing.addView(layoutH);
-
-        mButtonPingStart = new Button(mActivity);
-
-        layoutH.addView(mButtonPingStart);
-
-        mButtonPingStart.setText("Start");
-        mButtonPingStart.setOnClickListener(this);
-
-        mButtonPingStop = new Button(mActivity);
-
-        layoutH.addView(mButtonPingStop);
-
-        mButtonPingStop.setText("Stop");
-        mButtonPingStop.setOnClickListener(this);
-
         // ping plot
 
         mPlotPing = new XYPlot(mActivity, "Ping");
@@ -474,6 +444,17 @@ public class GraphsFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mWifiInfoCallback = (OnWifiInfoListener)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnWifiInfoListener");
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 
@@ -491,23 +472,15 @@ public class GraphsFragment extends Fragment implements View.OnClickListener {
         resume();
     }
 
-    public void onClick(View view) {
-        if (view == mButtonPingStart) {
-            pingStart();
-        } else if (view == mButtonPingStop) {
-            pingStop();
-        }
-    }
-
     protected void setPingServerAddress(int address) {
         if (mPingAddress != address) {
             mPingAddress = address;
 
-            mEditPingAddress.setText(Formatter.formatIpAddress(mPingAddress));
+            mWifiInfoCallback.onServerAddressObtained(mPingAddress);
         }
     }
 
-    protected void pingStart() {
+    public void pingStart(String address) {
         if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.FINISHED) {
             mPingTask.stop();
 
@@ -521,11 +494,11 @@ public class GraphsFragment extends Fragment implements View.OnClickListener {
         }
 
         if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
-            mPingTask.execute(mEditPingAddress.getText().toString());
+            mPingTask.execute(address);
         }
     }
 
-    protected void pingStop() {
+    public void pingStop() {
         if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.RUNNING) {
             mPingTask.stop();
 
