@@ -210,6 +210,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         // right
 
+/*
         LinearLayout layoutRight = new LinearLayout(mActivity);
 
         layoutRight.setOrientation(LinearLayout.VERTICAL);
@@ -225,6 +226,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         progressBarBufferDepth.setMax(100);
         progressBarBufferDepth.setProgress(30);
+*/
 
         onProgressChanged(null, 0, false);
 
