@@ -75,14 +75,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         layoutHorizontal.addView(layoutLeft);
 
-        mVideoView = new VideoView(mActivity);
-
-        mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
-
-        layoutLeft.addView(mVideoView);
-
-        mVideoView.setVisibility(View.VISIBLE);
-
         // control buttons
 
         LinearLayout layoutH = new LinearLayout(mActivity);
@@ -227,6 +219,14 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
         progressBarBufferDepth.setMax(100);
         progressBarBufferDepth.setProgress(30);
 */
+
+        mVideoView = new VideoView(mActivity);
+
+        mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
+
+        layoutLeft.addView(mVideoView);
+
+        mVideoView.setVisibility(View.VISIBLE);
 
         onProgressChanged(null, 0, false);
 
