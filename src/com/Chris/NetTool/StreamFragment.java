@@ -10,6 +10,7 @@ import android.widget.VideoView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +23,19 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 
-public class StreamFragment extends Fragment implements View.OnClickListener {
+public class StreamFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+    private static final String TAG = "StreamFragment";
+
     Activity mActivity;
     VideoView mVideoView;
     EditText mVideoAddress;
     Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
+    SeekBar mSeekBarBitrate, mSeekBarBufferSize, mSeekBarChunkSize;
+    TextView mTextParams;
     boolean mVideoIsPaused = false;
+    CheckBox mCheckBoxUseVideoView;
+
+    Streamer mStreamer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,6 +124,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         checkBoxRepeat.setEnabled(false);
 
+        mCheckBoxUseVideoView = new CheckBox(mActivity);
+
+        layoutH.addView(mCheckBoxUseVideoView);
+
+        mCheckBoxUseVideoView.setText("[use video view]");
+
         //
 
         layoutH = new LinearLayout(mActivity);
@@ -137,17 +151,62 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         //
 
-        SeekBar seekBarStreamRate = new SeekBar(mActivity);
+        TextView textView = new TextView(mActivity);
 
-        layoutLeft.addView(seekBarStreamRate);
+        layoutLeft.addView(textView);
 
-        SeekBar seekBarTargetBufferDepth = new SeekBar(mActivity);
+        textView.setText("Bitrate");
 
-        layoutLeft.addView(seekBarTargetBufferDepth);
+        mSeekBarBitrate = new SeekBar(mActivity);
 
-        SeekBar seekBarBlockSize = new SeekBar(mActivity);
+        layoutLeft.addView(mSeekBarBitrate);
 
-        layoutLeft.addView(seekBarBlockSize);
+        mSeekBarBitrate.setMax(1500);
+        mSeekBarBitrate.setProgress(1000);
+
+        mSeekBarBitrate.setOnSeekBarChangeListener(this);
+
+        //
+
+        textView = new TextView(mActivity);
+
+        layoutLeft.addView(textView);
+
+        textView.setText("Buffer size");
+
+        mSeekBarBufferSize = new SeekBar(mActivity);
+
+        layoutLeft.addView(mSeekBarBufferSize);
+
+        mSeekBarBufferSize.setMax(240);
+        mSeekBarBufferSize.setProgress(16);
+
+        mSeekBarBufferSize.setOnSeekBarChangeListener(this);
+
+        mSeekBarBufferSize.setEnabled(false);
+
+        //
+
+        textView = new TextView(mActivity);
+
+        layoutLeft.addView(textView);
+
+        textView.setText("Chunk size");
+
+        mSeekBarChunkSize = new SeekBar(mActivity);
+
+        layoutLeft.addView(mSeekBarChunkSize);
+
+        mSeekBarChunkSize.setMax(20);
+        mSeekBarChunkSize.setProgress(2);
+
+        mSeekBarChunkSize.setOnSeekBarChangeListener(this);
+
+        //
+
+        mTextParams = new TextView(mActivity);
+
+        layoutLeft.addView(mTextParams);
 
         // right
 
@@ -167,7 +226,23 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         progressBarBufferDepth.setMax(100);
         progressBarBufferDepth.setProgress(30);
 
+        onProgressChanged(null, 0, false);
+
         return layout;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mStreamer != null) {
+            mStreamer.stop();
+        }
     }
 
     public void onClick(View view) {
@@ -176,19 +251,55 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
                 mVideoView.setVideoURI(Uri.parse(mVideoAddress.getText().toString()));
             }
 
-            mVideoView.start();
-
             mVideoIsPaused = false;
+
+            if (mCheckBoxUseVideoView.isChecked()) {
+                mVideoView.start();
+            } else {
+                int bitrate = mSeekBarBitrate.getProgress();
+                int bufferSize = mSeekBarBufferSize.getProgress();
+                int chunkSize = mSeekBarChunkSize.getProgress();
+
+                if (bitrate > 0 && bufferSize > 0 && chunkSize > 0) {
+                    mStreamer = new Streamer(mVideoAddress.getText().toString(), bitrate, chunkSize, bufferSize);
+                }
+            }
         } else if (view == mButtonPause) {
-            mVideoView.pause();
+            if (mCheckBoxUseVideoView.isChecked()) {
+                mVideoView.pause();
+            } else {
+            }
 
             mVideoIsPaused = true;
         } else if (view == mButtonStop) {
-            mVideoView.stopPlayback();
+            if (mCheckBoxUseVideoView.isChecked()) {
+                mVideoView.stopPlayback();
+            } else {
+                mStreamer.stop();
+
+                mStreamer = null;
+            }
 
             mVideoIsPaused = false;
         } else if (view == mButtonRandomSeek) {
-            mVideoView.seekTo(0);
+            if (mCheckBoxUseVideoView.isChecked()) {
+                mVideoView.seekTo(0);
+            } else {
+            }
         }
+    }
+
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        mTextParams.setText(String.format(
+            "Bitrate: %d, Buffer size: %d, Chunk size: %d",
+            mSeekBarBitrate.getProgress(),
+            mSeekBarBufferSize.getProgress(),
+            mSeekBarChunkSize.getProgress()));
+    }
+
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    public void onStopTrackingTouch(SeekBar seekBar) {
     }
 }
