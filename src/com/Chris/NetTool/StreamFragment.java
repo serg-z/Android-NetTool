@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
+import android.text.InputType;
+
 import android.net.Uri;
 
 import android.support.v4.app.Fragment;
@@ -51,6 +53,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         mVideoAddress = new EditText(mActivity);
 
         mVideoAddress.setSingleLine(true);
+        mVideoAddress.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
 
         mVideoAddress.setText("http://ravewireless.com/content/StandardCycleContent/NewFamily/LATAM_ContentFull/1/2001436/divx_LATAM-MadMenChristmas_eng_video_level4_vbv9600_1200kbps.mkv");
 
