@@ -23,6 +23,9 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 
+import java.net.URL;
+import java.net.MalformedURLException;
+
 public class StreamFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "StreamFragment";
 
@@ -231,8 +234,20 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
     public void onClick(View view) {
         if (view == mButtonPlay) {
+            URL url = null;
+
+            try {
+                url = new URL(mVideoAddress.getText().toString().trim());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+
+                mVideoAddress.setError("URL is malformed");
+
+                return;
+            }
+
             if (!mVideoIsPaused) {
-                mVideoView.setVideoURI(Uri.parse(mVideoAddress.getText().toString()));
+                mVideoView.setVideoURI(Uri.parse(url.toString()));
             }
 
             mVideoIsPaused = false;
@@ -245,7 +260,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
                 int chunkSize = mSliderChunkSize.getAdjustedProgress();
 
                 if (bitrate > 0 && bufferSize > 0 && chunkSize > 0) {
-                    mStreamer = new Streamer(mVideoAddress.getText().toString(), bitrate, chunkSize, bufferSize);
+                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
                 }
             }
         } else if (view == mButtonPause) {

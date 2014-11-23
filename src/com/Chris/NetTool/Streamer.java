@@ -29,12 +29,12 @@ public class Streamer {
 
     Thread mConnectionThread;
 
-    Streamer(String urlString, int bitrate, int chunkSize, int bufferSize) {
+    Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
         mBitrate = bitrate;
         mChunkSize = chunkSize;
         mBufferSize = bufferSize;
 
-        mConnectionThread = new Thread(new ConnectionThread(urlString, mBitrate, mChunkSize, mBufferSize));
+        mConnectionThread = new Thread(new ConnectionThread(url, mBitrate, mChunkSize, mBufferSize));
 
         mConnectionThread.start();
     }
@@ -44,12 +44,12 @@ public class Streamer {
     }
 
     class ConnectionThread implements Runnable {
-        String mUrlString;
+        URL mUrl;
 
-        ConnectionThread(String urlString, int bitrate, int chunkSize, int bufferSize) {
+        ConnectionThread(URL url, int bitrate, int chunkSize, int bufferSize) {
             super();
 
-            mUrlString = urlString;
+            mUrl = url;
         }
 
         @Override
@@ -75,9 +75,7 @@ public class Streamer {
                         return;
                     }
 
-                    URL url = new URL(mUrlString);
-
-                    HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+                    HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
                     Log.d(TAG, String.format("Requesting %d-%d", rangeFrom, rangeTo));
 
