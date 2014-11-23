@@ -1,6 +1,7 @@
 package com.Chris.NetTool;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 
 import android.os.Bundle;
 
@@ -26,7 +27,7 @@ import android.util.Log;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-public class StreamFragment extends Fragment implements View.OnClickListener {
+public class StreamFragment extends Fragment implements View.OnClickListener, Streamer.OnDepthBufferLoadChangedListener {
     private static final String TAG = "StreamFragment";
 
     Activity mActivity;
@@ -34,6 +35,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
     EditText mVideoAddress;
     Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
     Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
+    VerticalProgressBar mProgressBarBufferDepth;
     boolean mVideoIsPaused = false;
     CheckBox mCheckBoxUseVideoView;
 
@@ -192,14 +194,14 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         layoutHorizontal.addView(layoutRight);
 
-        VerticalProgressBar progressBarBufferDepth = new VerticalProgressBar(mActivity, null, android.R.attr.progressBarStyleHorizontal);
+        mProgressBarBufferDepth = new VerticalProgressBar(mActivity, null, android.R.attr.progressBarStyleHorizontal);
 
-        progressBarBufferDepth.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        mProgressBarBufferDepth.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        layoutRight.addView(progressBarBufferDepth);
+        layoutRight.addView(mProgressBarBufferDepth);
 
-        progressBarBufferDepth.setMax(100);
-        progressBarBufferDepth.setProgress(30);
+        mProgressBarBufferDepth.setMax(100);
+        mProgressBarBufferDepth.setProgress(0);
 
         LinearLayout layoutVideo = new LinearLayout(mActivity);
 
@@ -229,6 +231,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         if (mStreamer != null) {
             mStreamer.stop();
+
+            mProgressBarBufferDepth.setProgress(0);
         }
     }
 
@@ -259,8 +263,24 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
                 int bufferSize = mSliderBufferSize.getAdjustedProgress();
                 int chunkSize = mSliderChunkSize.getAdjustedProgress();
 
+                if (bufferSize < chunkSize) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
+
+                    alertDialogBuilder
+                        .setMessage("Buffer size should be greater or equal to chunk size")
+                        .setTitle("Invalid buffer size");
+
+
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
+
+                    return;
+                }
+
                 if (bitrate > 0 && bufferSize > 0 && chunkSize > 0) {
                     mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
+
+                    mStreamer.setOnDepthBufferLoadChangedListener(this);
                 }
             }
         } else if (view == mButtonPause) {
@@ -278,6 +298,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
                     mStreamer.stop();
 
                     mStreamer = null;
+
+                    mProgressBarBufferDepth.setProgress(0);
                 }
             }
 
@@ -288,5 +310,11 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
             } else {
             }
         }
+    }
+
+    @Override
+    public void onDepthBufferLoadChanged(int value) {
+        mProgressBarBufferDepth.setProgress(value);
+        mProgressBarBufferDepth.invalidate();
     }
 }

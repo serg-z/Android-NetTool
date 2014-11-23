@@ -1,5 +1,9 @@
 package com.Chris.NetTool;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.Looper;
+
 import android.util.Log;
 
 import java.net.URL;
@@ -14,6 +18,10 @@ import java.util.regex.Matcher;
 public class Streamer {
     private static final String TAG = "Streamer";
 
+    public interface OnDepthBufferLoadChangedListener {
+        public void onDepthBufferLoadChanged(int value);
+    }
+
     public class InvalidContentSizeException extends Exception {
         public InvalidContentSizeException(String message) {
             super(message);
@@ -27,20 +35,97 @@ public class Streamer {
     // in seconds
     final int mBufferSize;
 
+    // sizes in bytes
+    final int mDataSizePerSecond;
+    final int mChunkDataSize;
+    final int mBufferCapacity;
+
+    OnDepthBufferLoadChangedListener mOnDepthBufferLoadChangedListener = null;
+
     Thread mConnectionThread;
+
+    DepthBuffer mDepthBuffer = new DepthBuffer();
+
+    Handler mTimerHandler = new Handler();
+
+    Runnable mTimerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mDepthBuffer.take(mDataSizePerSecond);
+
+            mTimerHandler.postDelayed(this, 1000);
+        }
+    };
+
+    Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message inputMessage) {
+            if (mOnDepthBufferLoadChangedListener != null) {
+                int load = (int)((float)((Integer)inputMessage.obj * 100) / mBufferCapacity);
+
+                Log.d(TAG, String.format("Depth buffer load: %d%%", load));
+
+                mOnDepthBufferLoadChangedListener.onDepthBufferLoadChanged(load);
+            }
+        }
+    };
 
     Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
         mBitrate = bitrate;
         mChunkSize = chunkSize;
         mBufferSize = bufferSize;
 
+        mDataSizePerSecond = mBitrate * (1000 / 8);
+        mChunkDataSize = mDataSizePerSecond * mChunkSize;
+        mBufferCapacity = mDataSizePerSecond * mBufferSize;
+
         mConnectionThread = new Thread(new ConnectionThread(url, mBitrate, mChunkSize, mBufferSize));
 
         mConnectionThread.start();
+
+        mTimerHandler.postDelayed(mTimerRunnable, 1000);
     }
 
     public void stop() {
         mConnectionThread.interrupt();
+
+        mTimerHandler.removeCallbacks(mTimerRunnable);
+    }
+
+    public void setOnDepthBufferLoadChangedListener(OnDepthBufferLoadChangedListener listener) {
+        mOnDepthBufferLoadChangedListener = listener;
+    }
+
+    class DepthBuffer {
+        int mSize = 0;
+
+        public synchronized void put(int size) {
+            mSize += size;
+
+            Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
+
+            Message message = mHandler.obtainMessage(0, new Integer(mSize));
+
+            message.sendToTarget();
+        }
+
+        public synchronized void take(int size) {
+            if (mSize == 0) {
+                return;
+            }
+
+            mSize -= Math.min(mSize, size);
+
+            Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
+
+            Message message = mHandler.obtainMessage(0, new Integer(mSize));
+
+            message.sendToTarget();
+        }
+
+        public synchronized int getSize() {
+            return mSize;
+        }
     }
 
     class ConnectionThread implements Runnable {
@@ -56,11 +141,6 @@ public class Streamer {
         public void run() {
             Log.d(TAG, String.format("Connection thread started [bitrate=%d, buffer=%d, chunk=%d]", mBitrate, mBufferSize, mChunkSize));
 
-            // sizes in bytes
-            final int oneSecondDataSize = mBitrate * (1000 / 8);
-            final int chunkDataSize = oneSecondDataSize * mChunkSize;
-            final int bufferDataSize = oneSecondDataSize * mBufferSize;
-
             try {
                 int contentSize = -1;
                 int receivedContentSize = 0;
@@ -74,6 +154,18 @@ public class Streamer {
 
                         return;
                     }
+
+                    int bufferCurrentSize = mDepthBuffer.getSize();
+
+                    if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
+                        Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
+                            bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize, mBufferCapacity));
+                    }
+
+                    while (mDepthBuffer.getSize() + mChunkDataSize > mBufferCapacity) {
+                    }
+
+                    Log.d(TAG, String.format("Buffer available (empty: %d)", mBufferCapacity - mDepthBuffer.getSize()));
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
@@ -94,7 +186,7 @@ public class Streamer {
 
                                 Log.d(TAG, "Content size: " + contentSize);
 
-                                rangeTo = Math.min(contentSize - 1, chunkDataSize - 1);
+                                rangeTo = Math.min(contentSize - 1, mChunkDataSize - 1);
 
                                 continue;
                             }
@@ -120,10 +212,12 @@ public class Streamer {
                             throw new InvalidContentSizeException("Can't obtain content size");
                         }
 
+                        mDepthBuffer.put(receivedSize);
+
                         Log.d(TAG, "=====");
 
                         rangeFrom = rangeTo + 1;
-                        rangeTo = Math.min(contentSize - 1, rangeFrom + chunkDataSize - 1);
+                        rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
 
                         receivedContentSize += receivedSize;
                     } finally {
