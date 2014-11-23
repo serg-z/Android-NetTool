@@ -113,12 +113,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         checkBoxRepeat.setEnabled(false);
 
-        mCheckBoxUseVideoView = new CheckBox(mActivity);
-
-        layoutLeft.addView(mCheckBoxUseVideoView);
-
-        mCheckBoxUseVideoView.setText("[use video view]");
-
         //
 
         layoutH = new LinearLayout(mActivity);
@@ -137,6 +131,14 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         mButtonRandomSeek.setText("Random Seek");
 
         mButtonRandomSeek.setEnabled(false);
+
+        //
+
+        mCheckBoxUseVideoView = new CheckBox(mActivity);
+
+        layoutH.addView(mCheckBoxUseVideoView);
+
+        mCheckBoxUseVideoView.setText("[use video view]");
 
         //
 
