@@ -54,7 +54,7 @@ public class Streamer {
 
         @Override
         public void run() {
-            Log.d(TAG, "Connection thread started");
+            Log.d(TAG, String.format("Connection thread started [bitrate=%d, buffer=%d, chunk=%d]", mBitrate, mBufferSize, mChunkSize));
 
             // sizes in bytes
             final int oneSecondDataSize = mBitrate * (1000 / 8);

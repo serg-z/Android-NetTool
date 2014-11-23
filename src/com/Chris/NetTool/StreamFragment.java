@@ -9,8 +9,6 @@ import android.widget.EditText;
 import android.widget.VideoView;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,15 +21,14 @@ import android.support.v4.app.Fragment;
 
 import android.util.Log;
 
-public class StreamFragment extends Fragment implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+public class StreamFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "StreamFragment";
 
     Activity mActivity;
     VideoView mVideoView;
     EditText mVideoAddress;
     Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
-    SeekBar mSeekBarBitrate, mSeekBarBufferSize, mSeekBarChunkSize;
-    TextView mTextParams;
+    Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
     boolean mVideoIsPaused = false;
     CheckBox mCheckBoxUseVideoView;
 
@@ -118,7 +115,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         mCheckBoxUseVideoView = new CheckBox(mActivity);
 
-        layoutH.addView(mCheckBoxUseVideoView);
+        layoutLeft.addView(mCheckBoxUseVideoView);
 
         mCheckBoxUseVideoView.setText("[use video view]");
 
@@ -143,62 +140,40 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         //
 
-        TextView textView = new TextView(mActivity);
+        mSliderBitrate = new Slider(mActivity);
 
-        layoutLeft.addView(textView);
+        mSliderBitrate.setLabel("Bitrate (Kbps)");
+        mSliderBitrate.setMin(400);
+        mSliderBitrate.setMax(1600);
+        mSliderBitrate.setStep(200);
 
-        textView.setText("Bitrate");
+        mSliderBitrate.setAdjustedProgress(1400);
 
-        mSeekBarBitrate = new SeekBar(mActivity);
-
-        layoutLeft.addView(mSeekBarBitrate);
-
-        mSeekBarBitrate.setMax(1500);
-        mSeekBarBitrate.setProgress(1000);
-
-        mSeekBarBitrate.setOnSeekBarChangeListener(this);
+        layoutLeft.addView(mSliderBitrate);
 
         //
 
-        textView = new TextView(mActivity);
+        mSliderBufferSize = new Slider(mActivity);
 
-        layoutLeft.addView(textView);
+        mSliderBufferSize.setLabel("Buffer size (seconds)");
+        mSliderBufferSize.setMin(0);
+        mSliderBufferSize.setMax(360);
 
-        textView.setText("Buffer size");
+        mSliderBufferSize.setAdjustedProgress(240);
 
-        mSeekBarBufferSize = new SeekBar(mActivity);
-
-        layoutLeft.addView(mSeekBarBufferSize);
-
-        mSeekBarBufferSize.setMax(240);
-        mSeekBarBufferSize.setProgress(16);
-
-        mSeekBarBufferSize.setOnSeekBarChangeListener(this);
-
-        mSeekBarBufferSize.setEnabled(false);
+        layoutLeft.addView(mSliderBufferSize);
 
         //
 
-        textView = new TextView(mActivity);
+        mSliderChunkSize = new Slider(mActivity);
 
-        layoutLeft.addView(textView);
+        mSliderChunkSize.setLabel("Chunk size (seconds)");
+        mSliderChunkSize.setMin(1);
+        mSliderChunkSize.setMax(20);
 
-        textView.setText("Chunk size");
+        mSliderChunkSize.setAdjustedProgress(2);
 
-        mSeekBarChunkSize = new SeekBar(mActivity);
-
-        layoutLeft.addView(mSeekBarChunkSize);
-
-        mSeekBarChunkSize.setMax(20);
-        mSeekBarChunkSize.setProgress(2);
-
-        mSeekBarChunkSize.setOnSeekBarChangeListener(this);
-
-        //
-
-        mTextParams = new TextView(mActivity);
-
-        layoutLeft.addView(mTextParams);
+        layoutLeft.addView(mSliderChunkSize);
 
         // right
 
@@ -228,8 +203,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
 
         mVideoView.setVisibility(View.VISIBLE);
 
-        onProgressChanged(null, 0, false);
-
         return layout;
     }
 
@@ -258,9 +231,9 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.start();
             } else {
-                int bitrate = mSeekBarBitrate.getProgress();
-                int bufferSize = mSeekBarBufferSize.getProgress();
-                int chunkSize = mSeekBarChunkSize.getProgress();
+                int bitrate = mSliderBitrate.getAdjustedProgress();
+                int bufferSize = mSliderBufferSize.getAdjustedProgress();
+                int chunkSize = mSliderChunkSize.getAdjustedProgress();
 
                 if (bitrate > 0 && bufferSize > 0 && chunkSize > 0) {
                     mStreamer = new Streamer(mVideoAddress.getText().toString(), bitrate, chunkSize, bufferSize);
@@ -291,19 +264,5 @@ public class StreamFragment extends Fragment implements View.OnClickListener, Se
             } else {
             }
         }
-    }
-
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        mTextParams.setText(String.format(
-            "Bitrate: %d, Buffer size: %d, Chunk size: %d",
-            mSeekBarBitrate.getProgress(),
-            mSeekBarBufferSize.getProgress(),
-            mSeekBarChunkSize.getProgress()));
-    }
-
-    public void onStartTrackingTouch(SeekBar seekBar) {
-    }
-
-    public void onStopTrackingTouch(SeekBar seekBar) {
     }
 }
