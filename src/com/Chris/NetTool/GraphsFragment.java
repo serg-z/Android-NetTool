@@ -326,7 +326,7 @@ public class GraphsFragment extends Fragment {
         addRow(tableLayout1, "MAC", R.id.text_mac);
         addRow(tableLayout1, "BSSID", R.id.text_bssid);
         addRow(tableLayout1, "RSSI", R.id.text_rssi);
-        addRow(tableLayout1, "Frequency", R.id.text_frequency);
+        addRow(tableLayout1, "Freq.", R.id.text_frequency);
 
         // create plots
 
