@@ -59,7 +59,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
         LinearLayout layoutHorizontal = new LinearLayout(mActivity);
 
         layoutHorizontal.setOrientation(LinearLayout.HORIZONTAL);
-        layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         layout.addView(layoutHorizontal);
 
@@ -179,11 +179,10 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         // right
 
-/*
         LinearLayout layoutRight = new LinearLayout(mActivity);
 
         layoutRight.setOrientation(LinearLayout.VERTICAL);
-        layoutRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT, 0.5f));
+        layoutRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         layoutHorizontal.addView(layoutRight);
 
@@ -195,13 +194,18 @@ public class StreamFragment extends Fragment implements View.OnClickListener {
 
         progressBarBufferDepth.setMax(100);
         progressBarBufferDepth.setProgress(30);
-*/
+
+        LinearLayout layoutVideo = new LinearLayout(mActivity);
+
+        layoutVideo.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+        layoutLeft.addView(layoutVideo);
 
         mVideoView = new VideoView(mActivity);
 
         mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
 
-        layoutLeft.addView(mVideoView);
+        layoutVideo.addView(mVideoView);
 
         mVideoView.setVisibility(View.VISIBLE);
 
