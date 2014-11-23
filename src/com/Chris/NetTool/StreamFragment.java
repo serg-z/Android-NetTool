@@ -263,11 +263,11 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 int bufferSize = mSliderBufferSize.getAdjustedProgress();
                 int chunkSize = mSliderChunkSize.getAdjustedProgress();
 
-                if (bufferSize < chunkSize) {
+                if (bufferSize != 0 && bufferSize < chunkSize) {
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
 
                     alertDialogBuilder
-                        .setMessage("Buffer size should be greater or equal to chunk size")
+                        .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
                         .setTitle("Invalid buffer size");
 
 
@@ -277,7 +277,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                     return;
                 }
 
-                if (bitrate > 0 && bufferSize > 0 && chunkSize > 0) {
+                if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
                     mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
 
                     mStreamer.setOnDepthBufferLoadChangedListener(this);

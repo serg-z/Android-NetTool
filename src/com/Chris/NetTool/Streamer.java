@@ -83,13 +83,17 @@ public class Streamer {
 
         mConnectionThread.start();
 
-        mTimerHandler.postDelayed(mTimerRunnable, 1000);
+        if (mBufferSize > 0) {
+            mTimerHandler.postDelayed(mTimerRunnable, 1000);
+        }
     }
 
     public void stop() {
         mConnectionThread.interrupt();
 
-        mTimerHandler.removeCallbacks(mTimerRunnable);
+        if (mBufferSize > 0) {
+            mTimerHandler.removeCallbacks(mTimerRunnable);
+        }
     }
 
     public void setOnDepthBufferLoadChangedListener(OnDepthBufferLoadChangedListener listener) {
@@ -155,17 +159,19 @@ public class Streamer {
                         return;
                     }
 
-                    int bufferCurrentSize = mDepthBuffer.getSize();
+                    if (mBufferSize > 0) {
+                        int bufferCurrentSize = mDepthBuffer.getSize();
 
-                    if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
-                        Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
-                            bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize, mBufferCapacity));
+                        if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
+                            Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
+                                bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize, mBufferCapacity));
+                        }
+
+                        while (mDepthBuffer.getSize() + mChunkDataSize > mBufferCapacity) {
+                        }
+
+                        Log.d(TAG, String.format("Buffer available (empty: %d)", mBufferCapacity - mDepthBuffer.getSize()));
                     }
-
-                    while (mDepthBuffer.getSize() + mChunkDataSize > mBufferCapacity) {
-                    }
-
-                    Log.d(TAG, String.format("Buffer available (empty: %d)", mBufferCapacity - mDepthBuffer.getSize()));
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
@@ -212,7 +218,9 @@ public class Streamer {
                             throw new InvalidContentSizeException("Can't obtain content size");
                         }
 
-                        mDepthBuffer.put(receivedSize);
+                        if (mBufferSize > 0) {
+                            mDepthBuffer.put(receivedSize);
+                        }
 
                         Log.d(TAG, "=====");
 
