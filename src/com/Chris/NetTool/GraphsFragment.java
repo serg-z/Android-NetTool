@@ -45,6 +45,9 @@ import android.support.v4.app.Fragment;
 
 import java.text.DecimalFormat;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -472,6 +475,13 @@ public class GraphsFragment extends Fragment {
         resume();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        pingStop();
+    }
+
     protected void setPingServerAddress(int address) {
         if (mPingAddress != address) {
             mPingAddress = address;
@@ -507,6 +517,36 @@ public class GraphsFragment extends Fragment {
     }
 
     public void parsePingLog(String line) {
+        int pingResult = -1;
+
+        Pattern p = Pattern.compile("\\d+\\sbytes\\sfrom\\s.*");
+        Matcher m = p.matcher(line);
+
+        if (m.matches()) {
+            pingResult = 1;
+        } else {
+            p = Pattern.compile("no\\sanswer\\syet\\sfor\\s.*");
+            m = p.matcher(line);
+
+            if (m.matches()) {
+                pingResult = 0;
+            }
+        }
+
+        if (pingResult >= 0) {
+            if (pingResult == 1) {
+                addValueToSeries(mSeriesPingSuccess, 1.0f);
+                addValueToSeries(mSeriesPingFail, -1.0f);
+            } else if (pingResult == 0) {
+                addValueToSeries(mSeriesPingSuccess, -1.0f);
+                addValueToSeries(mSeriesPingFail, 1.0f);
+            } else {
+                addValueToSeries(mSeriesPingSuccess, -1.0f);
+                addValueToSeries(mSeriesPingFail, 1.0f);
+            }
+
+            mPlotPing.redraw();
+        }
     }
 
     class PingTask extends AsyncTask<String, Void, Void> {
@@ -542,7 +582,7 @@ public class GraphsFragment extends Fragment {
         protected Void doInBackground(String... params) {
             try {
                 mProcess = new ProcessBuilder()
-                    .command("/system/bin/ping", params[0])
+                    .command("/system/bin/ping", "-i 1", "-O", params[0])
                     .redirectErrorStream(true)
                     .start();
 
