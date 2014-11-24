@@ -53,7 +53,7 @@ Builds can be found in "bin" directory
 
 ## Building debug version
 
-    ant debug
+    ./build_debug
 
 ## Building release version
 
