@@ -267,6 +267,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
 
                     alertDialogBuilder
+                        .setIconAttribute(android.R.attr.alertDialogIcon)
                         .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
                         .setTitle("Invalid buffer size");
 
