@@ -6,5 +6,3 @@ gen
 libs
 
 proguard-project.txt
-
-src/com/Chris/NetTool/Version.java

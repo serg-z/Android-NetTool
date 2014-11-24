@@ -31,6 +31,8 @@ import android.text.format.Formatter;
 import android.util.Pair;
 import android.util.Log;
 
+import android.content.pm.PackageManager.NameNotFoundException;
+
 import android.graphics.Color;
 
 import com.androidplot.Plot;
@@ -310,7 +312,15 @@ public class GraphsFragment extends Fragment {
 
         layout.addView(textVersion);
 
-        textVersion.setText("Version: " + Version.sVersion);
+        String versionString = "NOT DEFINED";
+
+        try {
+            versionString = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0).versionName;
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        textVersion.setText("Version: " + versionString);
 
         // wi-fi info
 

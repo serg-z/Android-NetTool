@@ -1,3 +1,21 @@
 #!/bin/bash
 
-echo -e "package com.Chris.NetTool;\n\npublic class Version {\n    public final static String sVersion;\n\n    static {\n        sVersion = \"$(git describe --tags)\";\n    }\n};" > src/com/Chris/NetTool/Version.java
+GIT_DESCRIBE=`git describe --tags`
+
+VER_NUMBERS=`echo $GIT_DESCRIBE | sed 's/[^[[:digit:]]]*\([[:digit:]]\+\)\.\([[:digit:]]\+\)\.\([[:digit:]]\+\).*/\1 \2 \3/'`
+
+MAJOR=`echo $VER_NUMBERS | cut -d ' ' -f 1`
+MINOR=`echo $VER_NUMBERS | cut -d ' ' -f 2`
+PATCH=`echo $VER_NUMBERS | cut -d ' ' -f 3`
+
+VERSION_CODE=$((MAJOR * 1000000 + MINOR * 1000 + PATCH))
+VERSION_NAME=$GIT_DESCRIBE
+
+echo $VERSION_CODE
+
+mkdir bin
+
+cat AndroidManifest.xml \
+    | sed "s/\(android:versionCode=\)\"[[:digit:]]*\"/\1\"$VERSION_CODE\"/" \
+    | sed "s/\(android:versionName=\)\".*\"\+/\1\"$VERSION_NAME\"/" \
+    > bin/AndroidManifest.xml
