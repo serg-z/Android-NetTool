@@ -302,6 +302,18 @@ public class GraphsFragment extends Fragment {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
+        // version
+
+        TextView textVersion = new TextView(mActivity);
+
+        textVersion.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        layout.addView(textVersion);
+
+        textVersion.setText("Version: " + Version.sVersion);
+
+        // wi-fi info
+
         LinearLayout lh = new LinearLayout(mActivity);
 
         lh.setOrientation(LinearLayout.HORIZONTAL);

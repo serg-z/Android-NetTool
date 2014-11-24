@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo -e "package com.Chris.NetTool;\n\npublic class Version {\n    public final static String sVersion = \"$(git describe --tags)\";\n};" > src/com/Chris/NetTool/Version.java
