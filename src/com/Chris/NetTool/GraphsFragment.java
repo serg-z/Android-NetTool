@@ -423,7 +423,7 @@ public class GraphsFragment extends Fragment {
 
         mSeriesPingSuccess.useImplicitXVals();
 
-        StepFormatter stepFormatter = new StepFormatter(Color.RED, Color.RED);
+        StepFormatter stepFormatter = new StepFormatter(Color.GREEN, Color.GREEN);
 
         stepFormatter.getLinePaint().setStrokeWidth(0);
         stepFormatter.getLinePaint().setAntiAlias(false);
