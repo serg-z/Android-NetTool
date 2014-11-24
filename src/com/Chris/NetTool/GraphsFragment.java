@@ -518,12 +518,16 @@ public class GraphsFragment extends Fragment {
 
     public void parsePingLog(String line) {
         int pingResult = -1;
+        // in ms
+        float pingTime = 0.0f;
 
-        Pattern p = Pattern.compile("\\d+\\sbytes\\sfrom\\s.*");
+        Pattern p = Pattern.compile("\\d+\\sbytes\\sfrom\\s.*\\stime=([\\d\\.]+).*");
         Matcher m = p.matcher(line);
 
         if (m.matches()) {
             pingResult = 1;
+
+            pingTime = Float.parseFloat(m.group(1));
         } else {
             p = Pattern.compile("no\\sanswer\\syet\\sfor\\s.*");
             m = p.matcher(line);
@@ -535,7 +539,7 @@ public class GraphsFragment extends Fragment {
 
         if (pingResult >= 0) {
             if (pingResult == 1) {
-                addValueToSeries(mSeriesPingSuccess, 1.0f);
+                addValueToSeries(mSeriesPingSuccess, pingTime / 1000.0f);
                 addValueToSeries(mSeriesPingFail, -1.0f);
             } else if (pingResult == 0) {
                 addValueToSeries(mSeriesPingSuccess, -1.0f);
