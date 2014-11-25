@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 
 import java.lang.Thread;
 import java.lang.Runnable;
+import java.lang.UnsupportedOperationException;
 
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -18,14 +19,22 @@ import java.util.regex.Matcher;
 public class Streamer {
     private static final String TAG = "Streamer";
 
-    public interface OnDepthBufferLoadChangedListener {
-        public void onDepthBufferLoadChanged(int value);
+    public interface StreamerListener {
+        public void onStreamStarted();
+        public void onStreamStopped();
+        public void onStreamDepthBufferLoadChanged(int value);
     }
 
     public class InvalidContentSizeException extends Exception {
         public InvalidContentSizeException(String message) {
             super(message);
         }
+    }
+
+    private enum MessageId {
+        DEPTH_BUFFER_SIZE_CHANGED,
+        STREAM_STARTED,
+        STREAM_STOPPED
     }
 
     // in Kbps
@@ -40,7 +49,7 @@ public class Streamer {
     final int mChunkDataSize;
     final int mBufferCapacity;
 
-    OnDepthBufferLoadChangedListener mOnDepthBufferLoadChangedListener = null;
+    StreamerListener mStreamerListener = null;
 
     Thread mConnectionThread;
 
@@ -60,12 +69,36 @@ public class Streamer {
     Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
-            if (mOnDepthBufferLoadChangedListener != null) {
-                int load = (int)((float)((Integer)inputMessage.obj * 100) / mBufferCapacity);
+            final MessageId messageId = MessageId.values()[inputMessage.what];
 
-                Log.d(TAG, String.format("Depth buffer load: %d%%", load));
+            switch (messageId) {
+                case STREAM_STARTED:
+                    if (mStreamerListener != null) {
+                        mStreamerListener.onStreamStarted();
+                    }
 
-                mOnDepthBufferLoadChangedListener.onDepthBufferLoadChanged(load);
+                    break;
+
+                case STREAM_STOPPED:
+                    if (mStreamerListener != null) {
+                        mStreamerListener.onStreamStopped();
+                    }
+
+                    break;
+
+                case DEPTH_BUFFER_SIZE_CHANGED:
+                    if (mStreamerListener != null) {
+                        int load = (int)((float)((Integer)inputMessage.obj * 100) / mBufferCapacity);
+
+                        Log.d(TAG, String.format("Depth buffer load: %d%%", load));
+
+                        mStreamerListener.onStreamDepthBufferLoadChanged(load);
+                    }
+
+                    break;
+
+                default:
+                    throw new UnsupportedOperationException("MessageId " + messageId + " is not implemented");
             }
         }
     };
@@ -96,8 +129,8 @@ public class Streamer {
         }
     }
 
-    public void setOnDepthBufferLoadChangedListener(OnDepthBufferLoadChangedListener listener) {
-        mOnDepthBufferLoadChangedListener = listener;
+    public void setStreamerListener(StreamerListener listener) {
+        mStreamerListener = listener;
     }
 
     class DepthBuffer {
@@ -108,9 +141,8 @@ public class Streamer {
 
             Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
 
-            Message message = mHandler.obtainMessage(0, Integer.valueOf(mSize));
-
-            message.sendToTarget();
+            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
+                .sendToTarget();
         }
 
         public synchronized void take(int size) {
@@ -122,9 +154,8 @@ public class Streamer {
 
             Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
 
-            Message message = mHandler.obtainMessage(0, Integer.valueOf(mSize));
-
-            message.sendToTarget();
+            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
+                .sendToTarget();
         }
 
         public synchronized int getSize() {
@@ -152,11 +183,15 @@ public class Streamer {
                 int rangeFrom = 0;
                 int rangeTo = 0;
 
-                while (receivedContentSize != contentSize) {
+                boolean stop = false;
+
+                while (receivedContentSize != contentSize && !stop) {
                     if (Thread.interrupted()) {
                         Log.d(TAG, "Interrupting connection thread");
 
-                        return;
+                        stop = true;
+
+                        continue;
                     }
 
                     if (mBufferSize > 0) {
@@ -193,6 +228,11 @@ public class Streamer {
                                 Log.d(TAG, "Content size: " + contentSize);
 
                                 rangeTo = Math.min(contentSize - 1, mChunkDataSize - 1);
+
+                                // send "stream started" message to Stream instance
+
+                                mHandler.obtainMessage(MessageId.STREAM_STARTED.ordinal(), null)
+                                    .sendToTarget();
 
                                 continue;
                             }
@@ -237,6 +277,9 @@ public class Streamer {
             }
 
             Log.d(TAG, ">> Connection thread finished");
+
+            mHandler.obtainMessage(MessageId.STREAM_STOPPED.ordinal(), null)
+                .sendToTarget();
         }
     }
 }

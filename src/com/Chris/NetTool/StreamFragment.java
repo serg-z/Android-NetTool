@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
+import android.media.MediaPlayer;
+
 import android.text.InputType;
 
 import android.net.Uri;
@@ -27,8 +29,19 @@ import android.util.Log;
 import java.net.URL;
 import java.net.MalformedURLException;
 
-public class StreamFragment extends Fragment implements View.OnClickListener, Streamer.OnDepthBufferLoadChangedListener {
+import java.lang.UnsupportedOperationException;
+
+public class StreamFragment extends Fragment implements View.OnClickListener, Streamer.StreamerListener,
+    MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
+
     private static final String TAG = "StreamFragment";
+
+    private enum UIState {
+        EVERYTHING_DISABLED,
+        READY_TO_PLAY,
+        PLAYING,
+        PAUSED
+    }
 
     Activity mActivity;
     VideoView mVideoView;
@@ -37,7 +50,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
     VerticalProgressBar mProgressBarBufferDepth;
     boolean mVideoIsPaused = false;
-    CheckBox mCheckBoxUseVideoView;
+    CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
 
     Streamer mStreamer;
 
@@ -113,13 +126,13 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mButtonStop.setOnClickListener(this);
 
-        CheckBox checkBoxRepeat = new CheckBox(mActivity);
+        mCheckBoxRepeat = new CheckBox(mActivity);
 
-        layoutH.addView(checkBoxRepeat);
+        layoutH.addView(mCheckBoxRepeat);
 
-        checkBoxRepeat.setText("Repeat");
+        mCheckBoxRepeat.setText("Repeat");
 
-        checkBoxRepeat.setEnabled(false);
+        mCheckBoxRepeat.setEnabled(false);
 
         //
 
@@ -217,6 +230,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mVideoView.setVisibility(View.VISIBLE);
 
+        mVideoView.setOnPreparedListener(this);
+        mVideoView.setOnCompletionListener(this);
+        mVideoView.setOnErrorListener(this);
+
+        setUIState(UIState.READY_TO_PLAY);
+
         return layout;
     }
 
@@ -233,6 +252,73 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
             mStreamer.stop();
 
             mProgressBarBufferDepth.setProgress(0);
+        }
+    }
+
+    private void setUIState(UIState state) {
+        switch (state) {
+            case EVERYTHING_DISABLED:
+                mButtonPlay.setEnabled(false);
+                mButtonPause.setEnabled(false);
+                mButtonStop.setEnabled(false);
+                //mButtonRandomSeek.setEnabled(false);
+
+                mCheckBoxUseVideoView.setEnabled(false);
+                mCheckBoxRepeat.setEnabled(false);
+
+                mSliderBitrate.setEnabled(false);
+                mSliderBufferSize.setEnabled(false);
+                mSliderChunkSize.setEnabled(false);
+
+                break;
+
+            case READY_TO_PLAY:
+                mButtonPlay.setEnabled(true);
+                mButtonPause.setEnabled(false);
+                mButtonStop.setEnabled(false);
+                //mButtonRandomSeek.setEnabled(false);
+
+                mCheckBoxUseVideoView.setEnabled(true);
+                //mCheckBoxRepeat.setEnabled(true);
+
+                mSliderBitrate.setEnabled(true);
+                mSliderBufferSize.setEnabled(true);
+                mSliderChunkSize.setEnabled(true);
+
+                break;
+
+            case PLAYING:
+                mButtonPlay.setEnabled(false);
+                mButtonPause.setEnabled(true);
+                mButtonStop.setEnabled(true);
+                //mButtonRandomSeek.setEnabled(true);
+
+                mCheckBoxUseVideoView.setEnabled(false);
+                //mCheckBoxRepeat.setEnabled(true);
+
+                mSliderBitrate.setEnabled(false);
+                mSliderBufferSize.setEnabled(false);
+                mSliderChunkSize.setEnabled(false);
+
+                break;
+
+            case PAUSED:
+                mButtonPlay.setEnabled(true);
+                mButtonPause.setEnabled(false);
+                mButtonStop.setEnabled(false);
+                //mButtonRandomSeek.setEnabled(false);
+
+                mCheckBoxUseVideoView.setEnabled(false);
+                //mCheckBoxRepeat.setEnabled(true);
+
+                mSliderBitrate.setEnabled(false);
+                mSliderBufferSize.setEnabled(false);
+                mSliderChunkSize.setEnabled(false);
+
+                break;
+
+            default:
+                throw new UnsupportedOperationException("UIState " + state + " is not implemented");
         }
     }
 
@@ -253,8 +339,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
             if (!mVideoIsPaused) {
                 mVideoView.setVideoURI(Uri.parse(url.toString()));
             }
-
-            mVideoIsPaused = false;
 
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.start();
@@ -282,12 +366,22 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
                     mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
 
-                    mStreamer.setOnDepthBufferLoadChangedListener(this);
+                    mStreamer.setStreamerListener(this);
                 }
             }
+
+            if (mCheckBoxUseVideoView.isChecked() && mVideoIsPaused) {
+                setUIState(UIState.PLAYING);
+            } else {
+                setUIState(UIState.EVERYTHING_DISABLED);
+            }
+
+            mVideoIsPaused = false;
         } else if (view == mButtonPause) {
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.pause();
+
+                setUIState(UIState.PAUSED);
             } else {
             }
 
@@ -295,6 +389,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         } else if (view == mButtonStop) {
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.stopPlayback();
+
+                setUIState(UIState.READY_TO_PLAY);
             } else {
                 if (mStreamer != null) {
                     mStreamer.stop();
@@ -315,8 +411,39 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onDepthBufferLoadChanged(int value) {
+    public void onStreamStarted() {
+        setUIState(UIState.PLAYING);
+    }
+
+    @Override
+    public void onStreamStopped() {
+        setUIState(UIState.READY_TO_PLAY);
+    }
+
+    @Override
+    public void onStreamDepthBufferLoadChanged(int value) {
         mProgressBarBufferDepth.setProgress(value);
         mProgressBarBufferDepth.invalidate();
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        if (mCheckBoxUseVideoView.isChecked()) {
+            setUIState(UIState.PLAYING);
+        }
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        if (mCheckBoxUseVideoView.isChecked()) {
+            setUIState(UIState.READY_TO_PLAY);
+        }
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        // TODO: show error message
+        // will cause onCompletion to be called
+        return false;
     }
 }
