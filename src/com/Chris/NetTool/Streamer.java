@@ -23,6 +23,7 @@ public class Streamer {
         public void onStreamStarted();
         public void onStreamStopped();
         public void onStreamDepthBufferLoadChanged(int value);
+        public void onStreamDepthBufferIsEmpty();
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -88,11 +89,16 @@ public class Streamer {
 
                 case DEPTH_BUFFER_SIZE_CHANGED:
                     if (mStreamerListener != null) {
-                        int load = (int)((float)((Integer)inputMessage.obj * 100) / mBufferCapacity);
+                        int bufferSize = (Integer)inputMessage.obj;
+                        int load = (int)((float)(bufferSize * 100) / mBufferCapacity);
 
                         Log.d(TAG, String.format("Depth buffer load: %d%%", load));
 
                         mStreamerListener.onStreamDepthBufferLoadChanged(load);
+
+                        if (bufferSize == 0) {
+                            mStreamerListener.onStreamDepthBufferIsEmpty();
+                        }
                     }
 
                     break;

@@ -132,8 +132,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mCheckBoxRepeat.setText("Repeat");
 
-        mCheckBoxRepeat.setEnabled(false);
-
         //
 
         layoutH = new LinearLayout(mActivity);
@@ -279,7 +277,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 //mButtonRandomSeek.setEnabled(false);
 
                 mCheckBoxUseVideoView.setEnabled(true);
-                //mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxRepeat.setEnabled(true);
 
                 mSliderBitrate.setEnabled(true);
                 mSliderBufferSize.setEnabled(true);
@@ -294,7 +292,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 //mButtonRandomSeek.setEnabled(true);
 
                 mCheckBoxUseVideoView.setEnabled(false);
-                //mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxRepeat.setEnabled(true);
 
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
@@ -309,7 +307,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 //mButtonRandomSeek.setEnabled(false);
 
                 mCheckBoxUseVideoView.setEnabled(false);
-                //mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxRepeat.setEnabled(true);
 
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
@@ -324,64 +322,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     public void onClick(View view) {
         if (view == mButtonPlay) {
-            URL url = null;
-
-            try {
-                url = new URL(mVideoAddress.getText().toString().trim());
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-
-                mVideoAddress.setError("URL is malformed");
-
-                return;
-            }
-
-            if (!mVideoIsPaused) {
-                mVideoView.setVideoURI(Uri.parse(url.toString()));
-            }
-
-            if (mCheckBoxUseVideoView.isChecked()) {
-                mVideoView.start();
-            } else {
-                int bitrate = mSliderBitrate.getAdjustedProgress();
-                int bufferSize = mSliderBufferSize.getAdjustedProgress();
-                int chunkSize = mSliderChunkSize.getAdjustedProgress();
-
-                if (bufferSize != 0 && bufferSize < chunkSize) {
-                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
-
-                    alertDialogBuilder
-                        .setIconAttribute(android.R.attr.alertDialogIcon)
-                        .setPositiveButton("OK", null)
-                        .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
-                        .setTitle("Invalid buffer size");
-
-                    AlertDialog alertDialog = alertDialogBuilder.create();
-                    alertDialog.show();
-
-                    return;
-                }
-
-                if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
-                    if (mStreamer != null) {
-                        mStreamer.stop();
-
-                        mStreamer = null;
-                    }
-
-                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
-
-                    mStreamer.setStreamerListener(this);
-                }
-            }
-
-            if (mCheckBoxUseVideoView.isChecked() && mVideoIsPaused) {
-                setUIState(UIState.PLAYING);
-            } else {
-                setUIState(UIState.EVERYTHING_DISABLED);
-            }
-
-            mVideoIsPaused = false;
+            streamStart();
         } else if (view == mButtonPause) {
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.pause();
@@ -411,6 +352,67 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         }
     }
 
+    private void streamStart() {
+        URL url = null;
+
+        try {
+            url = new URL(mVideoAddress.getText().toString().trim());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+
+            mVideoAddress.setError("URL is malformed");
+
+            return;
+        }
+
+        if (!mVideoIsPaused) {
+            mVideoView.setVideoURI(Uri.parse(url.toString()));
+        }
+
+        if (mCheckBoxUseVideoView.isChecked()) {
+            mVideoView.start();
+        } else {
+            int bitrate = mSliderBitrate.getAdjustedProgress();
+            int bufferSize = mSliderBufferSize.getAdjustedProgress();
+            int chunkSize = mSliderChunkSize.getAdjustedProgress();
+
+            if (bufferSize != 0 && bufferSize < chunkSize) {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
+
+                alertDialogBuilder
+                    .setIconAttribute(android.R.attr.alertDialogIcon)
+                    .setPositiveButton("OK", null)
+                    .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
+                    .setTitle("Invalid buffer size");
+
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+
+                return;
+            }
+
+            if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
+                if (mStreamer != null) {
+                    mStreamer.stop();
+
+                    mStreamer = null;
+                }
+
+                mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
+
+                mStreamer.setStreamerListener(this);
+            }
+        }
+
+        if (mCheckBoxUseVideoView.isChecked() && mVideoIsPaused) {
+            setUIState(UIState.PLAYING);
+        } else {
+            setUIState(UIState.EVERYTHING_DISABLED);
+        }
+
+        mVideoIsPaused = false;
+    }
+
     @Override
     public void onStreamStarted() {
         setUIState(UIState.PLAYING);
@@ -418,13 +420,23 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public void onStreamStopped() {
-        setUIState(UIState.READY_TO_PLAY);
     }
 
     @Override
     public void onStreamDepthBufferLoadChanged(int value) {
         mProgressBarBufferDepth.setProgress(value);
         mProgressBarBufferDepth.invalidate();
+    }
+
+    @Override
+    public void onStreamDepthBufferIsEmpty() {
+        if (mCheckBoxRepeat.isChecked()) {
+            streamStart();
+
+            return;
+        }
+
+        setUIState(UIState.READY_TO_PLAY);
     }
 
     @Override
@@ -437,6 +449,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (mCheckBoxUseVideoView.isChecked()) {
+            if (mCheckBoxRepeat.isChecked()) {
+                streamStart();
+
+                return;
+            }
+
             setUIState(UIState.READY_TO_PLAY);
         }
     }
