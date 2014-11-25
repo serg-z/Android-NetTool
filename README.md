@@ -67,7 +67,7 @@ To create virtual devices for emulator run next command:
 
 After creating device, note it's name and from root project directory run command:
 
-    ./run_emulator <avd name>
+    ./run_emulator <avd name> [scale]
 
 # Installing APK onto device or emulator using adb
 

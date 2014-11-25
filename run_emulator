@@ -1,1 +1,9 @@
-emulator -scale 0.5 -no-boot-anim @$1 &
+#!/bin/bash
+
+SCALE=1
+
+if [ -n "$2" ]; then
+    SCALE=$2
+fi
+
+emulator -scale $SCALE -no-boot-anim @$1 &
