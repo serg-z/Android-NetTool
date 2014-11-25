@@ -38,11 +38,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        mWakeLock = ((PowerManager)getSystemService(Context.POWER_SERVICE))
-            .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
-
-        mWakeLock.acquire();
-
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         mAdapter = new NetToolFragmentPagerAdapter(getSupportFragmentManager());
@@ -99,6 +94,11 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         super.onStart();
 
         Log.d(TAG, "Started");
+
+        mWakeLock = ((PowerManager)getSystemService(Context.POWER_SERVICE))
+            .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
+
+        mWakeLock.acquire();
     }
 
     @Override
@@ -120,6 +120,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         super.onStop();
 
         Log.d(TAG, "Stop");
+
+        if (mWakeLock != null) {
+            mWakeLock.release();
+
+            mWakeLock = null;
+        }
     }
 
     @Override
