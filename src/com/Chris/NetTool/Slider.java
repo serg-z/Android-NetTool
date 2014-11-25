@@ -16,6 +16,9 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
     int mStep = 0;
     String mLabel = "";
 
+    Paint mTextPaint;
+    Rect mTextBounds;
+
     public Slider(Context context) {
         super(context);
 
@@ -25,6 +28,9 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
 
         // TODO: fix thumb's position at start
         setThumb(null);
+
+        mTextPaint = new Paint();
+        mTextBounds = new Rect();
     }
 
     public synchronized void setLabel(String label) {
@@ -81,35 +87,31 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        Paint textPaint = new Paint();
-
-        textPaint.setAntiAlias(true);
-        textPaint.setColor(Color.WHITE);
-        textPaint.setTextSize(20);
-
-        Rect bounds = new Rect();
+        mTextPaint.setAntiAlias(true);
+        mTextPaint.setColor(Color.WHITE);
+        mTextPaint.setTextSize(20);
 
         // label
 
         String text = mLabel;
 
-        textPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
 
         int x = 0;
-        int y = bounds.height();
+        int y = mTextBounds.height();
 
-        canvas.drawText(text, x, y, textPaint);
+        canvas.drawText(text, x, y, mTextPaint);
 
         // value
 
         text = String.valueOf(getAdjustedProgress());
 
-        textPaint.getTextBounds(text, 0, text.length(), bounds);
+        mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
 
-        x = getWidth() / 2 - bounds.width();
-        y = getHeight() / 2 - bounds.centerY();
+        x = getWidth() / 2 - mTextBounds.width();
+        y = getHeight() / 2 - mTextBounds.centerY();
 
-        canvas.drawText(text, x, y, textPaint);
+        canvas.drawText(text, x, y, mTextPaint);
 
         // step labels
 
@@ -121,12 +123,12 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
             for (int i = mMin; i <= getMax(); i += mStep) {
                 text = String.valueOf(i);
 
-                textPaint.getTextBounds(text, 0, text.length(), bounds);
+                mTextPaint.getTextBounds(text, 0, text.length(), mTextBounds);
 
                 // TODO: after thumb's fixed, return to 40
                 y = getHeight() / 2 + 30;
 
-                canvas.drawText(text, x - bounds.centerX(), y, textPaint);
+                canvas.drawText(text, x - mTextBounds.centerX(), y, mTextPaint);
 
                 x += interval;
             }
