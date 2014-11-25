@@ -6,6 +6,17 @@
 
     <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="19" />
 
+    <supports-screens android:largeScreens="true"
+        android:smallScreens="true"
+        android:anyDensity="true"
+        android:normalScreens="true"/>
+
+    <uses-feature android:name="android.hardware.wifi" />
+
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application android:label="@string/app_name"
         android:allowBackup="false">
 
@@ -21,15 +32,4 @@
 
         <uses-library android:name="android.support.v4" android:required="true" />
     </application>
-
-    <supports-screens android:largeScreens="true"
-        android:smallScreens="true"
-        android:anyDensity="true"
-        android:normalScreens="true"/>
-
-    <uses-feature android:name="android.hardware.wifi" />
-
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 </manifest>
