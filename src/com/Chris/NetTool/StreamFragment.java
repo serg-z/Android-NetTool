@@ -356,7 +356,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                         .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
                         .setTitle("Invalid buffer size");
 
-
                     AlertDialog alertDialog = alertDialogBuilder.create();
                     alertDialog.show();
 
@@ -364,6 +363,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 }
 
                 if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
+                    if (mStreamer != null) {
+                        mStreamer.stop();
+
+                        mStreamer = null;
+                    }
+
                     mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
 
                     mStreamer.setStreamerListener(this);
@@ -394,10 +399,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
             } else {
                 if (mStreamer != null) {
                     mStreamer.stop();
-
-                    mStreamer = null;
-
-                    mProgressBarBufferDepth.setProgress(0);
                 }
             }
 
