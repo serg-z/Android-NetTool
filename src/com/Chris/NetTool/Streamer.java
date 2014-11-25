@@ -108,7 +108,7 @@ public class Streamer {
 
             Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
 
-            Message message = mHandler.obtainMessage(0, new Integer(mSize));
+            Message message = mHandler.obtainMessage(0, Integer.valueOf(mSize));
 
             message.sendToTarget();
         }
@@ -122,7 +122,7 @@ public class Streamer {
 
             Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
 
-            Message message = mHandler.obtainMessage(0, new Integer(mSize));
+            Message message = mHandler.obtainMessage(0, Integer.valueOf(mSize));
 
             message.sendToTarget();
         }
