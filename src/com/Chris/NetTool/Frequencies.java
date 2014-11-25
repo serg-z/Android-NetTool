@@ -1,75 +1,72 @@
 package com.Chris.NetTool;
 
+import android.util.SparseIntArray;
+
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Collections;
 
 public class Frequencies {
-    public static final Map<Integer, Integer> sChannels;
+    public static final SparseIntArray sChannels = new SparseIntArray() {
+        {
+            // 2.4 GHz
+            append(2412, 1);
+            append(2417, 2);
+            append(2422, 3);
+            append(2427, 4);
+            append(2432, 5);
+            append(2437, 6);
+            append(2442, 7);
+            append(2447, 8);
+            append(2452, 9);
+            append(2457, 10);
+            append(2462, 11);
+            append(2467, 12);
+            append(2472, 13);
+            append(2484, 14);
 
-    static {
-        Map<Integer, Integer> tmp = new HashMap<Integer, Integer>();
-
-        // 2.4 GHz
-        tmp.put(2412, 1);
-        tmp.put(2417, 2);
-        tmp.put(2422, 3);
-        tmp.put(2427, 4);
-        tmp.put(2432, 5);
-        tmp.put(2437, 6);
-        tmp.put(2442, 7);
-        tmp.put(2447, 8);
-        tmp.put(2452, 9);
-        tmp.put(2457, 10);
-        tmp.put(2462, 11);
-        tmp.put(2467, 12);
-        tmp.put(2472, 13);
-        tmp.put(2484, 14);
-
-        // 5 GHz
-        tmp.put(4915, 183);
-        tmp.put(4920, 184);
-        tmp.put(4925, 185);
-        tmp.put(4935, 187);
-        tmp.put(4940, 188);
-        tmp.put(4945, 189);
-        tmp.put(4960, 192);
-        tmp.put(4980, 196);
-        tmp.put(5035, 7);
-        tmp.put(5040, 8);
-        tmp.put(5045, 9);
-        tmp.put(5055, 11);
-        tmp.put(5060, 12);
-        tmp.put(5080, 16);
-        tmp.put(5170, 34);
-        tmp.put(5180, 36);
-        tmp.put(5190, 38);
-        tmp.put(5200, 40);
-        tmp.put(5210, 42);
-        tmp.put(5220, 44);
-        tmp.put(5230, 46);
-        tmp.put(5240, 48);
-        tmp.put(5260, 52);
-        tmp.put(5280, 56);
-        tmp.put(5300, 60);
-        tmp.put(5320, 64);
-        tmp.put(5500, 100);
-        tmp.put(5520, 104);
-        tmp.put(5540, 108);
-        tmp.put(5560, 112);
-        tmp.put(5580, 116);
-        tmp.put(5600, 120);
-        tmp.put(5620, 124);
-        tmp.put(5640, 128);
-        tmp.put(5660, 132);
-        tmp.put(5680, 136);
-        tmp.put(5700, 140);
-        tmp.put(5745, 149);
-        tmp.put(5765, 153);
-        tmp.put(5785, 157);
-        tmp.put(5805, 161);
-        tmp.put(5825, 165);
-
-        sChannels = Collections.unmodifiableMap(tmp);
-    }
+            // 5 GHz
+            append(4915, 183);
+            append(4920, 184);
+            append(4925, 185);
+            append(4935, 187);
+            append(4940, 188);
+            append(4945, 189);
+            append(4960, 192);
+            append(4980, 196);
+            append(5035, 7);
+            append(5040, 8);
+            append(5045, 9);
+            append(5055, 11);
+            append(5060, 12);
+            append(5080, 16);
+            append(5170, 34);
+            append(5180, 36);
+            append(5190, 38);
+            append(5200, 40);
+            append(5210, 42);
+            append(5220, 44);
+            append(5230, 46);
+            append(5240, 48);
+            append(5260, 52);
+            append(5280, 56);
+            append(5300, 60);
+            append(5320, 64);
+            append(5500, 100);
+            append(5520, 104);
+            append(5540, 108);
+            append(5560, 112);
+            append(5580, 116);
+            append(5600, 120);
+            append(5620, 124);
+            append(5640, 128);
+            append(5660, 132);
+            append(5680, 136);
+            append(5700, 140);
+            append(5745, 149);
+            append(5765, 153);
+            append(5785, 157);
+            append(5805, 161);
+            append(5825, 165);
+        }
+    };
 }
