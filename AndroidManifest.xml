@@ -16,14 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <uses-library android:name="android.support.v4" android:required="true" />
     </application>
 
     <supports-screens android:largeScreens="true"
         android:smallScreens="true"
         android:anyDensity="true"
         android:normalScreens="true"/>
-
-    <uses-library android:name="android.support.v4" android:required="true" />
 
     <uses-feature android:name="android.hardware.wifi" />
 
