@@ -45,7 +45,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     Activity mActivity;
-    VideoView mVideoView;
+    VideoView mVideoView = null;
     EditText mVideoAddress;
     Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
     Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
@@ -53,6 +53,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     boolean mVideoIsPaused = false;
     CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
     TextView mTextStatus;
+    LinearLayout mLayoutLeft;
 
     Streamer mStreamer;
 
@@ -88,12 +89,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         // left
 
-        LinearLayout layoutLeft = new LinearLayout(mActivity);
+        mLayoutLeft = new LinearLayout(mActivity);
 
-        layoutLeft.setOrientation(LinearLayout.VERTICAL);
-        layoutLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mLayoutLeft.setOrientation(LinearLayout.VERTICAL);
+        mLayoutLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        layoutHorizontal.addView(layoutLeft);
+        layoutHorizontal.addView(mLayoutLeft);
 
         // control buttons
 
@@ -102,7 +103,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         layoutH.setOrientation(LinearLayout.HORIZONTAL);
         layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        layoutLeft.addView(layoutH);
+        mLayoutLeft.addView(layoutH);
 
         mButtonPlay = new Button(mActivity);
 
@@ -141,7 +142,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         layoutH.setOrientation(LinearLayout.HORIZONTAL);
         layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        layoutLeft.addView(layoutH);
+        mLayoutLeft.addView(layoutH);
 
         mButtonRandomSeek = new Button(mActivity);
 
@@ -172,7 +173,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mSliderBitrate.setAdjustedProgress(1400);
 
-        layoutLeft.addView(mSliderBitrate);
+        mLayoutLeft.addView(mSliderBitrate);
 
         //
 
@@ -184,7 +185,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mSliderBufferSize.setAdjustedProgress(240);
 
-        layoutLeft.addView(mSliderBufferSize);
+        mLayoutLeft.addView(mSliderBufferSize);
 
         //
 
@@ -196,7 +197,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mSliderChunkSize.setAdjustedProgress(2);
 
-        layoutLeft.addView(mSliderChunkSize);
+        mLayoutLeft.addView(mSliderChunkSize);
 
         // right
 
@@ -218,27 +219,9 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
         mTextStatus = new TextView(mActivity);
 
-        layoutLeft.addView(mTextStatus);
+        mLayoutLeft.addView(mTextStatus);
 
         mTextStatus.setText("...");
-
-        LinearLayout layoutVideo = new LinearLayout(mActivity);
-
-        layoutVideo.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
-        layoutLeft.addView(layoutVideo);
-
-        mVideoView = new VideoView(mActivity);
-
-        mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
-
-        layoutVideo.addView(mVideoView);
-
-        mVideoView.setVisibility(View.VISIBLE);
-
-        mVideoView.setOnPreparedListener(this);
-        mVideoView.setOnCompletionListener(this);
-        mVideoView.setOnErrorListener(this);
 
         setUIState(UIState.READY_TO_PLAY);
 
@@ -360,6 +343,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.stopPlayback();
 
+                removeVideoView();
+
                 setUIState(UIState.READY_TO_PLAY);
             } else {
                 if (mStreamer != null) {
@@ -389,11 +374,23 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
             return;
         }
 
-        if (!mVideoIsPaused) {
-            mVideoView.setVideoURI(Uri.parse(url.toString()));
-        }
-
         if (mCheckBoxUseVideoView.isChecked()) {
+            if (!mVideoIsPaused) {
+                removeVideoView();
+
+                mVideoView = new VideoView(mActivity);
+
+                mVideoView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 300));
+
+                mLayoutLeft.addView(mVideoView);
+
+                mVideoView.setOnPreparedListener(this);
+                mVideoView.setOnCompletionListener(this);
+                mVideoView.setOnErrorListener(this);
+
+                mVideoView.setVideoURI(Uri.parse(url.toString()));
+            }
+
             mVideoView.start();
         } else {
             int bitrate = mSliderBitrate.getAdjustedProgress();
@@ -435,6 +432,14 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         }
 
         mVideoIsPaused = false;
+    }
+
+    private void removeVideoView() {
+        if (mVideoView != null) {
+            mLayoutLeft.removeView(mVideoView);
+
+            mVideoView = null;
+        }
     }
 
     @Override
@@ -488,6 +493,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 return;
             }
 
+            removeVideoView();
+
             setUIState(UIState.READY_TO_PLAY);
         }
     }
@@ -495,6 +502,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         if (mCheckBoxUseVideoView.isChecked()) {
+            removeVideoView();
+
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
 
             alertDialogBuilder
