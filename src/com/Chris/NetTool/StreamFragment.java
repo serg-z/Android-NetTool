@@ -420,6 +420,10 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public void onStreamStopped() {
+        // set ready to play state when buffering is disabled
+        if (mStreamer.getBufferCapacity() == 0) {
+            setUIState(UIState.READY_TO_PLAY);
+        }
     }
 
     @Override

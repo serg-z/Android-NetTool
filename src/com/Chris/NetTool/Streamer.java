@@ -154,6 +154,10 @@ public class Streamer {
         mStreamerListener = listener;
     }
 
+    public int getBufferCapacity() {
+        return mBufferCapacity;
+    }
+
     class DepthBuffer {
         int mSize = 0;
 
