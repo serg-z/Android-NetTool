@@ -100,6 +100,8 @@ public class Streamer {
 
                         if (bufferSize == 0) {
                             mStreamerListener.onStreamDepthBufferIsEmpty();
+
+                            stop();
                         }
                     }
 
@@ -137,10 +139,14 @@ public class Streamer {
     }
 
     public void stop() {
-        mConnectionThread.interrupt();
+        if (mConnectionThread.isAlive()) {
+            mConnectionThread.interrupt();
+        }
 
         if (mBufferSize > 0) {
             mTimerHandler.removeCallbacks(mTimerRunnable);
+
+            mDepthBuffer.clear();
         }
     }
 
@@ -161,7 +167,7 @@ public class Streamer {
         }
 
         public synchronized void take(int size) {
-            if (mSize == 0) {
+            if (mSize == 0 || size <= 0) {
                 return;
             }
 
@@ -175,6 +181,10 @@ public class Streamer {
 
         public synchronized int getSize() {
             return mSize;
+        }
+
+        public synchronized void clear() {
+            take(mSize);
         }
     }
 
