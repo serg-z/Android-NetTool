@@ -440,6 +440,11 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
+    public void onStreamPlaybackFailed() {
+        setUIState(UIState.READY_TO_PLAY);
+    }
+
+    @Override
     public void onPrepared(MediaPlayer mp) {
         if (mCheckBoxUseVideoView.isChecked()) {
             setUIState(UIState.PLAYING);
@@ -461,8 +466,24 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        // TODO: show error message
-        // will cause onCompletion to be called
-        return false;
+        if (mCheckBoxUseVideoView.isChecked()) {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
+
+            alertDialogBuilder
+                .setIconAttribute(android.R.attr.alertDialogIcon)
+                .setPositiveButton("OK", null)
+                .setMessage("Can't play this video")
+                .setTitle("Video view");
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+
+            setUIState(UIState.READY_TO_PLAY);
+
+            return true;
+        } else {
+            // will cause onCompletion to be called
+            return false;
+        }
     }
 }

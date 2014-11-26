@@ -24,6 +24,7 @@ public class Streamer {
         public void onStreamStopped();
         public void onStreamDepthBufferLoadChanged(int value);
         public void onStreamDepthBufferIsEmpty();
+        public void onStreamPlaybackFailed();
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -33,9 +34,10 @@ public class Streamer {
     }
 
     private enum MessageId {
-        DEPTH_BUFFER_SIZE_CHANGED,
         STREAM_STARTED,
-        STREAM_STOPPED
+        STREAM_STOPPED,
+        DEPTH_BUFFER_SIZE_CHANGED,
+        STREAM_PLAYBACK_FAILED
     }
 
     // in Kbps
@@ -99,6 +101,13 @@ public class Streamer {
                         if (bufferSize == 0) {
                             mStreamerListener.onStreamDepthBufferIsEmpty();
                         }
+                    }
+
+                    break;
+
+                case STREAM_PLAYBACK_FAILED:
+                    if (mStreamerListener != null) {
+                        mStreamerListener.onStreamPlaybackFailed();
                     }
 
                     break;
@@ -280,6 +289,9 @@ public class Streamer {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+
+                mHandler.obtainMessage(MessageId.STREAM_PLAYBACK_FAILED.ordinal(), null)
+                    .sendToTarget();
             }
 
             Log.d(TAG, ">> Connection thread finished");
