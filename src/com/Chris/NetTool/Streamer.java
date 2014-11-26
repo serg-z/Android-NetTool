@@ -57,6 +57,8 @@ public class Streamer {
     Thread mConnectionThread;
 
     DepthBuffer mDepthBuffer = new DepthBuffer();
+    private Object mConnectionThreadPauseLock = new Object();
+    private boolean mConnectionThreadPaused = false;
 
     Handler mTimerHandler = new Handler();
 
@@ -170,6 +172,20 @@ public class Streamer {
         return mBufferCapacity;
     }
 
+    private void setConnectionThreadPaused(boolean paused) {
+        if (paused) {
+            synchronized (mConnectionThreadPauseLock) {
+                mConnectionThreadPaused = true;
+            }
+        } else {
+            synchronized (mConnectionThreadPauseLock) {
+                mConnectionThreadPaused = false;
+
+                mConnectionThreadPauseLock.notifyAll();
+            }
+        }
+    }
+
     class DepthBuffer {
         int mSize = 0;
 
@@ -193,6 +209,8 @@ public class Streamer {
 
             mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
                 .sendToTarget();
+
+            setConnectionThreadPaused(false);
         }
 
         public synchronized int getSize() {
@@ -235,15 +253,33 @@ public class Streamer {
                         continue;
                     }
 
+                    // thread pausing logic
+                    synchronized (mConnectionThreadPauseLock) {
+                        // TODO: remove logging
+                        if (mConnectionThreadPaused) {
+                            while (mConnectionThreadPaused) {
+                                try {
+                                    Log.d(TAG, "*** CT: PAUSE");
+                                    mConnectionThreadPauseLock.wait();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            Log.d(TAG, "*** CT: CONTINUE");
+                        }
+                    }
+
                     if (mBufferSize > 0) {
                         int bufferCurrentSize = mDepthBuffer.getSize();
 
                         if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
                             Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
                                 bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize, mBufferCapacity));
-                        }
 
-                        while (mDepthBuffer.getSize() + mChunkDataSize > mBufferCapacity) {
+                            setConnectionThreadPaused(true);
+
+                            continue;
                         }
 
                         Log.d(TAG, String.format("Buffer available (empty: %d)", mBufferCapacity - mDepthBuffer.getSize()));
