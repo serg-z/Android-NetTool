@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.VideoView;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +52,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     VerticalProgressBar mProgressBarBufferDepth;
     boolean mVideoIsPaused = false;
     CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
+    TextView mTextStatus;
 
     Streamer mStreamer;
 
@@ -214,6 +216,12 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         mProgressBarBufferDepth.setMax(100);
         mProgressBarBufferDepth.setProgress(0);
 
+        mTextStatus = new TextView(mActivity);
+
+        layoutLeft.addView(mTextStatus);
+
+        mTextStatus.setText("...");
+
         LinearLayout layoutVideo = new LinearLayout(mActivity);
 
         layoutVideo.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -268,6 +276,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 mSliderBufferSize.setEnabled(false);
                 mSliderChunkSize.setEnabled(false);
 
+                mTextStatus.setText("Preparing...");
+
                 break;
 
             case READY_TO_PLAY:
@@ -282,6 +292,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 mSliderBitrate.setEnabled(true);
                 mSliderBufferSize.setEnabled(true);
                 mSliderChunkSize.setEnabled(true);
+
+                mTextStatus.setText("Ready to play");
 
                 break;
 
@@ -298,6 +310,16 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 mSliderBufferSize.setEnabled(false);
                 mSliderChunkSize.setEnabled(false);
 
+                if (mCheckBoxUseVideoView.isChecked()) {
+                    mTextStatus.setText("Playing...");
+                } else {
+                    mTextStatus.setText(String.format(
+                        "Streaming: bitrate=%d, buffer=%d, chunk=%d",
+                        mStreamer.getBitrate(),
+                        mStreamer.getBufferSize(),
+                        mStreamer.getChunkSize()));
+                }
+
                 break;
 
             case PAUSED:
@@ -312,6 +334,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
                 mSliderChunkSize.setEnabled(false);
+
+                mTextStatus.setText("Paused");
 
                 break;
 

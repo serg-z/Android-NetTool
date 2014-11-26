@@ -154,6 +154,18 @@ public class Streamer {
         mStreamerListener = listener;
     }
 
+    public int getBitrate() {
+        return mBitrate;
+    }
+
+    public int getChunkSize() {
+        return mChunkSize;
+    }
+
+    public int getBufferSize() {
+        return mBufferSize;
+    }
+
     public int getBufferCapacity() {
         return mBufferCapacity;
     }
