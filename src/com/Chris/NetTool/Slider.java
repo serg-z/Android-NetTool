@@ -12,12 +12,12 @@ import android.content.Context;
 import android.util.Log;
 
 public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
-    int mMin = 0;
-    int mStep = 0;
-    String mLabel = "";
+    private int mMin = 0;
+    private int mStep = 0;
+    private String mLabel = "";
 
-    Paint mTextPaint;
-    Rect mTextBounds;
+    private Paint mTextPaint;
+    private Rect mTextBounds;
 
     public Slider(Context context) {
         super(context);

@@ -67,11 +67,11 @@ public class GraphsFragment extends Fragment {
         public void onServerAddressObtained(int address);
     }
 
-    OnWifiInfoListener mWifiInfoCallback;
+    private OnWifiInfoListener mWifiInfoCallback;
 
-    Handler mTimerHandler = new Handler();
+    private Handler mTimerHandler = new Handler();
 
-    Runnable mTimerRunnable = new Runnable() {
+    private Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             updateUI();
@@ -80,34 +80,34 @@ public class GraphsFragment extends Fragment {
         }
     };
 
-    WifiManager mWifiManager;
+    private WifiManager mWifiManager;
 
-    XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRxTx;
-    SimpleXYSeries mSeriesRx, mSeriesTx;
+    private XYPlot mPlotRssi, mPlotLinkSpeed, mPlotRxTx;
+    private SimpleXYSeries mSeriesRx, mSeriesTx;
 
-    int mPingAddress = 0;
-    PingTask mPingTask;
-    XYPlot mPlotPing;
-    SimpleXYSeries mSeriesPingSuccess, mSeriesPingFail;
+    private int mPingAddress = 0;
+    private PingTask mPingTask;
+    private XYPlot mPlotPing;
+    private SimpleXYSeries mSeriesPingSuccess, mSeriesPingFail;
 
-    Activity mActivity;
+    private Activity mActivity;
 
-    long mLastRx = -1, mLastTx = -1;
+    private long mLastRx = -1, mLastTx = -1;
     private String mPingResumeAddress;
     private boolean mPingShouldResume = false;
 
-    public void pause() {
+    private void pauseTimer() {
         mTimerHandler.removeCallbacks(mTimerRunnable);
 
         mLastRx = -1;
         mLastTx = -1;
     }
 
-    public void resume() {
+    private void resumeTimer() {
         mTimerHandler.postDelayed(mTimerRunnable, 0);
     }
 
-    void updateUI() {
+    private void updateUI() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
 
@@ -132,12 +132,14 @@ public class GraphsFragment extends Fragment {
         int serverAddress = dhcpInfo.serverAddress;
 
         ((TextView)mActivity.findViewById(R.id.text_mac)).setText(wifiInfo.getMacAddress());
-        ((TextView)mActivity.findViewById(R.id.text_local_ip)).setText(Formatter.formatIpAddress(wifiInfo.getIpAddress()));
+        ((TextView)mActivity.findViewById(R.id.text_local_ip)).setText(
+            Formatter.formatIpAddress(wifiInfo.getIpAddress()));
         ((TextView)mActivity.findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
         ((TextView)mActivity.findViewById(R.id.text_bssid)).setText(bssid);
         ((TextView)mActivity.findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(serverAddress));
         ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
-        ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " " + WifiInfo.LINK_SPEED_UNITS);
+        ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " "
+            + WifiInfo.LINK_SPEED_UNITS);
 
         setPingServerAddress(serverAddress);
 
@@ -173,7 +175,7 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    void addValueToPlotSeries(XYPlot plot, float value) {
+    private void addValueToPlotSeries(XYPlot plot, float value) {
         if (plot != null) {
             SimpleXYSeries series = (SimpleXYSeries)plot.getSeriesSet().iterator().next();
 
@@ -183,7 +185,7 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    void addValueToSeries(SimpleXYSeries series, float value) {
+    private void addValueToSeries(SimpleXYSeries series, float value) {
         if (series != null) {
             if (series.size() > HISTORY_SIZE) {
                 series.removeFirst();
@@ -250,7 +252,7 @@ public class GraphsFragment extends Fragment {
         return series;
     }
 
-    void addRow(TableLayout table, String label, int id) {
+    private void addRow(TableLayout table, String label, int id) {
         TableRow tr = new TableRow(mActivity);
 
         table.addView(tr);
@@ -287,7 +289,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Destroy");
 
-        pause();
+        pauseTimer();
 
         mWifiManager = null;
 
@@ -322,8 +324,10 @@ public class GraphsFragment extends Fragment {
         tableLayout0.setColumnStretchable(1, true);
         tableLayout1.setColumnStretchable(1, true);
 
-        tableLayout0.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
-        tableLayout1.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        tableLayout0.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
+        tableLayout1.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         lh.addView(tableLayout0);
         lh.addView(tableLayout1);
@@ -350,7 +354,8 @@ public class GraphsFragment extends Fragment {
 
         LinearLayout plotsLayoutH = new LinearLayout(mActivity);
 
-        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutV.addView(plotsLayoutH);
 
@@ -358,7 +363,8 @@ public class GraphsFragment extends Fragment {
 
         mPlotRssi = new XYPlot(mActivity, "RSSI");
 
-        mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutH.addView(mPlotRssi);
 
@@ -372,7 +378,8 @@ public class GraphsFragment extends Fragment {
 
         mPlotLinkSpeed = new XYPlot(mActivity, "Link Speed");
 
-        mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutH.addView(mPlotLinkSpeed);
 
@@ -386,7 +393,8 @@ public class GraphsFragment extends Fragment {
 
         plotsLayoutH = new LinearLayout(mActivity);
 
-        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        plotsLayoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutV.addView(plotsLayoutH);
 
@@ -394,7 +402,8 @@ public class GraphsFragment extends Fragment {
 
         mPlotRxTx = new XYPlot(mActivity, "Rx / Tx");
 
-        mPlotRxTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotRxTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutH.addView(mPlotRxTx);
 
@@ -411,7 +420,8 @@ public class GraphsFragment extends Fragment {
 
         mPlotPing = new XYPlot(mActivity, "Ping");
 
-        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         plotsLayoutH.addView(mPlotPing);
 
@@ -445,9 +455,11 @@ public class GraphsFragment extends Fragment {
 
         RelativeLayout releativeLayoutVersion = new RelativeLayout(mActivity);
 
-        releativeLayoutVersion.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        releativeLayoutVersion.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT));
 
-        RelativeLayout.LayoutParams relativeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams relativeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT);
 
         relativeLayoutParams.rightMargin = 10;
 
@@ -489,7 +501,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Pause");
 
-        pause();
+        pauseTimer();
     }
 
     @Override
@@ -498,7 +510,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Resume");
 
-        resume();
+        resumeTimer();
 
         if (mPingShouldResume) {
             pingStart(mPingResumeAddress);
@@ -554,7 +566,7 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    public void parsePingLog(String line) {
+    private void parsePingLog(String line) {
         int pingResult = -1;
         // in ms
         float pingTime = 0.0f;
@@ -591,12 +603,12 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    class PingTask extends AsyncTask<String, Void, Void> {
-        PipedOutputStream mPipedOut;
-        PipedInputStream mPipedIn;
-        LineNumberReader mReader;
-        Process mProcess;
-        GraphsFragment mFragment;
+    private class PingTask extends AsyncTask<String, Void, Void> {
+        private PipedOutputStream mPipedOut;
+        private PipedInputStream mPipedIn;
+        private LineNumberReader mReader;
+        private Process mProcess;
+        private GraphsFragment mFragment;
 
         @Override
         protected void onPreExecute() {

@@ -43,29 +43,29 @@ public class Streamer {
     }
 
     // in Kbps
-    final int mBitrate;
+    private final int mBitrate;
     // in seconds
-    final int mChunkSize;
+    private final int mChunkSize;
     // in seconds
-    final int mBufferSize;
+    private final int mBufferSize;
 
     // sizes in bytes
-    final int mDataSizePerSecond;
-    final int mChunkDataSize;
-    final int mBufferCapacity;
+    private final int mDataSizePerSecond;
+    private final int mChunkDataSize;
+    private final int mBufferCapacity;
 
-    StreamerListener mStreamerListener = null;
+    private StreamerListener mStreamerListener = null;
 
-    Thread mConnectionThread;
+    private Thread mConnectionThread;
 
-    DepthBuffer mDepthBuffer = new DepthBuffer();
+    private DepthBuffer mDepthBuffer = new DepthBuffer();
     private Object mConnectionThreadPauseLock = new Object();
     private boolean mConnectionThreadPaused = false;
     private boolean mStoppedByUser = false;
 
-    Handler mTimerHandler = new Handler();
+    private Handler mTimerHandler = new Handler();
 
-    Runnable mTimerRunnable = new Runnable() {
+    private Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             mDepthBuffer.take(mDataSizePerSecond);
@@ -74,7 +74,7 @@ public class Streamer {
         }
     };
 
-    Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
             final MessageId messageId = MessageId.values()[inputMessage.what];
@@ -212,7 +212,7 @@ public class Streamer {
         }
     }
 
-    class DepthBuffer {
+    private class DepthBuffer {
         int mSize = 0;
 
         public synchronized void put(int size) {
@@ -248,10 +248,10 @@ public class Streamer {
         }
     }
 
-    class ConnectionThread implements Runnable {
-        URL mUrl;
+    private class ConnectionThread implements Runnable {
+        private URL mUrl;
 
-        ConnectionThread(URL url, int bitrate, int chunkSize, int bufferSize) {
+        public ConnectionThread(URL url, int bitrate, int chunkSize, int bufferSize) {
             super();
 
             mUrl = url;
@@ -259,7 +259,8 @@ public class Streamer {
 
         @Override
         public void run() {
-            Log.d(TAG, String.format("Connection thread started [bitrate=%d, buffer=%d, chunk=%d]", mBitrate, mBufferSize, mChunkSize));
+            Log.d(TAG, String.format("Connection thread started [bitrate=%d, buffer=%d, chunk=%d]",
+                mBitrate, mBufferSize, mChunkSize));
 
             try {
                 int contentSize = -1;
@@ -301,14 +302,16 @@ public class Streamer {
 
                         if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
                             Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
-                                bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize, mBufferCapacity));
+                                bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize,
+                                mBufferCapacity));
 
                             setConnectionThreadPaused(true);
 
                             continue;
                         }
 
-                        Log.d(TAG, String.format("Buffer available (empty: %d)", mBufferCapacity - mDepthBuffer.getSize()));
+                        Log.d(TAG, String.format("Buffer available (empty: %d)",
+                            mBufferCapacity - mDepthBuffer.getSize()));
                     }
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
@@ -356,7 +359,8 @@ public class Streamer {
 
                             receivedSize = receivedTo - receivedFrom + 1;
 
-                            Log.d(TAG, String.format("Received: %d-%d (bytes: %d)", receivedFrom, receivedTo, receivedSize));
+                            Log.d(TAG, String.format("Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
+                                receivedSize));
                         } else {
                             throw new InvalidContentSizeException("Can't obtain content size");
                         }

@@ -19,16 +19,18 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 
-public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener, GraphsFragment.OnWifiInfoListener {
+public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
+    GraphsFragment.OnWifiInfoListener {
+
     private static final String TAG = "NetToolActivity";
 
     private static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
     private static final String tag_fragment_stream = "android:switcher:" + R.id.view_pager + ":1";
     private static final String tag_fragment_settings = "android:switcher:" + R.id.view_pager + ":2";
 
-    NetToolFragmentPagerAdapter mAdapter;
-    ViewPager mViewPager;
-    PowerManager.WakeLock mWakeLock = null;
+    private NetToolFragmentPagerAdapter mAdapter;
+    private ViewPager mViewPager;
+    private PowerManager.WakeLock mWakeLock = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         }
     }
 
-    public static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
+    private static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
         public NetToolFragmentPagerAdapter(FragmentManager fragmentManager) {
             super(fragmentManager);
         }
@@ -135,24 +137,30 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         Log.d(TAG, "Destroy");
     }
 
+    @Override
     public void onPingStart(String address) {
-        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager().findFragmentByTag(tag_fragment_graphs);
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(tag_fragment_graphs);
 
         if (fragmentGraphs != null) {
             fragmentGraphs.pingStart(address);
         }
     }
 
+    @Override
     public void onPingStop() {
-        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager().findFragmentByTag(tag_fragment_graphs);
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(tag_fragment_graphs);
 
         if (fragmentGraphs != null) {
             fragmentGraphs.pingStop();
         }
     }
 
+    @Override
     public void onServerAddressObtained(int address) {
-        SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager().findFragmentByTag(tag_fragment_settings);
+        SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
+            .findFragmentByTag(tag_fragment_settings);
 
         if (fragmentSettings != null) {
             fragmentSettings.setPingServerAddress(address);

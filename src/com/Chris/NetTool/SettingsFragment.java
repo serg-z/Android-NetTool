@@ -18,11 +18,11 @@ import android.text.format.Formatter;
 import android.support.v4.app.Fragment;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {
-    Activity mActivity;
-    OnPingListener mPingCallback;
+    private Activity mActivity;
+    private OnPingListener mPingCallback;
 
-    Button mButtonPingStart, mButtonPingStop;
-    EditText mEditPingAddress;
+    private Button mButtonPingStart, mButtonPingStop;
+    private EditText mEditPingAddress;
 
     public interface OnPingListener {
         public void onPingStart(String address);
@@ -49,7 +49,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
         mEditPingAddress = new EditText(mActivity);
 
-        mEditPingAddress.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        mEditPingAddress.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT));
 
         layout.addView(mEditPingAddress);
 

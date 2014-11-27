@@ -45,18 +45,18 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         PAUSED
     }
 
-    Activity mActivity;
-    VideoView mVideoView = null;
-    EditText mVideoAddress;
-    Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
-    Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
-    VerticalProgressBar mProgressBarBufferDepth;
-    boolean mVideoIsPaused = false;
-    CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
-    TextView mTextStatus;
-    LinearLayout mLayoutLeft;
+    private Activity mActivity;
+    private VideoView mVideoView = null;
+    private EditText mVideoAddress;
+    private Button mButtonPlay, mButtonPause, mButtonStop, mButtonRandomSeek;
+    private Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
+    private VerticalProgressBar mProgressBarBufferDepth;
+    private boolean mVideoIsPaused = false;
+    private CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
+    private TextView mTextStatus;
+    private LinearLayout mLayoutLeft;
 
-    Streamer mStreamer;
+    private Streamer mStreamer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         LinearLayout layoutHorizontal = new LinearLayout(mActivity);
 
         layoutHorizontal.setOrientation(LinearLayout.HORIZONTAL);
-        layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        layoutHorizontal.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT));
 
         layout.addView(layoutHorizontal);
 
@@ -93,7 +94,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         mLayoutLeft = new LinearLayout(mActivity);
 
         mLayoutLeft.setOrientation(LinearLayout.VERTICAL);
-        mLayoutLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
+        mLayoutLeft.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.5f));
 
         layoutHorizontal.addView(mLayoutLeft);
 
@@ -205,13 +207,15 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         LinearLayout layoutRight = new LinearLayout(mActivity);
 
         layoutRight.setOrientation(LinearLayout.VERTICAL);
-        layoutRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        layoutRight.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.MATCH_PARENT));
 
         layoutHorizontal.addView(layoutRight);
 
         mProgressBarBufferDepth = new VerticalProgressBar(mActivity, null, android.R.attr.progressBarStyleHorizontal);
 
-        mProgressBarBufferDepth.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        mProgressBarBufferDepth.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT));
 
         layoutRight.addView(mProgressBarBufferDepth);
 
@@ -328,6 +332,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         }
     }
 
+    @Override
     public void onClick(View view) {
         if (view == mButtonPlay) {
             streamStart();
