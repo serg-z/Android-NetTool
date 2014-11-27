@@ -468,10 +468,6 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onStreamDepthBufferIsEmpty() {
-    }
-
-    @Override
     public void onStreamPlaybackFailed() {
         setUIState(UIState.READY_TO_PLAY);
     }

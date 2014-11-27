@@ -24,7 +24,6 @@ public class Streamer {
         public void onStreamDownloadingStopped();
         public void onStreamDownloadingProgress(int progress);
         public void onStreamDepthBufferLoadChanged(int value);
-        public void onStreamDepthBufferIsEmpty();
         public void onStreamPlaybackFailed();
         public void onStreamerFinished(boolean stoppedByUser);
     }
@@ -122,8 +121,6 @@ public class Streamer {
                         mStreamerListener.onStreamDepthBufferLoadChanged(load);
 
                         if (bufferSize == 0) {
-                            mStreamerListener.onStreamDepthBufferIsEmpty();
-
                             stopStreamer();
 
                             mStreamerListener.onStreamerFinished(mStoppedByUser);
