@@ -449,8 +449,15 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public void onStreamStopped() {
-        // set ready to play state when buffering is disabled
+        // repeat in no buffering mode
+        // or set ready to play state when buffering is disabled
         if (mStreamer.getBufferCapacity() == 0) {
+            if (mCheckBoxRepeat.isChecked()) {
+                streamStart();
+
+                return;
+            }
+
             setUIState(UIState.READY_TO_PLAY);
         }
     }
