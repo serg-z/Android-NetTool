@@ -26,6 +26,7 @@ public class Streamer {
         public void onStreamDepthBufferLoadChanged(int value);
         public void onStreamDepthBufferIsEmpty();
         public void onStreamPlaybackFailed();
+        public void onStreamerFinished(boolean stoppedByUser);
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -61,6 +62,7 @@ public class Streamer {
     DepthBuffer mDepthBuffer = new DepthBuffer();
     private Object mConnectionThreadPauseLock = new Object();
     private boolean mConnectionThreadPaused = false;
+    private boolean mStoppedByUser = false;
 
     Handler mTimerHandler = new Handler();
 
@@ -89,15 +91,23 @@ public class Streamer {
                 case STREAM_DOWNLOADING_STOPPED:
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamDownloadingStopped();
+
+                        // notify that streamer is done if it's running in "no buffering" mode
+                        if (mBufferSize == 0) {
+                            mStreamerListener.onStreamerFinished(mStoppedByUser);
+                        }
                     }
 
                     break;
 
                 case STREAM_DOWNLOADING_PROGRESS:
                     if (mStreamerListener != null) {
-                        int progress = (Integer)inputMessage.obj;
+                        if (!mStoppedByUser)
+                        {
+                            int progress = (Integer)inputMessage.obj;
 
-                        mStreamerListener.onStreamDownloadingProgress(progress);
+                            mStreamerListener.onStreamDownloadingProgress(progress);
+                        }
                     }
 
                     break;
@@ -114,7 +124,9 @@ public class Streamer {
                         if (bufferSize == 0) {
                             mStreamerListener.onStreamDepthBufferIsEmpty();
 
-                            stop();
+                            stopStreamer();
+
+                            mStreamerListener.onStreamerFinished(mStoppedByUser);
                         }
                     }
 
@@ -152,6 +164,12 @@ public class Streamer {
     }
 
     public void stop() {
+        mStoppedByUser = true;
+
+        stopStreamer();
+    }
+
+    private void stopStreamer() {
         if (mConnectionThread.isAlive()) {
             mConnectionThread.interrupt();
         }
