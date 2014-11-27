@@ -20,7 +20,7 @@ public class Streamer {
     private static final String TAG = "Streamer";
 
     public interface StreamerListener {
-        public void onStreamStarted();
+        public void onStreamDownloadingStarted();
         public void onStreamDownloadingStopped();
         public void onStreamDownloadingProgress(int progress);
         public void onStreamDepthBufferLoadChanged(int value);
@@ -35,7 +35,7 @@ public class Streamer {
     }
 
     private enum MessageId {
-        STREAM_STARTED,
+        STREAM_DOWNLOADING_STARTED,
         STREAM_DOWNLOADING_STOPPED,
         STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
@@ -79,9 +79,9 @@ public class Streamer {
             final MessageId messageId = MessageId.values()[inputMessage.what];
 
             switch (messageId) {
-                case STREAM_STARTED:
+                case STREAM_DOWNLOADING_STARTED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamStarted();
+                        mStreamerListener.onStreamDownloadingStarted();
                     }
 
                     break;
@@ -319,7 +319,7 @@ public class Streamer {
 
                                 // send "stream started" message to Stream instance
 
-                                mHandler.obtainMessage(MessageId.STREAM_STARTED.ordinal(), null)
+                                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED.ordinal(), null)
                                     .sendToTarget();
 
                                 continue;

@@ -448,7 +448,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onStreamStarted() {
+    public void onStreamDownloadingStarted() {
         setUIState(UIState.PLAYING);
     }
 
