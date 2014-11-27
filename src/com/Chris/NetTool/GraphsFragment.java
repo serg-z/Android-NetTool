@@ -422,22 +422,13 @@ public class GraphsFragment extends Fragment {
         // TODO: change to 0-40 on logarithmic scale
         mPlotRxTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
-        // ping
-
-        LinearLayout layoutPing = new LinearLayout(mActivity);
-
-        layoutPing.setOrientation(LinearLayout.VERTICAL);
-        layoutPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
-
-        plotsLayoutH.addView(layoutPing);
-
         // ping plot
 
         mPlotPing = new XYPlot(mActivity, "Ping");
 
-        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0.5f));
 
-        layoutPing.addView(mPlotPing);
+        plotsLayoutH.addView(mPlotPing);
 
         setupPlotPing(mPlotPing);
 
