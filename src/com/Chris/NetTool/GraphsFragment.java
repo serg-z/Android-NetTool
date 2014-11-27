@@ -93,6 +93,8 @@ public class GraphsFragment extends Fragment {
     Activity mActivity;
 
     long mLastRx = -1, mLastTx = -1;
+    private String mPingResumeAddress;
+    private boolean mPingShouldResume = false;
 
     public void pause() {
         mTimerHandler.removeCallbacks(mTimerRunnable);
@@ -497,11 +499,21 @@ public class GraphsFragment extends Fragment {
         Log.d(TAG, "Resume");
 
         resume();
+
+        if (mPingShouldResume) {
+            pingStart(mPingResumeAddress);
+
+            mPingShouldResume = false;
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
+        if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.RUNNING) {
+            mPingShouldResume = true;
+        }
 
         pingStop();
     }
@@ -515,6 +527,8 @@ public class GraphsFragment extends Fragment {
     }
 
     public void pingStart(String address) {
+        mPingResumeAddress = address;
+
         if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.FINISHED) {
             mPingTask.stop();
 
