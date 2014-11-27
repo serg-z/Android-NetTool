@@ -21,10 +21,10 @@ public class Streamer {
 
     public interface StreamerListener {
         public void onStreamDownloadingStarted();
-        public void onStreamDownloadingStopped();
+        public void onStreamDownloadingFinished();
         public void onStreamDownloadingProgress(int progress);
         public void onStreamDepthBufferLoadChanged(int value);
-        public void onStreamPlaybackFailed();
+        public void onStreamDownloadingFailed();
         public void onStreamerFinished(boolean stoppedByUser);
     }
 
@@ -36,10 +36,10 @@ public class Streamer {
 
     private enum MessageId {
         STREAM_DOWNLOADING_STARTED,
-        STREAM_DOWNLOADING_STOPPED,
+        STREAM_DOWNLOADING_FINISHED,
         STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
-        STREAM_PLAYBACK_FAILED
+        STREAM_DOWNLOADING_FAILED
     }
 
     // in Kbps
@@ -87,9 +87,9 @@ public class Streamer {
 
                     break;
 
-                case STREAM_DOWNLOADING_STOPPED:
+                case STREAM_DOWNLOADING_FINISHED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamDownloadingStopped();
+                        mStreamerListener.onStreamDownloadingFinished();
 
                         // notify that streamer is done if it's running in "no buffering" mode
                         if (mBufferSize == 0) {
@@ -129,9 +129,9 @@ public class Streamer {
 
                     break;
 
-                case STREAM_PLAYBACK_FAILED:
+                case STREAM_DOWNLOADING_FAILED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamPlaybackFailed();
+                        mStreamerListener.onStreamDownloadingFailed();
                     }
 
                     break;
@@ -385,13 +385,13 @@ public class Streamer {
             } catch (Exception e) {
                 e.printStackTrace();
 
-                mHandler.obtainMessage(MessageId.STREAM_PLAYBACK_FAILED.ordinal(), null)
+                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED.ordinal(), null)
                     .sendToTarget();
             }
 
             Log.d(TAG, ">> Connection thread finished");
 
-            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STOPPED.ordinal(), null)
+            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FINISHED.ordinal(), null)
                 .sendToTarget();
         }
     }

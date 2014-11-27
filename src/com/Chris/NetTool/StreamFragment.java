@@ -453,7 +453,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onStreamDownloadingStopped() {
+    public void onStreamDownloadingFinished() {
     }
 
     @Override
@@ -468,7 +468,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onStreamPlaybackFailed() {
+    public void onStreamDownloadingFailed() {
         setUIState(UIState.READY_TO_PLAY);
     }
 
