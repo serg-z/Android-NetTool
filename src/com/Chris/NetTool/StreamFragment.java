@@ -11,6 +11,7 @@ import android.widget.VideoView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -449,11 +450,14 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public void onStreamDownloadingStarted() {
+        Toast.makeText(mActivity, R.string.stream_downloading_started, 1).show();
+
         setUIState(UIState.PLAYING);
     }
 
     @Override
     public void onStreamDownloadingFinished() {
+        Toast.makeText(mActivity, R.string.stream_downloading_finished, 1).show();
     }
 
     @Override
@@ -469,11 +473,15 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
     @Override
     public void onStreamDownloadingFailed() {
+        Toast.makeText(mActivity, R.string.stream_downloading_failed, 1).show();
+
         setUIState(UIState.READY_TO_PLAY);
     }
 
     @Override
     public void onStreamerFinished(boolean stoppedByUser) {
+        Toast.makeText(mActivity, R.string.streamer_finished, 1).show();
+
         if (!stoppedByUser && mCheckBoxRepeat.isChecked()) {
             streamStart();
 

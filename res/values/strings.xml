@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">NetTool</string>
+    <string name="stream_downloading_started">Stream downloading started</string>
+    <string name="stream_downloading_finished">Stream downloading finished</string>
+    <string name="stream_downloading_failed">Stream downloading failed</string>
+    <string name="streamer_finished">Streamer finished</string>
 </resources>
