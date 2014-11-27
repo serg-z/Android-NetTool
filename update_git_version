@@ -19,3 +19,8 @@ cat AndroidManifest.xml \
     | sed "s/\(android:versionCode=\)\"[[:digit:]]*\"/\1\"$VERSION_CODE\"/" \
     | sed "s/\(android:versionName=\)\".*\"\+/\1\"$VERSION_NAME\"/" \
     > bin/AndroidManifest.xml
+
+echo -e \
+"`readlink -f bin/AndroidManifest.xml` : \\
+`readlink -f AndroidManifest.xml` \\" \
+    > bin/AndroidManifest.xml.d
