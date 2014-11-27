@@ -22,6 +22,7 @@ public class Streamer {
     public interface StreamerListener {
         public void onStreamStarted();
         public void onStreamStopped();
+        public void onStreamDownloadingProgress(int progress);
         public void onStreamDepthBufferLoadChanged(int value);
         public void onStreamDepthBufferIsEmpty();
         public void onStreamPlaybackFailed();
@@ -36,6 +37,7 @@ public class Streamer {
     private enum MessageId {
         STREAM_STARTED,
         STREAM_STOPPED,
+        STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
         STREAM_PLAYBACK_FAILED
     }
@@ -87,6 +89,15 @@ public class Streamer {
                 case STREAM_STOPPED:
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamStopped();
+                    }
+
+                    break;
+
+                case STREAM_DOWNLOADING_PROGRESS:
+                    if (mStreamerListener != null) {
+                        int progress = (Integer)inputMessage.obj;
+
+                        mStreamerListener.onStreamDownloadingProgress(progress);
                     }
 
                     break;
@@ -339,12 +350,19 @@ public class Streamer {
                             mDepthBuffer.put(receivedSize);
                         }
 
-                        Log.d(TAG, "=====");
-
                         rangeFrom = rangeTo + 1;
                         rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
 
                         receivedContentSize += receivedSize;
+
+                        int streamingProgress = (int)((float)(receivedContentSize * 100) / contentSize);
+
+                        // send "streaming downloading progress" message to Stream instance
+
+                        mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_PROGRESS.ordinal(), streamingProgress)
+                            .sendToTarget();
+
+                        Log.d(TAG, "=====");
                     } finally {
                         connection.disconnect();
                     }

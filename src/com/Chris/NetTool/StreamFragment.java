@@ -442,6 +442,11 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
         }
     }
 
+    private void showStreamDownloadingProgress(int progress) {
+        mProgressBarBufferDepth.setSecondaryProgress(progress);
+        mProgressBarBufferDepth.invalidate();
+    }
+
     @Override
     public void onStreamStarted() {
         setUIState(UIState.PLAYING);
@@ -458,8 +463,15 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
                 return;
             }
 
+            showStreamDownloadingProgress(0);
+
             setUIState(UIState.READY_TO_PLAY);
         }
+    }
+
+    @Override
+    public void onStreamDownloadingProgress(int progress) {
+        showStreamDownloadingProgress(progress);
     }
 
     @Override
@@ -475,6 +487,8 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
 
             return;
         }
+
+        showStreamDownloadingProgress(0);
 
         setUIState(UIState.READY_TO_PLAY);
     }
