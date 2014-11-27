@@ -21,7 +21,7 @@ public class Streamer {
 
     public interface StreamerListener {
         public void onStreamStarted();
-        public void onStreamStopped();
+        public void onStreamDownloadingStopped();
         public void onStreamDownloadingProgress(int progress);
         public void onStreamDepthBufferLoadChanged(int value);
         public void onStreamDepthBufferIsEmpty();
@@ -36,7 +36,7 @@ public class Streamer {
 
     private enum MessageId {
         STREAM_STARTED,
-        STREAM_STOPPED,
+        STREAM_DOWNLOADING_STOPPED,
         STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
         STREAM_PLAYBACK_FAILED
@@ -86,9 +86,9 @@ public class Streamer {
 
                     break;
 
-                case STREAM_STOPPED:
+                case STREAM_DOWNLOADING_STOPPED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamStopped();
+                        mStreamerListener.onStreamDownloadingStopped();
                     }
 
                     break;
@@ -376,7 +376,7 @@ public class Streamer {
 
             Log.d(TAG, ">> Connection thread finished");
 
-            mHandler.obtainMessage(MessageId.STREAM_STOPPED.ordinal(), null)
+            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STOPPED.ordinal(), null)
                 .sendToTarget();
         }
     }

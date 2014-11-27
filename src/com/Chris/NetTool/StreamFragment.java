@@ -453,7 +453,7 @@ public class StreamFragment extends Fragment implements View.OnClickListener, St
     }
 
     @Override
-    public void onStreamStopped() {
+    public void onStreamDownloadingStopped() {
         // repeat in no buffering mode
         // or set ready to play state when buffering is disabled
         if (mStreamer.getBufferCapacity() == 0) {
