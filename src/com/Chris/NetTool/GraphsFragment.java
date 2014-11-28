@@ -65,6 +65,7 @@ public class GraphsFragment extends Fragment {
     }
 
     private OnWifiInfoListener mWifiInfoCallback;
+    private SettingsFragment.OnPingListener mPingCallback;
 
     private Handler mTimerHandler = new Handler();
 
@@ -460,6 +461,12 @@ public class GraphsFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnWifiInfoListener");
         }
+
+        try {
+            mPingCallback = (SettingsFragment.OnPingListener)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnPingListener");
+        }
     }
 
     @Override
@@ -534,6 +541,11 @@ public class GraphsFragment extends Fragment {
     }
 
     private void parsePingLog(String line) {
+        // add line to ping log text in settings
+        mPingCallback.onPingLog(line);
+
+        // parse the line
+
         int pingResult = -1;
         // in ms
         float pingTime = 0.0f;

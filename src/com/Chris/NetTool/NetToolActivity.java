@@ -105,6 +105,16 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     }
 
     @Override
+    public void onPingLog(String line) {
+        SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_settings);
+
+        if (fragmentSettings != null) {
+            fragmentSettings.pingLog(line);
+        }
+    }
+
+    @Override
     public void onServerAddressObtained(int address) {
         SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
             .findFragmentByTag(PagerFragment.tag_fragment_settings);

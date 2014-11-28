@@ -4,9 +4,12 @@ import android.app.Activity;
 
 import android.os.Bundle;
 
+import android.content.Intent;
+
 import android.widget.LinearLayout;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +24,14 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private Activity mActivity;
     private OnPingListener mPingCallback;
 
-    private Button mButtonPingStart, mButtonPingStop;
+    private Button mButtonPingStart, mButtonPingStop, mButtonPingLogShare;
     private EditText mEditPingAddress;
+    private TextView mPingLog;
 
     public interface OnPingListener {
         public void onPingStart(String address);
         public void onPingStop();
+        public void onPingLog(String line);
     }
 
     @Override
@@ -45,7 +50,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        // ping buttons
+        // ping address
 
         mEditPingAddress = new EditText(mActivity);
 
@@ -56,6 +61,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
         mEditPingAddress.setSingleLine(true);
         mEditPingAddress.setText("localhost");
+
+        // ping buttons
 
         LinearLayout layoutH = new LinearLayout(mActivity);
 
@@ -78,6 +85,29 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         mButtonPingStop.setText("Stop");
         mButtonPingStop.setOnClickListener(this);
 
+        // ping log
+
+        mPingLog = new TextView(mActivity);
+
+        mPingLog.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.WRAP_CONTENT));
+
+        layout.addView(mPingLog);
+
+        mPingLog.setLines(20);
+
+        // ping share
+
+        mButtonPingLogShare = new Button(mActivity);
+
+        mButtonPingLogShare.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT));
+
+        layout.addView(mButtonPingLogShare);
+
+        mButtonPingLogShare.setText("Share ping log");
+        mButtonPingLogShare.setOnClickListener(this);
+
         return layout;
     }
 
@@ -98,10 +128,22 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             mPingCallback.onPingStart(mEditPingAddress.getText().toString());
         } else if (view == mButtonPingStop) {
             mPingCallback.onPingStop();
+        } else if (view == mButtonPingLogShare) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Ping Log");
+            intent.putExtra(Intent.EXTRA_TEXT, mPingLog.getText());
+
+            mActivity.startActivity(Intent.createChooser(intent, "Share ping log"));
         }
     }
 
     public void setPingServerAddress(int address) {
         mEditPingAddress.setText(Formatter.formatIpAddress(address));
+    }
+
+    public void pingLog(String line) {
+        mPingLog.setText(line + "\n" + mPingLog.getText());
     }
 }
