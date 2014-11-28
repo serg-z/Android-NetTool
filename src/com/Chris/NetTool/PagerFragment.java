@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.widget.LinearLayout;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +21,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.view.ViewPager;
 
-public class PagerFragment extends Fragment implements Button.OnClickListener {
+public class PagerFragment extends Fragment implements ImageButton.OnClickListener {
     private static final String TAG = "PagerFragment";
 
     static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
@@ -31,7 +31,7 @@ public class PagerFragment extends Fragment implements Button.OnClickListener {
 
     private Activity mActivity;
 
-    private Button mButtonSettings;
+    private ImageButton mButtonSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class PagerFragment extends Fragment implements Button.OnClickListener {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        mButtonSettings = new Button(mActivity);
+        mButtonSettings = new ImageButton(mActivity);
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, 
             LayoutParams.WRAP_CONTENT);
@@ -63,7 +63,7 @@ public class PagerFragment extends Fragment implements Button.OnClickListener {
 
         layout.addView(mButtonSettings);
 
-        mButtonSettings.setText("Settings");
+        mButtonSettings.setImageResource(android.R.drawable.ic_menu_manage);
         mButtonSettings.setOnClickListener(this);
 
         ViewPager viewPager = new ViewPager(mActivity);
