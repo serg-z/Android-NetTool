@@ -52,9 +52,25 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
+        // view pager
+
+        ViewPager viewPager = new ViewPager(mActivity);
+
+        viewPager.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+            LayoutParams.MATCH_PARENT, 1));
+
+        layout.addView(viewPager);
+
+        viewPager.setId(R.id.view_pager);
+        viewPager.setOffscreenPageLimit(1);
+
+        viewPager.setAdapter(adapter);
+
+        // settings button
+
         mButtonSettings = new ImageButton(mActivity);
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, 
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT);
 
         layoutParams.gravity = Gravity.RIGHT;
@@ -66,16 +82,7 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
         mButtonSettings.setImageResource(android.R.drawable.ic_menu_manage);
         mButtonSettings.setOnClickListener(this);
 
-        ViewPager viewPager = new ViewPager(mActivity);
-
-        viewPager.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-
-        layout.addView(viewPager);
-
-        viewPager.setId(R.id.view_pager);
-        viewPager.setOffscreenPageLimit(1);
-
-        viewPager.setAdapter(adapter);
+        // add fragments
 
         if (savedInstanceState == null) {
             GraphsFragment fragmentGraphs = new GraphsFragment();
