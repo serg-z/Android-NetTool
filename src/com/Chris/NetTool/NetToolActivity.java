@@ -16,8 +16,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     GraphsFragment.OnWifiInfoListener {
     private static final String TAG = "NetToolActivity";
 
-    private static final String tag_fragment_pager = "fragment_pager";
-
     private PowerManager.WakeLock mWakeLock = null;
 
     @Override
@@ -34,7 +32,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             PagerFragment fragmentPager = new PagerFragment();
 
             getSupportFragmentManager().beginTransaction()
-                .add(android.R.id.content, fragmentPager, tag_fragment_pager)
+                .add(android.R.id.content, fragmentPager, PagerFragment.tag_fragment_pager)
                 .commit();
         }
     }

@@ -5,26 +5,33 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.widget.LinearLayout;
+import android.widget.Button;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Gravity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+
 import android.support.v4.view.ViewPager;
 
-public class PagerFragment extends Fragment {
+public class PagerFragment extends Fragment implements Button.OnClickListener {
     private static final String TAG = "PagerFragment";
 
     static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
     static final String tag_fragment_stream = "android:switcher:" + R.id.view_pager + ":1";
     static final String tag_fragment_settings = "android:switcher:" + R.id.view_pager + ":2";
+    static final String tag_fragment_pager = "fragment_pager";
 
     private Activity mActivity;
+
+    private Button mButtonSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,8 +49,22 @@ public class PagerFragment extends Fragment {
 
         LinearLayout layout = new LinearLayout(mActivity);
 
+        layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        layout.setFilterTouchesWhenObscured(true);
+
+        mButtonSettings = new Button(mActivity);
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, 
+            LayoutParams.WRAP_CONTENT);
+
+        layoutParams.gravity = Gravity.RIGHT;
+
+        mButtonSettings.setLayoutParams(layoutParams);
+
+        layout.addView(mButtonSettings);
+
+        mButtonSettings.setText("Settings");
+        mButtonSettings.setOnClickListener(this);
 
         ViewPager viewPager = new ViewPager(mActivity);
 
@@ -52,7 +73,7 @@ public class PagerFragment extends Fragment {
         layout.addView(viewPager);
 
         viewPager.setId(R.id.view_pager);
-        viewPager.setOffscreenPageLimit(2);
+        viewPager.setOffscreenPageLimit(1);
 
         viewPager.setAdapter(adapter);
 
@@ -64,11 +85,24 @@ public class PagerFragment extends Fragment {
             ((FragmentActivity)mActivity).getSupportFragmentManager().beginTransaction()
                 .add(R.id.view_pager, fragmentGraphs, tag_fragment_graphs)
                 .add(R.id.view_pager, fragmentStream, tag_fragment_stream)
-                .add(R.id.view_pager, fragmentSettings, tag_fragment_settings)
                 .commit();
         }
 
         return layout;
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view == mButtonSettings) {
+            FragmentManager fragmentManager = ((FragmentActivity)mActivity).getSupportFragmentManager();
+
+            fragmentManager.beginTransaction()
+                .hide(fragmentManager.findFragmentByTag(tag_fragment_pager))
+                .add(android.R.id.content, new SettingsFragment())
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .addToBackStack(null)
+                .commit();
+        }
     }
 
     private static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {
@@ -78,7 +112,7 @@ public class PagerFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
 
         @Override
