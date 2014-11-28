@@ -550,36 +550,32 @@ public class GraphsFragment extends Fragment {
         // in ms
         float pingTime = 0.0f;
 
-        Pattern p = Pattern.compile("\\d+\\sbytes\\sfrom\\s.*\\stime=([\\d\\.]+).*");
-        Matcher m = p.matcher(line);
+        Matcher m = Pattern.compile("^\\d+\\sbytes\\sfrom\\s.*\\stime=([\\d\\.]+).*").matcher(line);
 
         if (m.matches()) {
             pingResult = 1;
 
             pingTime = Float.parseFloat(m.group(1));
         } else {
-            p = Pattern.compile("no\\sanswer\\syet\\sfor\\s.*");
-            m = p.matcher(line);
+            m = Pattern.compile("^no\\sanswer\\syet\\sfor\\s.*").matcher(line);
 
             if (m.matches()) {
                 pingResult = 0;
             }
         }
 
-        if (pingResult >= 0) {
-            if (pingResult == 1) {
-                addValueToSeries(mSeriesPingSuccess, pingTime / 1000.0f);
-                addValueToSeries(mSeriesPingFail, -1.0f);
-            } else if (pingResult == 0) {
-                addValueToSeries(mSeriesPingSuccess, -1.0f);
-                addValueToSeries(mSeriesPingFail, 1.0f);
-            } else {
-                addValueToSeries(mSeriesPingSuccess, -1.0f);
-                addValueToSeries(mSeriesPingFail, 1.0f);
-            }
-
-            mPlotPing.redraw();
+        if (pingResult == 1) {
+            addValueToSeries(mSeriesPingSuccess, pingTime / 1000.0f);
+            addValueToSeries(mSeriesPingFail, -1.0f);
+        } else if (pingResult == 0) {
+            addValueToSeries(mSeriesPingSuccess, -1.0f);
+            addValueToSeries(mSeriesPingFail, 1.0f);
+        } else {
+            addValueToSeries(mSeriesPingSuccess, -1.0f);
+            addValueToSeries(mSeriesPingFail, 0.5f);
         }
+
+        mPlotPing.redraw();
     }
 
     private class PingTask extends AsyncTask<String, Void, Void> {
