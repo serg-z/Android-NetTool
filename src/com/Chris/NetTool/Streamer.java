@@ -167,7 +167,7 @@ public class Streamer {
     }
 
     private void stopStreamer() {
-        if (mConnectionThread.isAlive()) {
+        if (mConnectionThread != null && mConnectionThread.isAlive()) {
             mConnectionThread.interrupt();
         }
 
@@ -264,14 +264,11 @@ public class Streamer {
 
             try {
                 int contentSize = -1;
-                int receivedContentSize = 0;
-
-                int rangeFrom = 0;
-                int rangeTo = 0;
+                int totalReceivedSize = 0;
 
                 boolean stop = false;
 
-                while (receivedContentSize != contentSize && !stop) {
+                while (totalReceivedSize != contentSize && !stop) {
                     if (Thread.interrupted()) {
                         Log.d(TAG, "Interrupting connection thread");
 
@@ -316,9 +313,21 @@ public class Streamer {
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
-                    Log.d(TAG, String.format("Requesting %d-%d", rangeFrom, rangeTo));
-
                     try {
+                        int rangeFrom;
+                        int rangeTo;
+
+                        if (contentSize == -1) {
+                            rangeFrom = 0;
+                            rangeTo = 0;
+                        } else {
+                            rangeFrom = totalReceivedSize;
+                            rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
+                        }
+
+                        Log.d(TAG, String.format("Requesting %d-%d (bytes: %d)", rangeFrom, rangeTo,
+                            rangeTo - rangeFrom + 1));
+
                         connection.setChunkedStreamingMode(0);
 
                         connection.setRequestProperty("Accept-Encoding", "identity");
@@ -333,8 +342,6 @@ public class Streamer {
 
                                 Log.d(TAG, "Content size: " + contentSize);
 
-                                rangeTo = Math.min(contentSize - 1, mChunkDataSize - 1);
-
                                 // send "stream started" message to Stream instance
 
                                 mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED.ordinal(), null)
@@ -348,8 +355,8 @@ public class Streamer {
                             }
                         }
 
-                        Pattern p = Pattern.compile("bytes\\s(\\d+)-(\\d+).*");
-                        Matcher m = p.matcher(connection.getHeaderField("Content-Range"));
+                        Matcher m = Pattern.compile("bytes\\s(\\d+)-(\\d+).*")
+                            .matcher(connection.getHeaderField("Content-Range"));
 
                         int receivedSize = 0;
 
@@ -369,12 +376,9 @@ public class Streamer {
                             mDepthBuffer.put(receivedSize);
                         }
 
-                        rangeFrom = rangeTo + 1;
-                        rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
+                        totalReceivedSize += receivedSize;
 
-                        receivedContentSize += receivedSize;
-
-                        int streamingProgress = (int)((float)(receivedContentSize * 100) / contentSize);
+                        int streamingProgress = (int)((float)(totalReceivedSize * 100) / contentSize);
 
                         // send "streaming downloading progress" message to Stream instance
 
