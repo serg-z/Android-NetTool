@@ -29,7 +29,7 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
 
     static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
     static final String tag_fragment_streamer = "android:switcher:" + R.id.view_pager + ":1";
-    static final String tag_fragment_settings = "android:switcher:" + R.id.view_pager + ":2";
+    static final String tag_fragment_settings = "fragment_settings";
     static final String tag_fragment_pager = "fragment_pager";
 
     private Activity mActivity;
@@ -123,6 +123,8 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
             ((FragmentActivity)mActivity).getSupportFragmentManager().beginTransaction()
                 .add(R.id.view_pager, fragmentGraphs, tag_fragment_graphs)
                 .add(R.id.view_pager, fragmentStreamer, tag_fragment_streamer)
+                .add(android.R.id.content, fragmentSettings, tag_fragment_settings)
+                .hide(fragmentSettings)
                 .commit();
         }
 
@@ -136,7 +138,7 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
 
             fragmentManager.beginTransaction()
                 .hide(fragmentManager.findFragmentByTag(tag_fragment_pager))
-                .add(android.R.id.content, new SettingsFragment())
+                .show(fragmentManager.findFragmentByTag(tag_fragment_settings))
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                 .addToBackStack(null)
                 .commit();
