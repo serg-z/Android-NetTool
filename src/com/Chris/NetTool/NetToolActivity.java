@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener {
+
     private static final String TAG = "NetToolActivity";
 
     private PowerManager.WakeLock mWakeLock = null;

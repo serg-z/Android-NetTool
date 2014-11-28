@@ -148,7 +148,7 @@ public class Streamer {
         }
     };
 
-    Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
+    public Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
         mUrl = url;
         mBitrate = bitrate;
         mChunkSize = chunkSize;
@@ -250,7 +250,7 @@ public class Streamer {
     }
 
     private class DepthBuffer {
-        int mSize = 0;
+        private int mSize = 0;
 
         public synchronized void put(int size) {
             mSize += size;
