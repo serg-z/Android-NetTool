@@ -10,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
-import android.widget.RelativeLayout;
 
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
@@ -31,8 +30,6 @@ import android.text.format.Formatter;
 
 import android.util.Pair;
 import android.util.Log;
-
-import android.content.pm.PackageManager.NameNotFoundException;
 
 import android.graphics.Color;
 
@@ -450,36 +447,6 @@ public class GraphsFragment extends Fragment {
         stepFormatter.setVertexPaint(null);
 
         mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
-
-        // version
-
-        RelativeLayout releativeLayoutVersion = new RelativeLayout(mActivity);
-
-        releativeLayoutVersion.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-            LayoutParams.WRAP_CONTENT));
-
-        RelativeLayout.LayoutParams relativeLayoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT);
-
-        relativeLayoutParams.rightMargin = 10;
-
-        relativeLayoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-
-        TextView textVersion = new TextView(mActivity);
-
-        releativeLayoutVersion.addView(textVersion, relativeLayoutParams);
-
-        plotsLayoutV.addView(releativeLayoutVersion);
-
-        String versionString = "NOT DEFINED";
-
-        try {
-            versionString = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0).versionName;
-        } catch (NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        textVersion.setText("Version: " + versionString);
 
         return layout;
     }

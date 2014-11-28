@@ -6,12 +6,15 @@ import android.os.Bundle;
 
 import android.widget.LinearLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Gravity;
+
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -66,18 +69,46 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
 
         viewPager.setAdapter(adapter);
 
-        // settings button
+        // version
 
-        mButtonSettings = new ImageButton(mActivity);
+        LinearLayout layoutBottom = new LinearLayout(mActivity);
 
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT);
 
         layoutParams.gravity = Gravity.RIGHT;
 
-        mButtonSettings.setLayoutParams(layoutParams);
+        layoutBottom.setLayoutParams(layoutParams);
 
-        layout.addView(mButtonSettings);
+        layout.addView(layoutBottom);
+
+        layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT);
+
+        layoutParams.gravity = Gravity.CENTER_VERTICAL;
+
+        TextView textVersion = new TextView(mActivity);
+
+        layoutBottom.addView(textVersion, layoutParams);
+
+        String versionString = "UNDEFINED";
+
+        try {
+            versionString = mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0).versionName;
+        } catch (NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        textVersion.setText("Version: " + versionString);
+
+        // settings button
+
+        mButtonSettings = new ImageButton(mActivity);
+
+        mButtonSettings.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT));
+
+        layoutBottom.addView(mButtonSettings);
 
         mButtonSettings.setImageResource(android.R.drawable.ic_menu_manage);
         mButtonSettings.setOnClickListener(this);
