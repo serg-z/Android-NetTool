@@ -33,10 +33,10 @@ import java.net.MalformedURLException;
 
 import java.lang.UnsupportedOperationException;
 
-public class StreamFragment extends Fragment implements View.OnClickListener, Streamer.StreamerListener,
+public class StreamerFragment extends Fragment implements View.OnClickListener, Streamer.StreamerListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
-    private static final String TAG = "StreamFragment";
+    private static final String TAG = "StreamerFragment";
 
     private enum UIState {
         EVERYTHING_DISABLED,
