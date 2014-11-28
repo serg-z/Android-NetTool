@@ -13,6 +13,8 @@ import java.lang.Thread;
 import java.lang.Runnable;
 import java.lang.UnsupportedOperationException;
 
+import java.util.Random;
+
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -42,6 +44,7 @@ public class Streamer {
         STREAM_DOWNLOADING_FAILED
     }
 
+    private final URL mUrl;
     // in Kbps
     private final int mBitrate;
     // in seconds
@@ -62,6 +65,7 @@ public class Streamer {
     private Object mConnectionThreadPauseLock = new Object();
     private boolean mConnectionThreadPaused = false;
     private boolean mStoppedByUser = false;
+    private boolean mConnectionThreadRandomSeek = false;
 
     private Handler mTimerHandler = new Handler();
 
@@ -96,6 +100,8 @@ public class Streamer {
                             mStreamerListener.onStreamerFinished(mStoppedByUser);
                         }
                     }
+
+                    mConnectionThread = null;
 
                     break;
 
@@ -143,6 +149,7 @@ public class Streamer {
     };
 
     Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
+        mUrl = url;
         mBitrate = bitrate;
         mChunkSize = chunkSize;
         mBufferSize = bufferSize;
@@ -151,19 +158,39 @@ public class Streamer {
         mChunkDataSize = mDataSizePerSecond * mChunkSize;
         mBufferCapacity = mDataSizePerSecond * mBufferSize;
 
-        mConnectionThread = new Thread(new ConnectionThread(url, mBitrate, mChunkSize, mBufferSize));
-
-        mConnectionThread.start();
+        createAndStartConnectionThread();
 
         if (mBufferSize > 0) {
             mTimerHandler.postDelayed(mTimerRunnable, 1000);
         }
     }
 
+    private void createAndStartConnectionThread() {
+        if (mConnectionThread != null) {
+            throw new IllegalStateException("Connection thread is already created");
+        }
+
+        mConnectionThread = new Thread(new ConnectionThread(mUrl, mBitrate, mChunkSize, mBufferSize));
+
+        mConnectionThread.start();
+    }
+
     public void stop() {
         mStoppedByUser = true;
 
         stopStreamer();
+    }
+
+    public void randomSeek() {
+        if (mBufferSize > 0) {
+            mDepthBuffer.clear(false);
+        }
+
+        if (mConnectionThread == null) {
+            createAndStartConnectionThread();
+        }
+
+        setConnectionThreadRandomSeek(true);
     }
 
     private void stopStreamer() {
@@ -174,7 +201,7 @@ public class Streamer {
         if (mBufferSize > 0) {
             mTimerHandler.removeCallbacks(mTimerRunnable);
 
-            mDepthBuffer.clear();
+            mDepthBuffer.clear(true);
         }
     }
 
@@ -199,17 +226,27 @@ public class Streamer {
     }
 
     private void setConnectionThreadPaused(boolean paused) {
-        if (paused) {
-            synchronized (mConnectionThreadPauseLock) {
-                mConnectionThreadPaused = true;
-            }
-        } else {
-            synchronized (mConnectionThreadPauseLock) {
-                mConnectionThreadPaused = false;
+        if (mConnectionThread != null) {
+            if (paused) {
+                synchronized (mConnectionThreadPauseLock) {
+                    mConnectionThreadPaused = true;
+                }
+            } else {
+                synchronized (mConnectionThreadPauseLock) {
+                    mConnectionThreadPaused = false;
 
-                mConnectionThreadPauseLock.notifyAll();
+                    mConnectionThreadPauseLock.notifyAll();
+                }
             }
         }
+    }
+
+    private synchronized void setConnectionThreadRandomSeek(boolean value) {
+        mConnectionThreadRandomSeek = value;
+    }
+
+    private synchronized boolean getConnectionThreadRandomSeek() {
+        return mConnectionThreadRandomSeek;
     }
 
     private class DepthBuffer {
@@ -225,6 +262,10 @@ public class Streamer {
         }
 
         public synchronized void take(int size) {
+            take(size, true);
+        }
+
+        private synchronized void take(int size, boolean sendMessage) {
             if (mSize == 0 || size <= 0) {
                 return;
             }
@@ -233,8 +274,10 @@ public class Streamer {
 
             Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
 
-            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
-                .sendToTarget();
+            if (sendMessage) {
+                mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
+                    .sendToTarget();
+            }
 
             setConnectionThreadPaused(false);
         }
@@ -243,8 +286,8 @@ public class Streamer {
             return mSize;
         }
 
-        public synchronized void clear() {
-            take(mSize);
+        public synchronized void clear(boolean sendMessage) {
+            take(mSize, sendMessage);
         }
     }
 
@@ -309,6 +352,16 @@ public class Streamer {
 
                         Log.d(TAG, String.format("Buffer available (empty: %d)",
                             mBufferCapacity - mDepthBuffer.getSize()));
+                    }
+
+                    // random seek logic
+                    // TODO: remove logging
+                    if (getConnectionThreadRandomSeek() && contentSize != -1) {
+                        totalReceivedSize = (new Random()).nextInt(contentSize);
+
+                        Log.d(TAG, "*** CT: RANDOM SEEK TO " + totalReceivedSize);
+
+                        setConnectionThreadRandomSeek(false);
                     }
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();

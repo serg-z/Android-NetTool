@@ -155,8 +155,6 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
         mButtonRandomSeek.setText("Random Seek");
 
-        mButtonRandomSeek.setEnabled(false);
-
         //
 
         mCheckBoxUseVideoView = new CheckBox(mActivity);
@@ -255,7 +253,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                 mButtonPlay.setEnabled(false);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
-                //mButtonRandomSeek.setEnabled(false);
+                mButtonRandomSeek.setEnabled(false);
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(false);
@@ -272,7 +270,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                 mButtonPlay.setEnabled(true);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
-                //mButtonRandomSeek.setEnabled(false);
+                mButtonRandomSeek.setEnabled(false);
 
                 mCheckBoxUseVideoView.setEnabled(true);
                 mCheckBoxRepeat.setEnabled(true);
@@ -289,7 +287,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                 mButtonPlay.setEnabled(false);
                 mButtonPause.setEnabled(true);
                 mButtonStop.setEnabled(true);
-                //mButtonRandomSeek.setEnabled(true);
+                mButtonRandomSeek.setEnabled(true);
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(true);
@@ -314,7 +312,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                 mButtonPlay.setEnabled(true);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
-                //mButtonRandomSeek.setEnabled(false);
+                mButtonRandomSeek.setEnabled(false);
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(true);
@@ -363,6 +361,12 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.seekTo(0);
             } else {
+                if (mStreamer != null) {
+                    mStreamer.randomSeek();
+
+                    showStreamDownloadingProgress(0);
+                    showStreamDepthBufferLoadProgress(0);
+                }
             }
         }
     }
@@ -453,6 +457,11 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         mProgressBarBufferDepth.invalidate();
     }
 
+    private void showStreamDepthBufferLoadProgress(int progress) {
+        mProgressBarBufferDepth.setProgress(progress);
+        mProgressBarBufferDepth.invalidate();
+    }
+
     @Override
     public void onStreamDownloadingStarted() {
         Toast.makeText(mActivity, R.string.stream_downloading_started, 1).show();
@@ -472,8 +481,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamDepthBufferLoadChanged(int value) {
-        mProgressBarBufferDepth.setProgress(value);
-        mProgressBarBufferDepth.invalidate();
+        showStreamDepthBufferLoadProgress(value);
     }
 
     @Override
