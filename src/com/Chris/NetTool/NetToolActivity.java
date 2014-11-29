@@ -7,10 +7,13 @@ import android.content.Context;
 
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.KeyEvent;
 
 import android.util.Log;
 
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener {
@@ -21,6 +24,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        setTheme(android.R.style.Theme_DeviceDefault);
+
         super.onCreate(savedInstanceState);
 
         Log.d(TAG, "Created");
@@ -36,6 +41,17 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 .add(android.R.id.content, fragmentPager, PagerFragment.tag_fragment_pager)
                 .commit();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            showSettings();
+
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -122,6 +138,17 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         if (fragmentSettings != null) {
             fragmentSettings.setPingServerAddress(address);
         }
+    }
+
+    private void showSettings() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        fragmentManager.beginTransaction()
+            .hide(fragmentManager.findFragmentByTag(PagerFragment.tag_fragment_pager))
+            .show(fragmentManager.findFragmentByTag(PagerFragment.tag_fragment_settings))
+            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+            .addToBackStack(null)
+            .commit();
     }
 }
 

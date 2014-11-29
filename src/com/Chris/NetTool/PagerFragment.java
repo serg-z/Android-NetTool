@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.widget.LinearLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import android.view.LayoutInflater;
@@ -24,7 +23,7 @@ import android.support.v4.app.FragmentTransaction;
 
 import android.support.v4.view.ViewPager;
 
-public class PagerFragment extends Fragment implements ImageButton.OnClickListener {
+public class PagerFragment extends Fragment {
     private static final String TAG = "PagerFragment";
 
     static final String tag_fragment_graphs = "android:switcher:" + R.id.view_pager + ":0";
@@ -33,8 +32,6 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
     static final String tag_fragment_pager = "fragment_pager";
 
     private Activity mActivity;
-
-    private ImageButton mButtonSettings;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -85,6 +82,7 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
         layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT);
 
+        layoutParams.rightMargin = 10;
         layoutParams.gravity = Gravity.CENTER_VERTICAL;
 
         TextView textVersion = new TextView(mActivity);
@@ -100,18 +98,6 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
         }
 
         textVersion.setText("Version: " + versionString);
-
-        // settings button
-
-        mButtonSettings = new ImageButton(mActivity);
-
-        mButtonSettings.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT));
-
-        layoutBottom.addView(mButtonSettings);
-
-        mButtonSettings.setImageResource(android.R.drawable.ic_menu_manage);
-        mButtonSettings.setOnClickListener(this);
 
         // add fragments
 
@@ -129,20 +115,6 @@ public class PagerFragment extends Fragment implements ImageButton.OnClickListen
         }
 
         return layout;
-    }
-
-    @Override
-    public void onClick(View view) {
-        if (view == mButtonSettings) {
-            FragmentManager fragmentManager = ((FragmentActivity)mActivity).getSupportFragmentManager();
-
-            fragmentManager.beginTransaction()
-                .hide(fragmentManager.findFragmentByTag(tag_fragment_pager))
-                .show(fragmentManager.findFragmentByTag(tag_fragment_settings))
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .addToBackStack(null)
-                .commit();
-        }
     }
 
     private static class NetToolFragmentPagerAdapter extends FragmentPagerAdapter {

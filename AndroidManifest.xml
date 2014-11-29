@@ -4,7 +4,8 @@
     android:versionCode=""
     android:versionName="">
 
-    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="19" />
+    <!-- targetSdkVersion has to be lower than 11 to force legacy soft menu button to be shown -->
+    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="10" />
 
     <supports-screens android:largeScreens="true"
         android:smallScreens="true"
