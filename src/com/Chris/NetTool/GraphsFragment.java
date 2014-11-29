@@ -135,9 +135,8 @@ public class GraphsFragment extends Fragment {
         ((TextView)mActivity.findViewById(R.id.text_ssid)).setText(wifiInfo.getSSID());
         ((TextView)mActivity.findViewById(R.id.text_bssid)).setText(bssid);
         ((TextView)mActivity.findViewById(R.id.text_server_address)).setText(Formatter.formatIpAddress(serverAddress));
-        ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(String.valueOf(rssi) + " dBm");
-        ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(String.valueOf(linkSpeed) + " "
-            + WifiInfo.LINK_SPEED_UNITS);
+        ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(rssi + " dBm");
+        ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(linkSpeed + " " + WifiInfo.LINK_SPEED_UNITS);
 
         setPingServerAddress(serverAddress);
 

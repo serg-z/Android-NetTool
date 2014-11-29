@@ -257,7 +257,7 @@ public class Streamer {
 
             Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
 
-            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
+            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), mSize)
                 .sendToTarget();
         }
 
@@ -275,7 +275,7 @@ public class Streamer {
             Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
 
             if (sendMessage) {
-                mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), Integer.valueOf(mSize))
+                mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), mSize)
                     .sendToTarget();
             }
 
