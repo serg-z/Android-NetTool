@@ -12,6 +12,9 @@ import android.view.KeyEvent;
 
 import android.widget.Toast;
 
+import android.media.ToneGenerator;
+import android.media.AudioManager;
+
 import android.net.wifi.WifiManager;
 
 import android.util.Log;
@@ -193,6 +196,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     public void onDatagramReceived(String datagramMessage) {
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
 
+        boolean countdownBeep = false;
+
         for (String line : datagramMessage.split("\n")) {
             final String[] lineArray = line.trim().split("=");
 
@@ -212,6 +217,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentStreamer != null) {
                     fragmentStreamer.setVideoAddress(value);
                 }
+            } else if (name.equals("countdown_beep")) {
+                countdownBeep = value.equals("on");
             } else if (name.equals("random_start_delay")) {
                 final int delay = Integer.valueOf(value);
 
@@ -230,9 +237,20 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
                 Toast.makeText(this, "Starting streamer in " + randomDelay + "s", 1).show();
 
+                final ToneGenerator toneGenerator;
+
+                if (countdownBeep) {
+                    toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+                } else {
+                    toneGenerator = null;
+                }
+
                 mCountDownTimerStreamerStart =
                     new CountDownTimer(randomDelay * 1000 + 100, 900) {
                         public void onTick(long millisUntilFinished) {
+                            if (toneGenerator != null) {
+                                toneGenerator.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+                            }
                         }
 
                         public void onFinish() {
