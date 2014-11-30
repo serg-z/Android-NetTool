@@ -26,6 +26,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     private PowerManager.WakeLock mWakeLock = null;
     private DatagramReceiver mDatagramReceiver = null;
+    private WifiManager.WifiLock mWifiLock = null;
     private WifiManager.MulticastLock mMulticastLock = null;
 
     @Override
@@ -71,6 +72,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         mWakeLock.acquire();
 
+        // acquire wifi lock
+        mWifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE))
+            .createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG + "_WifiLock");
+
+        mWifiLock.acquire();
+
         // acquire multicast lock
         mMulticastLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE))
             .createMulticastLock(TAG + "_MulticastLock");
@@ -109,6 +116,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             mWakeLock.release();
 
             mWakeLock = null;
+        }
+
+        if (mWifiLock != null) {
+            mWifiLock.release();
+
+            mWifiLock = null;
         }
 
         if (mMulticastLock != null) {
