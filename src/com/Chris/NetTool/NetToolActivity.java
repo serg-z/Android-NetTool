@@ -196,6 +196,9 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     public void onDatagramReceived(String datagramMessage) {
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
 
+        new ToneGenerator(AudioManager.STREAM_ALARM, 100)
+            .startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
+
         boolean countdownBeep = false;
         boolean startStream = false;
         int startStreamDelayMax = 0;
