@@ -224,8 +224,27 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             } else if (name.equals("random_start_delay")) {
                 startStream = true;
                 startStreamDelayMax = Integer.valueOf(value);
+            } else if (name.equals("bitrate")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
 
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setBitrate(Integer.valueOf(value));
+                }
+            } else if (name.equals("buffer_size")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
 
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setBufferSize(Integer.valueOf(value));
+                }
+            } else if (name.equals("chunk_size")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setChunkSize(Integer.valueOf(value));
+                }
             }
         }
 

@@ -556,4 +556,16 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     public void setVideoAddress(String address) {
         mVideoAddress.setText(address);
     }
+
+    public void setBitrate(int bitrate) {
+        mSliderBitrate.setAdjustedProgress(bitrate);
+    }
+
+    public void setBufferSize(int bufferSize) {
+        mSliderBufferSize.setAdjustedProgress(bufferSize);
+    }
+
+    public void setChunkSize(int chunkSize) {
+        mSliderChunkSize.setAdjustedProgress(chunkSize);
+    }
 }
