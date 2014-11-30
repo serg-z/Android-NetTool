@@ -568,4 +568,12 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     public void setChunkSize(int chunkSize) {
         mSliderChunkSize.setAdjustedProgress(chunkSize);
     }
+
+    public void setRepeat(boolean repeat) {
+        mCheckBoxRepeat.setChecked(repeat);
+    }
+
+    public void setUseVideoView(boolean useVideoView) {
+        mCheckBoxUseVideoView.setChecked(useVideoView);
+    }
 }

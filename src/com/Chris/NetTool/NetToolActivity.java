@@ -258,6 +258,20 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 }
             } else if (name.equals("ping")) {
                 pingCommand = value.equals("on") ? 1 : 0;
+            } else if (name.equals("repeat")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setRepeat(value.equals("true"));
+                }
+            } else if (name.equals("use_video_view")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setUseVideoView(value.equals("true"));
+                }
             }
         }
 
