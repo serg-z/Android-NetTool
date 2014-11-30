@@ -125,9 +125,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if (view == mButtonPingStart) {
-            mPingCallback.onPingStart(mEditPingAddress.getText().toString());
+            pingStart();
         } else if (view == mButtonPingStop) {
-            mPingCallback.onPingStop();
+            pingStop();
         } else if (view == mButtonPingLogShare) {
             Intent intent = new Intent(Intent.ACTION_SEND);
 
@@ -149,5 +149,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
     public void pingLog(String line) {
         mPingLog.setText(line + "\n" + mPingLog.getText());
+    }
+
+    public void pingStart() {
+        mPingCallback.onPingStart(mEditPingAddress.getText().toString());
+    }
+
+    public void pingStop() {
+        mPingCallback.onPingStop();
     }
 }

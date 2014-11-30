@@ -202,6 +202,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         boolean countdownBeep = false;
         boolean startStream = false;
         int startStreamDelayMax = 0;
+        int pingCommand = -1;
 
         for (String line : datagramMessage.split("\n")) {
             final String[] lineArray = line.trim().split("=");
@@ -255,6 +256,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentSettings != null) {
                     fragmentSettings.setPingServerAddress(value);
                 }
+            } else if (name.equals("ping")) {
+                pingCommand = value.equals("on") ? 1 : 0;
             }
         }
 
@@ -292,6 +295,20 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                             streamerStart();
                         }
                     }.start();
+            }
+        }
+
+        // start/stop ping
+        if (pingCommand > -1) {
+            SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
+                .findFragmentByTag(PagerFragment.tag_fragment_settings);
+
+            if (fragmentSettings != null) {
+                if (pingCommand == 1) {
+                    fragmentSettings.pingStart();
+                } else {
+                    fragmentSettings.pingStop();
+                }
             }
         }
     }
