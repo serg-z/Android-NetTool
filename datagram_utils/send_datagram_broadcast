@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cat $1 \
+    | sed '/^#.*$/d' \
+    | sed '/^$/d' \
+    | socat -uv - UDP-DATAGRAM:255.255.255.255:55555,broadcast
