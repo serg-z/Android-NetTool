@@ -2,6 +2,7 @@ package com.Chris.NetTool;
 
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.os.CountDownTimer;
 
 import android.content.Context;
 
@@ -19,6 +20,8 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
+import java.util.Random;
+
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener {
 
@@ -28,6 +31,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     private DatagramReceiver mDatagramReceiver = null;
     private WifiManager.WifiLock mWifiLock = null;
     private WifiManager.MulticastLock mMulticastLock = null;
+    private CountDownTimer mCountDownTimerStreamerStart = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,7 +194,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
 
         for (String line : datagramMessage.split("\n")) {
-            String[] lineArray = line.trim().split("=");
+            final String[] lineArray = line.trim().split("=");
 
             if (lineArray.length != 2) {
                 Log.d(TAG, "Erroneous line: " + line);
@@ -198,8 +202,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 continue;
             }
 
-            String name = lineArray[0];
-            String value = lineArray[1];
+            final String name = lineArray[0];
+            final String value = lineArray[1];
 
             if (name.equals("address")) {
                 StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
@@ -208,6 +212,33 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentStreamer != null) {
                     fragmentStreamer.setVideoAddress(value);
                 }
+            } else if (name.equals("random_start_delay")) {
+                final int delay = Integer.valueOf(value);
+
+                if (delay == 0) {
+                    streamerStart();
+
+                    continue;
+                }
+
+                if (mCountDownTimerStreamerStart != null) {
+                    mCountDownTimerStreamerStart.cancel();
+                }
+
+                // delay in range [1, value]
+                final int randomDelay = (new Random()).nextInt(delay) + 1;
+
+                Toast.makeText(this, "Starting streamer in " + randomDelay + "s", 1).show();
+
+                mCountDownTimerStreamerStart =
+                    new CountDownTimer(randomDelay * 1000 + 100, 900) {
+                        public void onTick(long millisUntilFinished) {
+                        }
+
+                        public void onFinish() {
+                            streamerStart();
+                        }
+                    }.start();
             }
         }
     }
@@ -221,6 +252,15 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
             .addToBackStack(null)
             .commit();
+    }
+
+    private void streamerStart() {
+        StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+        if (fragmentStreamer != null) {
+            fragmentStreamer.streamStart();
+        }
     }
 }
 

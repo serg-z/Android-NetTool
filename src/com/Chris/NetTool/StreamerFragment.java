@@ -371,7 +371,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         }
     }
 
-    private void streamStart() {
+    public void streamStart() {
         URL url = null;
 
         try {
