@@ -344,19 +344,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
             mVideoIsPaused = true;
         } else if (view == mButtonStop) {
-            if (mCheckBoxUseVideoView.isChecked()) {
-                mVideoView.stopPlayback();
-
-                removeVideoView();
-
-                setUIState(UIState.READY_TO_PLAY);
-            } else {
-                if (mStreamer != null) {
-                    mStreamer.stop();
-                }
-            }
-
-            mVideoIsPaused = false;
+            streamStop();
         } else if (view == mButtonRandomSeek) {
             if (mCheckBoxUseVideoView.isChecked()) {
                 mVideoView.seekTo(0);
@@ -439,6 +427,22 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             setUIState(UIState.PLAYING);
         } else {
             setUIState(UIState.EVERYTHING_DISABLED);
+        }
+
+        mVideoIsPaused = false;
+    }
+
+    public void streamStop() {
+        if (mCheckBoxUseVideoView.isChecked()) {
+            mVideoView.stopPlayback();
+
+            removeVideoView();
+
+            setUIState(UIState.READY_TO_PLAY);
+        } else {
+            if (mStreamer != null) {
+                mStreamer.stop();
+            }
         }
 
         mVideoIsPaused = false;

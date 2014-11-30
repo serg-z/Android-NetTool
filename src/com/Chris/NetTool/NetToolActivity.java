@@ -343,6 +343,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .findFragmentByTag(PagerFragment.tag_fragment_streamer);
 
         if (fragmentStreamer != null) {
+            fragmentStreamer.streamStop();
+
             fragmentStreamer.streamStart();
         }
     }
