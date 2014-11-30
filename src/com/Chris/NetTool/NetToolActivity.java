@@ -188,6 +188,28 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     @Override
     public void onDatagramReceived(String datagramMessage) {
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
+
+        for (String line : datagramMessage.split("\n")) {
+            String[] lineArray = line.trim().split("=");
+
+            if (lineArray.length != 2) {
+                Log.d(TAG, "Erroneous line: " + line);
+
+                continue;
+            }
+
+            String name = lineArray[0];
+            String value = lineArray[1];
+
+            if (name.equals("address")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setVideoAddress(value);
+                }
+            }
+        }
     }
 
     private void showSettings() {

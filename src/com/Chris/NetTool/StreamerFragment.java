@@ -552,4 +552,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             return false;
         }
     }
+
+    public void setVideoAddress(String address) {
+        mVideoAddress.setText(address);
+    }
 }

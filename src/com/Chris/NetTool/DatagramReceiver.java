@@ -101,6 +101,7 @@ public class DatagramReceiver {
                         socket.receive(packet);
                     } catch (SocketTimeoutException e) {
                         Log.d(TAG, "Datagram socket timeout");
+
                         continue;
                     }
 
