@@ -197,6 +197,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
 
         boolean countdownBeep = false;
+        boolean startStream = false;
+        int startStreamDelayMax = 0;
 
         for (String line : datagramMessage.split("\n")) {
             final String[] lineArray = line.trim().split("=");
@@ -220,20 +222,24 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             } else if (name.equals("countdown_beep")) {
                 countdownBeep = value.equals("on");
             } else if (name.equals("random_start_delay")) {
-                final int delay = Integer.valueOf(value);
+                startStream = true;
+                startStreamDelayMax = Integer.valueOf(value);
 
-                if (delay == 0) {
-                    streamerStart();
 
-                    continue;
-                }
+            }
+        }
 
+        // start stream
+        if (startStream) {
+            if (startStreamDelayMax == 0) {
+                streamerStart();
+            } else {
                 if (mCountDownTimerStreamerStart != null) {
                     mCountDownTimerStreamerStart.cancel();
                 }
 
                 // delay in range [1, value]
-                final int randomDelay = (new Random()).nextInt(delay) + 1;
+                final int randomDelay = (new Random()).nextInt(startStreamDelayMax) + 1;
 
                 Toast.makeText(this, "Starting streamer in " + randomDelay + "s", 1).show();
 
