@@ -248,6 +248,13 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentStreamer != null) {
                     fragmentStreamer.setChunkSize(Integer.valueOf(value));
                 }
+            } else if (name.equals("ping_ip")) {
+                SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_settings);
+
+                if (fragmentSettings != null) {
+                    fragmentSettings.setPingServerAddress(value);
+                }
             }
         }
 

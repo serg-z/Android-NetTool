@@ -143,6 +143,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         mEditPingAddress.setText(Formatter.formatIpAddress(address));
     }
 
+    public void setPingServerAddress(String address) {
+        mEditPingAddress.setText(address);
+    }
+
     public void pingLog(String line) {
         mPingLog.setText(line + "\n" + mPingLog.getText());
     }
