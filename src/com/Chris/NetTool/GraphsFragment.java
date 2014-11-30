@@ -556,9 +556,12 @@ public class GraphsFragment extends Fragment {
 
             pingTime = Float.parseFloat(m.group(1));
         } else {
-            m = Pattern.compile("^no\\sanswer\\syet\\sfor\\s.*").matcher(line);
+            final boolean match =
+                Pattern.compile("^no\\sanswer\\syet\\sfor\\s.*").matcher(line).matches()
+                || Pattern.compile("^.*Network\\sis\\sunreachable$").matcher(line).matches()
+                || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches();
 
-            if (m.matches()) {
+            if (match) {
                 pingResult = 0;
             }
         }
