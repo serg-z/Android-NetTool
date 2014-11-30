@@ -18,6 +18,8 @@ import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import java.io.InputStream;
+
 public class Streamer {
     private static final String TAG = "Streamer";
 
@@ -423,6 +425,11 @@ public class Streamer {
                                 receivedSize));
                         } else {
                             throw new InvalidContentSizeException("Can't obtain content size");
+                        }
+
+                        InputStream inputStream = connection.getInputStream();
+
+                        while (inputStream.read() != -1) {
                         }
 
                         if (mBufferSize > 0) {
