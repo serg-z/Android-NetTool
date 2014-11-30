@@ -9,6 +9,10 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.KeyEvent;
 
+import android.widget.Toast;
+
+import android.net.wifi.WifiManager;
+
 import android.util.Log;
 
 import android.support.v4.app.FragmentActivity;
@@ -16,11 +20,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
-    GraphsFragment.OnWifiInfoListener {
+    GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener {
 
     private static final String TAG = "NetToolActivity";
 
     private PowerManager.WakeLock mWakeLock = null;
+    private DatagramReceiver mDatagramReceiver = null;
+    private WifiManager.MulticastLock mMulticastLock = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +70,19 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
 
         mWakeLock.acquire();
+
+        // acquire multicast lock
+        mMulticastLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE))
+            .createMulticastLock(TAG + "_MulticastLock");
+
+        mMulticastLock.acquire();
+
+        // create listening datagram socket
+        if (mDatagramReceiver == null) {
+            mDatagramReceiver = new DatagramReceiver(55555);
+
+            mDatagramReceiver.setListener(this);
+        }
     }
 
     @Override
@@ -90,6 +109,19 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             mWakeLock.release();
 
             mWakeLock = null;
+        }
+
+        if (mMulticastLock != null) {
+            mMulticastLock.release();
+
+            mMulticastLock = null;
+        }
+
+        // stop listening datagram socket
+        if (mDatagramReceiver != null) {
+            mDatagramReceiver.stop();
+
+            mDatagramReceiver = null;
         }
     }
 
@@ -138,6 +170,11 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         if (fragmentSettings != null) {
             fragmentSettings.setPingServerAddress(address);
         }
+    }
+
+    @Override
+    public void onDatagramReceived(String datagramMessage) {
+        Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
     }
 
     private void showSettings() {
