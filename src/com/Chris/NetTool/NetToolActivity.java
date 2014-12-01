@@ -196,7 +196,13 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     public void onDatagramReceived(String datagramMessage) {
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
 
-        new ToneGenerator(AudioManager.STREAM_ALARM, 100)
+        AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
+        final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+        final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+        final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
+
+        new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume)
             .startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);
 
         boolean countdownBeep = false;
@@ -292,7 +298,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 final ToneGenerator toneGenerator;
 
                 if (countdownBeep) {
-                    toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, 100);
+                    toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume);
                 } else {
                     toneGenerator = null;
                 }
