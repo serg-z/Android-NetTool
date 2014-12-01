@@ -427,6 +427,8 @@ public class Streamer {
                             throw new InvalidContentSizeException("Can't obtain content size");
                         }
 
+                        Log.d(TAG, "** STREAMER: READING DATA");
+
                         InputStream inputStream = connection.getInputStream();
 
                         while (inputStream.read() != -1) {
@@ -435,6 +437,8 @@ public class Streamer {
                         if (mBufferSize > 0) {
                             mDepthBuffer.put(receivedSize);
                         }
+
+                        Log.d(TAG, "** STREAMER: FINISHED READING DATA");
 
                         totalReceivedSize += receivedSize;
 
