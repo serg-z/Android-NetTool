@@ -434,11 +434,13 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     public void streamStop() {
         if (mCheckBoxUseVideoView.isChecked()) {
-            mVideoView.stopPlayback();
+            if (mVideoView != null) {
+                mVideoView.stopPlayback();
 
-            removeVideoView();
+                removeVideoView();
 
-            setUIState(UIState.READY_TO_PLAY);
+                setUIState(UIState.READY_TO_PLAY);
+            }
         } else {
             if (mStreamer != null) {
                 mStreamer.stop();
