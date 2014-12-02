@@ -547,6 +547,11 @@ public class GraphsFragment extends Fragment {
         // add line to ping log text in settings
         mPingCallback.onPingLog(line);
 
+        // ignore "PING ... bytes of data" line
+        if (Pattern.compile("^PING.*bytes of data\\.").matcher(line).matches()) {
+            return;
+        }
+
         // parse the line
 
         int pingResult = -1;
