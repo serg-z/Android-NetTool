@@ -30,6 +30,7 @@ import android.text.format.Formatter;
 
 import android.util.Pair;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import android.graphics.Color;
 
@@ -93,6 +94,7 @@ public class GraphsFragment extends Fragment {
     private long mLastRx = -1, mLastTx = -1;
     private String mPingResumeAddress;
     private boolean mPingShouldResume = false;
+    private SparseIntArray mPingNoAnswer = new SparseIntArray();
 
     private void pauseTimer() {
         mTimerHandler.removeCallbacks(mTimerRunnable);
@@ -527,6 +529,8 @@ public class GraphsFragment extends Fragment {
         }
 
         if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
+            mPingNoAnswer.clear();
+
             mPingTask.execute(address);
         }
     }
@@ -546,28 +550,55 @@ public class GraphsFragment extends Fragment {
         // parse the line
 
         int pingResult = -1;
-        // in ms
         float pingTime = 0.0f;
 
-        Matcher m = Pattern.compile("^\\d+\\sbytes\\sfrom\\s.*\\stime=([\\d\\.]+).*").matcher(line);
+        Matcher m = Pattern.compile("^\\d+\\sbytes\\sfrom\\s.*icmp_seq=(\\d+).*\\stime=([\\d\\.]+).*").matcher(line);
 
         if (m.matches()) {
             pingResult = 1;
 
-            pingTime = Float.parseFloat(m.group(1));
-        } else {
-            final boolean match =
-                Pattern.compile("^no\\sanswer\\syet\\sfor\\s.*").matcher(line).matches()
-                || Pattern.compile("^.*Network\\sis\\sunreachable$").matcher(line).matches()
-                || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches();
+            int icmpSeq = Integer.valueOf(m.group(1));
+            pingTime = Float.parseFloat(m.group(2)) / 1000.0f;
 
-            if (match) {
+            // update tracked "no answer yet" bar, if there any with such icmp_seq
+            for (int i = 0; i < mPingNoAnswer.size(); ++i) {
+                int key = mPingNoAnswer.keyAt(i);
+                int value = mPingNoAnswer.valueAt(i);
+
+                if (key == icmpSeq) {
+                    mSeriesPingFail.setY(-1.0f, value);
+                    mSeriesPingSuccess.setY(pingTime, value);
+
+                    mPingNoAnswer.removeAt(i);
+
+                    mPlotPing.redraw();
+
+                    return;
+                }
+            }
+        } else {
+            m = Pattern.compile("^no\\sanswer\\syet\\sfor\\sicmp_seq=(\\d+).*").matcher(line);
+
+            if (m.matches()) {
+                int icmpSeq = Integer.valueOf(m.group(1));
+
                 pingResult = 0;
+
+                // add for future tracking
+                mPingNoAnswer.append(icmpSeq, mSeriesPingFail.size());
+            } else {
+                final boolean match =
+                    Pattern.compile("^.*Network\\sis\\sunreachable$").matcher(line).matches()
+                    || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches();
+
+                if (match) {
+                    pingResult = 0;
+                }
             }
         }
 
         if (pingResult == 1) {
-            addValueToSeries(mSeriesPingSuccess, pingTime / 1000.0f);
+            addValueToSeries(mSeriesPingSuccess, pingTime);
             addValueToSeries(mSeriesPingFail, -1.0f);
         } else if (pingResult == 0) {
             addValueToSeries(mSeriesPingSuccess, -1.0f);
@@ -575,6 +606,21 @@ public class GraphsFragment extends Fragment {
         } else {
             addValueToSeries(mSeriesPingSuccess, -1.0f);
             addValueToSeries(mSeriesPingFail, 0.5f);
+        }
+
+        // remove old values and shift ids
+        if (mSeriesPingFail.size() > HISTORY_SIZE) {
+            for (int i = mPingNoAnswer.size() - 1; i >= 0; --i) {
+                int key = mPingNoAnswer.keyAt(i);
+                int value = mPingNoAnswer.valueAt(i);
+
+                if (value == 0) {
+                    mPingNoAnswer.removeAt(i);
+                }
+                else {
+                    mPingNoAnswer.put(key, value - 1);
+                }
+            }
         }
 
         mPlotPing.redraw();
