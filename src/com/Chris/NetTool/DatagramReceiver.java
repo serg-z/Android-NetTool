@@ -3,6 +3,7 @@ package com.Chris.NetTool;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
@@ -72,6 +73,8 @@ public class DatagramReceiver {
         @Override
         public void run() {
             Log.d(TAG, "Datagram thread started");
+
+            Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
             DatagramSocket socket = null;
 
