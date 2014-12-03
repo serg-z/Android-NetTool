@@ -128,7 +128,9 @@ public class Streamer {
 
                         mStreamerListener.onStreamerBufferDepthChanged(load);
 
-                        if (bufferSize == 0) {
+                        // stop streamer and notify if
+                        // buffer is empty and downloading is finished
+                        if (bufferSize == 0 && mConnectionThread == null) {
                             stopStreamer();
 
                             mStreamerListener.onStreamerFinished(mStoppedByUser);
