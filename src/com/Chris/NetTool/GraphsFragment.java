@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 
 import android.content.Context;
 
+import android.content.res.Configuration;
+
 import android.net.DhcpInfo;
 import android.net.TrafficStats;
 
@@ -481,6 +483,25 @@ public class GraphsFragment extends Fragment {
         mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
 
         return layout;
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        Log.d(TAG, "Configuration changed");
+
+        mTimerHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mPlotRssi.redraw();
+                    mPlotLinkSpeed.redraw();
+                    mPlotRxTx.redraw();
+                    mPlotStreamer.redraw();
+                    mPlotPing.redraw();
+                }
+            },
+            100);
     }
 
     @Override
