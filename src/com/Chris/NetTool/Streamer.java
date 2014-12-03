@@ -95,10 +95,14 @@ public class Streamer {
 
                 case STREAM_DOWNLOADING_FINISHED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamerDownloadingFinished();
+                        if (mStoppedByUser) {
+                            mStreamerBuffer.clear(true);
+                        } else {
+                            mStreamerListener.onStreamerDownloadingFinished();
+                        }
 
                         // notify that streamer is done if it's running in "no buffering" mode
-                        if (mBufferSize == 0) {
+                        if (mBufferSize == 0 || mStoppedByUser) {
                             mStreamerListener.onStreamerFinished(mStoppedByUser);
                         }
                     }
@@ -200,9 +204,7 @@ public class Streamer {
     private void stopStreamer() {
         if (mConnectionThread != null && mConnectionThread.isAlive()) {
             mConnectionThread.interrupt();
-        }
-
-        if (mBufferSize > 0) {
+        } else if (mBufferSize > 0) {
             mTimerHandler.removeCallbacks(mTimerRunnable);
 
             mStreamerBuffer.clear(true);
