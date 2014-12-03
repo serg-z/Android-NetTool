@@ -149,7 +149,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     protected void onDestroy() {
         super.onDestroy();
 
-        Log.d(TAG, "Destroy");
+        Log.d(TAG, "Destroy, finishing=" + isFinishing());
     }
 
     @Override
