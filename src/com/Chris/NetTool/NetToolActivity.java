@@ -207,6 +207,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         boolean countdownBeep = false;
         boolean startStream = false;
+        boolean stopStream = false;
         int startStreamDelayMax = 0;
         int pingCommand = -1;
 
@@ -234,6 +235,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             } else if (name.equals("random_start_delay")) {
                 startStream = true;
                 startStreamDelayMax = Integer.valueOf(value);
+            } else if (name.equals("streamer_stop") && value.equals("1")) {
+                stopStream = true;
             } else if (name.equals("bitrate")) {
                 StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
                     .findFragmentByTag(PagerFragment.tag_fragment_streamer);
@@ -318,6 +321,11 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             }
         }
 
+        // stop stream
+        if (stopStream) {
+            streamerStop();
+        }
+
         // start/stop ping
         if (pingCommand > -1) {
             SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
@@ -372,6 +380,15 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             fragmentStreamer.streamStop();
 
             fragmentStreamer.streamStart();
+        }
+    }
+
+    private void streamerStop() {
+        StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+        if (fragmentStreamer != null) {
+            fragmentStreamer.streamStop();
         }
     }
 }
