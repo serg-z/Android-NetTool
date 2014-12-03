@@ -419,8 +419,8 @@ public class GraphsFragment extends Fragment {
 
         setupPlot(mPlotRxTx, false);
 
-        mSeriesRx = addSeries(mPlotRxTx, "Rx", Color.BLUE, Color.rgb(100, 100, 200));
-        mSeriesTx = addSeries(mPlotRxTx, "Tx", Color.RED, Color.rgb(200, 100, 100));
+        mSeriesRx = addSeries(mPlotRxTx, "Rx", Color.BLUE, Color.argb(128, 100, 100, 200));
+        mSeriesTx = addSeries(mPlotRxTx, "Tx", Color.RED, Color.argb(128, 200, 100, 100));
 
         mPlotRxTx.setRangeLabel("Mbps");
         // TODO: change to 0-40 on logarithmic scale
