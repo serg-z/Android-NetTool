@@ -370,8 +370,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                 if (mStreamer != null) {
                     mStreamer.randomSeek();
 
-                    showStreamDownloadingProgress(0);
-                    showStreamDepthBufferLoadProgress(0);
+                    showStreamerDownloadingProgress(0);
+                    showStreamerBufferDepthProgress(0);
                 }
             }
         }
@@ -474,48 +474,48 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         }
     }
 
-    private void showStreamDownloadingProgress(int progress) {
-        mProgressBarBufferDepth.setSecondaryProgress(progress);
+    private void showStreamerDownloadingProgress(int downloadingProgress) {
+        mProgressBarBufferDepth.setSecondaryProgress(downloadingProgress);
         mProgressBarBufferDepth.invalidate();
     }
 
-    private void showStreamDepthBufferLoadProgress(int progress) {
-        mProgressBarBufferDepth.setProgress(progress);
+    private void showStreamerBufferDepthProgress(int bufferDepth) {
+        mProgressBarBufferDepth.setProgress(bufferDepth);
         mProgressBarBufferDepth.invalidate();
     }
 
     @Override
-    public void onStreamDownloadingStarted() {
+    public void onStreamerDownloadingStarted() {
         Toast.makeText(mActivity, R.string.stream_downloading_started, 1).show();
 
         setUIState(UIState.PLAYING);
     }
 
     @Override
-    public void onStreamDownloadingFinished() {
+    public void onStreamerDownloadingFinished() {
         Toast.makeText(mActivity, R.string.stream_downloading_finished, 1).show();
     }
 
     @Override
-    public void onStreamDownloadingProgress(int progress) {
-        showStreamDownloadingProgress(progress);
+    public void onStreamerDownloadingProgressChanged(int downloadingProgress) {
+        showStreamerDownloadingProgress(downloadingProgress);
 
         if (mStreamerFragmentCallback != null) {
-            mStreamerFragmentCallback.onStreamerFragmentDownloadingProgressChanged(progress);
+            mStreamerFragmentCallback.onStreamerFragmentDownloadingProgressChanged(downloadingProgress);
         }
     }
 
     @Override
-    public void onStreamDepthBufferLoadChanged(int value) {
-        showStreamDepthBufferLoadProgress(value);
+    public void onStreamerBufferDepthChanged(int bufferDepth) {
+        showStreamerBufferDepthProgress(bufferDepth);
 
         if (mStreamerFragmentCallback != null) {
-            mStreamerFragmentCallback.onStreamerFragmentBufferDepthChanged(value);
+            mStreamerFragmentCallback.onStreamerFragmentBufferDepthChanged(bufferDepth);
         }
     }
 
     @Override
-    public void onStreamDownloadingFailed() {
+    public void onStreamerDownloadingFailed() {
         Toast.makeText(mActivity, R.string.stream_downloading_failed, 1).show();
 
         setUIState(UIState.READY_TO_PLAY);
@@ -531,7 +531,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             return;
         }
 
-        onStreamDownloadingProgress(0);
+        onStreamerDownloadingProgressChanged(0);
 
         setUIState(UIState.READY_TO_PLAY);
     }

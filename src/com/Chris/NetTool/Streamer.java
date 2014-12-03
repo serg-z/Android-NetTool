@@ -24,11 +24,11 @@ public class Streamer {
     private static final String TAG = "Streamer";
 
     public interface StreamerListener {
-        public void onStreamDownloadingStarted();
-        public void onStreamDownloadingFinished();
-        public void onStreamDownloadingProgress(int progress);
-        public void onStreamDepthBufferLoadChanged(int value);
-        public void onStreamDownloadingFailed();
+        public void onStreamerDownloadingStarted();
+        public void onStreamerDownloadingFinished();
+        public void onStreamerDownloadingProgressChanged(int downloadingProgress);
+        public void onStreamerBufferDepthChanged(int bufferDepth);
+        public void onStreamerDownloadingFailed();
         public void onStreamerFinished(boolean stoppedByUser);
     }
 
@@ -63,7 +63,7 @@ public class Streamer {
 
     private Thread mConnectionThread;
 
-    private DepthBuffer mDepthBuffer = new DepthBuffer();
+    private StreamerBuffer mStreamerBuffer = new StreamerBuffer();
     private Object mConnectionThreadPauseLock = new Object();
     private boolean mConnectionThreadPaused = false;
     private boolean mStoppedByUser = false;
@@ -74,7 +74,7 @@ public class Streamer {
     private Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
-            mDepthBuffer.take(mDataSizePerSecond);
+            mStreamerBuffer.take(mDataSizePerSecond);
 
             mTimerHandler.postDelayed(this, 1000);
         }
@@ -88,14 +88,14 @@ public class Streamer {
             switch (messageId) {
                 case STREAM_DOWNLOADING_STARTED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamDownloadingStarted();
+                        mStreamerListener.onStreamerDownloadingStarted();
                     }
 
                     break;
 
                 case STREAM_DOWNLOADING_FINISHED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamDownloadingFinished();
+                        mStreamerListener.onStreamerDownloadingFinished();
 
                         // notify that streamer is done if it's running in "no buffering" mode
                         if (mBufferSize == 0) {
@@ -113,7 +113,7 @@ public class Streamer {
                         {
                             int progress = (Integer)inputMessage.obj;
 
-                            mStreamerListener.onStreamDownloadingProgress(progress);
+                            mStreamerListener.onStreamerDownloadingProgressChanged(progress);
                         }
                     }
 
@@ -124,9 +124,9 @@ public class Streamer {
                         int bufferSize = (Integer)inputMessage.obj;
                         int load = (int)((float)(bufferSize * 100) / mBufferCapacity);
 
-                        Log.d(TAG, String.format("Depth buffer load: %d%%", load));
+                        Log.d(TAG, String.format("Buffer load: %d%%", load));
 
-                        mStreamerListener.onStreamDepthBufferLoadChanged(load);
+                        mStreamerListener.onStreamerBufferDepthChanged(load);
 
                         if (bufferSize == 0) {
                             stopStreamer();
@@ -139,7 +139,7 @@ public class Streamer {
 
                 case STREAM_DOWNLOADING_FAILED:
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamDownloadingFailed();
+                        mStreamerListener.onStreamerDownloadingFailed();
                     }
 
                     break;
@@ -185,7 +185,7 @@ public class Streamer {
 
     public void randomSeek() {
         if (mBufferSize > 0) {
-            mDepthBuffer.clear(false);
+            mStreamerBuffer.clear(false);
         }
 
         if (mConnectionThread == null) {
@@ -203,7 +203,7 @@ public class Streamer {
         if (mBufferSize > 0) {
             mTimerHandler.removeCallbacks(mTimerRunnable);
 
-            mDepthBuffer.clear(true);
+            mStreamerBuffer.clear(true);
         }
     }
 
@@ -251,7 +251,7 @@ public class Streamer {
         return mConnectionThreadRandomSeek;
     }
 
-    private class DepthBuffer {
+    private class StreamerBuffer {
         private int mSize = 0;
 
         public synchronized void put(int size) {
@@ -340,7 +340,7 @@ public class Streamer {
                     }
 
                     if (mBufferSize > 0) {
-                        int bufferCurrentSize = mDepthBuffer.getSize();
+                        int bufferCurrentSize = mStreamerBuffer.getSize();
 
                         if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
                             Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
@@ -353,7 +353,7 @@ public class Streamer {
                         }
 
                         Log.d(TAG, String.format("Buffer available (empty: %d)",
-                            mBufferCapacity - mDepthBuffer.getSize()));
+                            mBufferCapacity - mStreamerBuffer.getSize()));
                     }
 
                     // random seek logic
@@ -435,7 +435,7 @@ public class Streamer {
                         }
 
                         if (mBufferSize > 0) {
-                            mDepthBuffer.put(receivedSize);
+                            mStreamerBuffer.put(receivedSize);
                         }
 
                         Log.d(TAG, "** STREAMER: FINISHED READING DATA");
