@@ -59,6 +59,26 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
+//
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PointF;
+import android.graphics.RectF;
+import android.graphics.Canvas;
+
+import com.androidplot.xy.PointLabelFormatter;
+import com.androidplot.xy.PointLabeler;
+import com.androidplot.xy.XYSeries;
+import com.androidplot.xy.LineAndPointFormatter;
+import com.androidplot.xy.LineAndPointRenderer;
+
+import com.androidplot.ui.SeriesRenderer;
+
+import com.androidplot.util.ValPixConverter;
+import com.androidplot.util.PixelUtils;
+
+import java.util.ArrayList;
+
 public class GraphsFragment extends Fragment {
     private static final String TAG = "GraphsFragment";
     private static final int HISTORY_SIZE = 120;
@@ -254,14 +274,18 @@ public class GraphsFragment extends Fragment {
         plot.setTicksPerDomainLabel(30);
     }
 
-    private SimpleXYSeries addSeries(XYPlot plot, String label, int lineColor, int fillColor) {
+    private SimpleXYSeries addSeries(XYPlot plot, String label, LineAndPointFormatter formatter) {
         SimpleXYSeries series = new SimpleXYSeries(label);
 
         series.useImplicitXVals();
 
-        plot.addSeries(series, new LineAndPointFormatter(lineColor, null, fillColor, null));
+        plot.addSeries(series, formatter);
 
         return series;
+    }
+
+    private SimpleXYSeries addSeries(XYPlot plot, String label, int lineColor, int fillColor) {
+        return addSeries(plot, label, new LineAndPointFormatter(lineColor, null, fillColor, null));
     }
 
     private void addRow(TableLayout table, String label, int id) {
@@ -381,7 +405,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotRssi);
 
         setupPlot(mPlotRssi);
-        addSeries(mPlotRssi, "", Color.BLUE, Color.rgb(100, 100, 200));
+        addSeries(mPlotRssi, "", new GYRFormatter(-65, -79));
 
         mPlotRssi.setRangeLabel("dBm");
         mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
@@ -396,7 +420,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotLinkSpeed);
 
         setupPlot(mPlotLinkSpeed);
-        addSeries(mPlotLinkSpeed, "", Color.BLUE, Color.rgb(100, 100, 200));
+        addSeries(mPlotLinkSpeed, "", new GYRFormatter(53, 19));
 
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
@@ -773,6 +797,161 @@ public class GraphsFragment extends Fragment {
                     Log.d(TAG, "OUTPUT: " + line);
                 }
             } catch (IOException t) {
+            }
+        }
+    }
+
+    // green-yellow-red formatter and renderer
+
+    class GYRFormatter extends LineAndPointFormatter {
+        private int mThresholdGreen;
+        private int mThresholdYellow;
+
+        public GYRFormatter(int thresholdGreen, int thresholdYellow) {
+            // TODO: change to null
+            super(Color.TRANSPARENT, null, Color.argb(128, 100, 100, 200), null);
+
+            mThresholdGreen = thresholdGreen;
+            mThresholdYellow = thresholdYellow;
+        }
+
+        public int getThresholdGreen() {
+            return mThresholdGreen;
+        }
+
+        public int getThresholdYellow() {
+            return mThresholdYellow;
+        }
+
+        @Override
+        public Class<? extends SeriesRenderer> getRendererClass() {
+            return GYRRenderer.class;
+        }
+
+        @Override
+        public SeriesRenderer getRendererInstance(XYPlot plot) {
+            return new GYRRenderer(plot);
+        }
+    }
+
+    class GYRRenderer extends LineAndPointRenderer<GYRFormatter> {
+        private Paint mPaintGreen;
+        private Paint mPaintYellow;
+        private Paint mPaintRed;
+
+        public GYRRenderer(XYPlot plot) {
+            super(plot);
+
+            mPaintGreen = new Paint();
+            mPaintYellow = new Paint();
+            mPaintRed = new Paint();
+
+            mPaintGreen.setColor(Color.GREEN);
+            mPaintGreen.setStrokeWidth(PixelUtils.dpToPix(2));
+            mPaintGreen.setStyle(Paint.Style.STROKE);
+            mPaintGreen.setAntiAlias(true);
+
+            mPaintYellow.setColor(Color.YELLOW);
+            mPaintYellow.setStrokeWidth(PixelUtils.dpToPix(2));
+            mPaintYellow.setStyle(Paint.Style.STROKE);
+            mPaintYellow.setAntiAlias(true);
+
+            mPaintRed.setColor(Color.RED);
+            mPaintRed.setStrokeWidth(PixelUtils.dpToPix(2));
+            mPaintRed.setStyle(Paint.Style.STROKE);
+            mPaintRed.setAntiAlias(true);
+        }
+
+        @Override
+        protected void drawSeries(Canvas canvas, RectF plotArea, XYSeries series, LineAndPointFormatter formatter) {
+            // TODO: remove
+            super.drawSeries(canvas, plotArea, series, formatter);
+
+            PointF thisPoint;
+            PointF lastPoint = null;
+            PointF firstPoint = null;
+
+            Path pathGreen = null, pathYellow = null, pathRed = null;
+            Path path = null;
+
+            Path prevPath = null;
+
+            final int thresholdGreen = ((GYRFormatter)formatter).getThresholdGreen();
+            final int thresholdYellow = ((GYRFormatter)formatter).getThresholdYellow();
+
+            for (int i = 0; i < series.size(); ++i) {
+                Number x = series.getX(i);
+                Number y = series.getY(i);
+
+                final int yVal = y.intValue();
+
+                if (yVal > thresholdGreen) {
+                    if (pathGreen == null) {
+                        pathGreen = new Path();
+                    }
+
+                    path = pathGreen;
+                } else if (yVal > thresholdYellow) {
+                    if (pathYellow == null) {
+                        pathYellow = new Path();
+                    }
+
+                    path = pathYellow;
+                } else {
+                    if (pathRed == null) {
+                        pathRed = new Path();
+                    }
+
+                    path = pathRed;
+                }
+
+                if (y != null && x != null) {
+                    thisPoint = ValPixConverter.valToPix(
+                        x,
+                        y,
+                        plotArea,
+                        getPlot().getCalculatedMinX(),
+                        getPlot().getCalculatedMaxX(),
+                        getPlot().getCalculatedMinY(),
+                        getPlot().getCalculatedMaxY());
+                } else {
+                    thisPoint = null;
+                }
+
+                if (thisPoint != null) {
+                    if (firstPoint == null) {
+                        firstPoint = thisPoint;
+
+                        path.moveTo(firstPoint.x, firstPoint.y);
+                    }
+
+                    if (lastPoint != null) {
+                        if (prevPath != null && prevPath != path) {
+                            path.moveTo(lastPoint.x, lastPoint.y);
+                        }
+
+                        appendToPath(path, thisPoint, lastPoint);
+                    }
+
+                    lastPoint = thisPoint;
+                } else {
+                    if (lastPoint != null) {
+                        canvas.drawPath(pathGreen, mPaintGreen);
+                        canvas.drawPath(pathYellow, mPaintYellow);
+                        canvas.drawPath(pathRed, mPaintRed);
+                    }
+
+                    firstPoint = null;
+                    lastPoint = null;
+                }
+
+                prevPath = path;
+            }
+
+            if (firstPoint != null) {
+                canvas.drawPath(pathGreen, mPaintGreen);
+                canvas.drawPath(pathYellow, mPaintYellow);
+                canvas.drawPath(pathRed, mPaintRed);
             }
         }
     }
