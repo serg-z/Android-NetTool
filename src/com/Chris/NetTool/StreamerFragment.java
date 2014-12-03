@@ -36,6 +36,11 @@ import java.lang.UnsupportedOperationException;
 public class StreamerFragment extends Fragment implements View.OnClickListener, Streamer.StreamerListener,
     MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
+    public interface StreamerFragmentListener {
+        void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress);
+        void onStreamerFragmentBufferDepthChanged(int bufferDepth);
+    }
+
     private static final String TAG = "StreamerFragment";
 
     private enum UIState {
@@ -57,6 +62,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     private LinearLayout mLayoutLeft;
 
     private Streamer mStreamer;
+
+    private StreamerFragmentListener mStreamerFragmentCallback;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -229,6 +236,17 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         setUIState(UIState.READY_TO_PLAY);
 
         return layout;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mStreamerFragmentCallback = (StreamerFragmentListener)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement StreamerFragmentListener");
+        }
     }
 
     @Override
@@ -481,11 +499,19 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     @Override
     public void onStreamDownloadingProgress(int progress) {
         showStreamDownloadingProgress(progress);
+
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentDownloadingProgressChanged(progress);
+        }
     }
 
     @Override
     public void onStreamDepthBufferLoadChanged(int value) {
         showStreamDepthBufferLoadProgress(value);
+
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentBufferDepthChanged(value);
+        }
     }
 
     @Override
@@ -505,7 +531,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             return;
         }
 
-        showStreamDownloadingProgress(0);
+        onStreamDownloadingProgress(0);
 
         setUIState(UIState.READY_TO_PLAY);
     }

@@ -89,6 +89,10 @@ public class GraphsFragment extends Fragment {
     private XYPlot mPlotPing;
     private SimpleXYSeries mSeriesPingSuccess, mSeriesPingFail;
 
+    private XYPlot mPlotStreamer;
+    private SimpleXYSeries mSeriesStreamerDownloadingProgress, mSeriesStreamerBufferDepth;
+    private int mStreamerDownloadingProgress = 0, mStreamerBufferDepth = 0;
+
     private Activity mActivity;
 
     private long mLastRx = -1, mLastTx = -1;
@@ -171,6 +175,13 @@ public class GraphsFragment extends Fragment {
             addValueToSeries(mSeriesTx, txPerSec);
 
             mPlotRxTx.redraw();
+        }
+
+        if (mPlotStreamer != null) {
+            addValueToSeries(mSeriesStreamerDownloadingProgress, mStreamerDownloadingProgress);
+            addValueToSeries(mSeriesStreamerBufferDepth, mStreamerBufferDepth);
+
+            mPlotStreamer.redraw();
         }
     }
 
@@ -388,7 +399,7 @@ public class GraphsFragment extends Fragment {
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
 
-        // Rx and Tx
+        // Rx / Tx, streamer, ping
 
         plotsLayoutH = new LinearLayout(mActivity);
 
@@ -402,7 +413,7 @@ public class GraphsFragment extends Fragment {
         mPlotRxTx = new XYPlot(mActivity, "Rx / Tx");
 
         mPlotRxTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT, 0.5f));
+            LayoutParams.WRAP_CONTENT, 0.3f));
 
         plotsLayoutH.addView(mPlotRxTx);
 
@@ -415,12 +426,31 @@ public class GraphsFragment extends Fragment {
         // TODO: change to 0-40 on logarithmic scale
         mPlotRxTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
 
+        // streamer plot
+
+        mPlotStreamer = new XYPlot(mActivity, "Streamer");
+
+        mPlotStreamer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.3f));
+
+        plotsLayoutH.addView(mPlotStreamer);
+
+        setupPlot(mPlotStreamer, false);
+
+        mSeriesStreamerDownloadingProgress = addSeries(mPlotStreamer, "Downloading Progress", Color.BLUE,
+            Color.argb(128, 100, 100, 200));
+        mSeriesStreamerBufferDepth = addSeries(mPlotStreamer, "Buffer Depth", Color.RED,
+            Color.argb(128, 200, 100, 100));
+
+        mPlotStreamer.setRangeLabel("%");
+        mPlotStreamer.setRangeBoundaries(0, 100, BoundaryMode.FIXED);
+
         // ping plot
 
         mPlotPing = new XYPlot(mActivity, "Ping");
 
         mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT, 0.5f));
+            LayoutParams.WRAP_CONTENT, 0.3f));
 
         plotsLayoutH.addView(mPlotPing);
 
@@ -503,6 +533,14 @@ public class GraphsFragment extends Fragment {
         }
 
         pingStop();
+    }
+
+    public void setStreamerDownloadingProgress(int downloadingProgress) {
+        mStreamerDownloadingProgress = downloadingProgress;
+    }
+
+    public void setStreamerBufferDepth(int bufferDepth) {
+        mStreamerBufferDepth = bufferDepth;
     }
 
     protected void setPingServerAddress(int address) {

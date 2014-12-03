@@ -26,7 +26,7 @@ import android.support.v4.app.FragmentTransaction;
 import java.util.Random;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
-    GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener {
+    GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener, StreamerFragment.StreamerFragmentListener {
 
     private static final String TAG = "NetToolActivity";
 
@@ -330,6 +330,26 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                     fragmentSettings.pingStop();
                 }
             }
+        }
+    }
+
+    @Override
+    public void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress) {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.setStreamerDownloadingProgress(downloadingProgress);
+        }
+    }
+
+    @Override
+    public void onStreamerFragmentBufferDepthChanged(int bufferDepth) {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.setStreamerBufferDepth(bufferDepth);
         }
     }
 
