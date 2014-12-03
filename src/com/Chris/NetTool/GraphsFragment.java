@@ -371,7 +371,7 @@ public class GraphsFragment extends Fragment {
 
         // rssi
 
-        mPlotRssi = new XYPlot(mActivity, "RSSI");
+        mPlotRssi = new XYPlot(mActivity, "RSSI", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.5f));
@@ -386,7 +386,7 @@ public class GraphsFragment extends Fragment {
 
         // link speed
 
-        mPlotLinkSpeed = new XYPlot(mActivity, "Link Speed");
+        mPlotLinkSpeed = new XYPlot(mActivity, "Link Speed", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.5f));
@@ -410,7 +410,7 @@ public class GraphsFragment extends Fragment {
 
         // Rx / Tx
 
-        mPlotRxTx = new XYPlot(mActivity, "Rx / Tx");
+        mPlotRxTx = new XYPlot(mActivity, "Rx / Tx", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotRxTx.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.3f));
@@ -428,7 +428,7 @@ public class GraphsFragment extends Fragment {
 
         // streamer plot
 
-        mPlotStreamer = new XYPlot(mActivity, "Streamer");
+        mPlotStreamer = new XYPlot(mActivity, "Streamer", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotStreamer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.3f));
@@ -447,7 +447,7 @@ public class GraphsFragment extends Fragment {
 
         // ping plot
 
-        mPlotPing = new XYPlot(mActivity, "Ping");
+        mPlotPing = new XYPlot(mActivity, "Ping", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.3f));
