@@ -3,8 +3,10 @@ package com.Chris.NetTool;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.CountDownTimer;
+import android.os.SystemClock;
 
 import android.content.Context;
+import android.content.Intent;
 
 import android.view.Window;
 import android.view.WindowManager;
@@ -281,6 +283,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentStreamer != null) {
                     fragmentStreamer.setUseVideoView(value.equals("true"));
                 }
+            } else if (name.equals("restart") && value.equals("1")) {
+                restart();
             }
         }
 
@@ -390,6 +394,20 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         if (fragmentStreamer != null) {
             fragmentStreamer.streamStop();
         }
+    }
+
+    private void restart() {
+        mDatagramReceiver.stop();
+
+        mDatagramReceiver = null;
+
+        Intent intent = getIntent();
+        finish();
+
+        // wait until datagram receiver is done
+        SystemClock.sleep(10000);
+
+        startActivity(intent);
     }
 }
 
