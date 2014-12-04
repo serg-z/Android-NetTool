@@ -425,7 +425,7 @@ public class GraphsFragment extends Fragment {
 
         mPlotRssi.addMarker(marker);
 
-        marker = new YValueMarker(-79, "-79",
+        marker = new YValueMarker(-80, "-80",
             new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
 
         marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
@@ -456,7 +456,7 @@ public class GraphsFragment extends Fragment {
 
         mPlotLinkSpeed.addMarker(marker);
 
-        marker = new YValueMarker(19, "19",
+        marker = new YValueMarker(20, "20",
             new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
 
         marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
