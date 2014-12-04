@@ -835,46 +835,69 @@ public class GraphsFragment extends Fragment {
     }
 
     class GYRRenderer extends LineAndPointRenderer<GYRFormatter> {
-        private Paint mPaintGreen;
-        private Paint mPaintYellow;
-        private Paint mPaintRed;
+        private Paint mPaintLineGreen;
+        private Paint mPaintLineYellow;
+        private Paint mPaintLineRed;
+        private Paint mPaintFillGreen;
+        private Paint mPaintFillYellow;
+        private Paint mPaintFillRed;
 
         public GYRRenderer(XYPlot plot) {
             super(plot);
 
-            mPaintGreen = new Paint();
-            mPaintYellow = new Paint();
-            mPaintRed = new Paint();
+            // line paint
 
-            mPaintGreen.setColor(Color.GREEN);
-            mPaintGreen.setStrokeWidth(PixelUtils.dpToPix(2));
-            mPaintGreen.setStyle(Paint.Style.STROKE);
-            mPaintGreen.setAntiAlias(true);
+            mPaintLineGreen = new Paint();
+            mPaintLineYellow = new Paint();
+            mPaintLineRed = new Paint();
 
-            mPaintYellow.setColor(Color.YELLOW);
-            mPaintYellow.setStrokeWidth(PixelUtils.dpToPix(2));
-            mPaintYellow.setStyle(Paint.Style.STROKE);
-            mPaintYellow.setAntiAlias(true);
+            final float lineStrokeWidthDp = 1.5f;
 
-            mPaintRed.setColor(Color.RED);
-            mPaintRed.setStrokeWidth(PixelUtils.dpToPix(2));
-            mPaintRed.setStyle(Paint.Style.STROKE);
-            mPaintRed.setAntiAlias(true);
+            mPaintLineGreen.setColor(Color.GREEN);
+            mPaintLineGreen.setStrokeWidth(PixelUtils.dpToPix(lineStrokeWidthDp));
+            mPaintLineGreen.setStyle(Paint.Style.STROKE);
+            mPaintLineGreen.setAntiAlias(true);
+
+            mPaintLineYellow.setColor(Color.YELLOW);
+            mPaintLineYellow.setStrokeWidth(PixelUtils.dpToPix(lineStrokeWidthDp));
+            mPaintLineYellow.setStyle(Paint.Style.STROKE);
+            mPaintLineYellow.setAntiAlias(true);
+
+            mPaintLineRed.setColor(Color.RED);
+            mPaintLineRed.setStrokeWidth(PixelUtils.dpToPix(lineStrokeWidthDp));
+            mPaintLineRed.setStyle(Paint.Style.STROKE);
+            mPaintLineRed.setAntiAlias(true);
+
+            // fill paint
+
+            final int alpha = 200;
+
+            mPaintFillGreen = new Paint();
+            mPaintFillYellow = new Paint();
+            mPaintFillRed = new Paint();
+
+            mPaintFillGreen.setARGB(alpha, 100, 200, 100);
+            mPaintFillGreen.setAntiAlias(true);
+
+            mPaintFillYellow.setARGB(alpha, 200, 200, 100);
+            mPaintFillYellow.setAntiAlias(true);
+
+            mPaintFillRed.setARGB(alpha, 200, 100, 100);
+            mPaintFillRed.setAntiAlias(true);
         }
 
         @Override
         protected void drawSeries(Canvas canvas, RectF plotArea, XYSeries series, LineAndPointFormatter formatter) {
-            // TODO: remove
-            super.drawSeries(canvas, plotArea, series, formatter);
-
             PointF thisPoint;
             PointF lastPoint = null;
             PointF firstPoint = null;
 
             Path pathGreen = null, pathYellow = null, pathRed = null;
-            Path path = null;
+            Path pathFillGreen = null, pathFillYellow = null, pathFillRed = null;
 
-            Path prevPath = null;
+            Path path = null, pathFill = null;
+
+            Path prevPath = null, prevPathFill = null;
 
             final int thresholdGreen = ((GYRFormatter)formatter).getThresholdGreen();
             final int thresholdYellow = ((GYRFormatter)formatter).getThresholdYellow();
@@ -883,27 +906,6 @@ public class GraphsFragment extends Fragment {
                 Number x = series.getX(i);
                 Number y = series.getY(i);
 
-                final int yVal = y.intValue();
-
-                if (yVal > thresholdGreen) {
-                    if (pathGreen == null) {
-                        pathGreen = new Path();
-                    }
-
-                    path = pathGreen;
-                } else if (yVal > thresholdYellow) {
-                    if (pathYellow == null) {
-                        pathYellow = new Path();
-                    }
-
-                    path = pathYellow;
-                } else {
-                    if (pathRed == null) {
-                        pathRed = new Path();
-                    }
-
-                    path = pathRed;
-                }
 
                 if (y != null && x != null) {
                     thisPoint = ValPixConverter.valToPix(
@@ -919,26 +921,74 @@ public class GraphsFragment extends Fragment {
                 }
 
                 if (thisPoint != null) {
+                    final int yVal = y.intValue();
+
+                    if (yVal > thresholdGreen) {
+                        if (pathGreen == null) {
+                            pathGreen = new Path();
+                            pathFillGreen = new Path();
+                        }
+
+                        path = pathGreen;
+                        pathFill = pathFillGreen;
+                    } else if (yVal > thresholdYellow) {
+                        if (pathYellow == null) {
+                            pathYellow = new Path();
+                            pathFillYellow = new Path();
+                        }
+
+                        path = pathYellow;
+                        pathFill = pathFillYellow;
+                    } else {
+                        if (pathRed == null) {
+                            pathRed = new Path();
+                            pathFillRed = new Path();
+                        }
+
+                        path = pathRed;
+                        pathFill = pathFillRed;
+                    }
+
                     if (firstPoint == null) {
                         firstPoint = thisPoint;
 
                         path.moveTo(firstPoint.x, firstPoint.y);
+
+                        pathFill.moveTo(firstPoint.x, plotArea.bottom);
+                        pathFill.lineTo(firstPoint.x, firstPoint.y);
                     }
 
                     if (lastPoint != null) {
                         if (prevPath != null && prevPath != path) {
                             path.moveTo(lastPoint.x, lastPoint.y);
+
+                            prevPathFill.lineTo(lastPoint.x, plotArea.bottom);
+
+                            pathFill.moveTo(lastPoint.x, plotArea.bottom);
+                            pathFill.lineTo(lastPoint.x, lastPoint.y);
                         }
 
                         appendToPath(path, thisPoint, lastPoint);
+                        appendToPath(pathFill, thisPoint, lastPoint);
                     }
 
                     lastPoint = thisPoint;
                 } else {
                     if (lastPoint != null) {
-                        canvas.drawPath(pathGreen, mPaintGreen);
-                        canvas.drawPath(pathYellow, mPaintYellow);
-                        canvas.drawPath(pathRed, mPaintRed);
+                        if (pathGreen != null) {
+                            drawPaths(canvas, plotArea, firstPoint, lastPoint, pathGreen, pathFillGreen, mPaintLineGreen,
+                                mPaintFillGreen);
+                        }
+
+                        if (pathYellow != null) {
+                            drawPaths(canvas, plotArea, firstPoint, lastPoint, pathYellow, pathFillYellow, mPaintLineYellow,
+                                mPaintFillYellow);
+                        }
+
+                        if (pathRed != null) {
+                            drawPaths(canvas, plotArea, firstPoint, lastPoint, pathRed, pathFillRed, mPaintLineRed,
+                                mPaintFillRed);
+                        }
                     }
 
                     firstPoint = null;
@@ -946,13 +996,35 @@ public class GraphsFragment extends Fragment {
                 }
 
                 prevPath = path;
+                prevPathFill = pathFill;
             }
 
             if (firstPoint != null) {
-                canvas.drawPath(pathGreen, mPaintGreen);
-                canvas.drawPath(pathYellow, mPaintYellow);
-                canvas.drawPath(pathRed, mPaintRed);
+                if (pathGreen != null) {
+                    drawPaths(canvas, plotArea, firstPoint, lastPoint, pathGreen, pathFillGreen, mPaintLineGreen,
+                        mPaintFillGreen);
+                }
+
+                if (pathYellow != null) {
+                    drawPaths(canvas, plotArea, firstPoint, lastPoint, pathYellow, pathFillYellow, mPaintLineYellow,
+                        mPaintFillYellow);
+                }
+
+                if (pathRed != null) {
+                    drawPaths(canvas, plotArea, firstPoint, lastPoint, pathRed, pathFillRed, mPaintLineRed,
+                        mPaintFillRed);
+                }
             }
+        }
+
+        private void drawPaths(Canvas canvas, RectF plotArea, PointF firstPoint, PointF lastPoint, Path pathLine,
+                Path pathFill, Paint paintLine, Paint paintFill) {
+            pathFill.lineTo(lastPoint.x, plotArea.bottom);
+            pathFill.lineTo(firstPoint.x, plotArea.bottom);
+            pathFill.close();
+
+            canvas.drawPath(pathFill, paintFill);
+            canvas.drawPath(pathLine, paintLine);
         }
     }
 }
