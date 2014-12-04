@@ -44,6 +44,9 @@ import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.StepFormatter;
 import com.androidplot.xy.XYStepMode;
 
+import com.androidplot.ui.XPositionMetric;
+import com.androidplot.ui.XLayoutStyle;
+
 import android.support.v4.app.Fragment;
 
 import java.text.DecimalFormat;
@@ -65,12 +68,14 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 
 import com.androidplot.xy.PointLabelFormatter;
 import com.androidplot.xy.PointLabeler;
 import com.androidplot.xy.XYSeries;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.LineAndPointRenderer;
+import com.androidplot.xy.YValueMarker;
 
 import com.androidplot.ui.SeriesRenderer;
 
@@ -410,6 +415,24 @@ public class GraphsFragment extends Fragment {
         mPlotRssi.setRangeLabel("dBm");
         mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
 
+        DashPathEffect dpe = new DashPathEffect(new float[]{ PixelUtils.dpToPix(2), PixelUtils.dpToPix(2) }, 0);
+
+        YValueMarker marker = new YValueMarker(-65, "-65",
+            new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
+
+        marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
+        marker.getLinePaint().setPathEffect(dpe);
+
+        mPlotRssi.addMarker(marker);
+
+        marker = new YValueMarker(-79, "-79",
+            new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
+
+        marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
+        marker.getLinePaint().setPathEffect(dpe);
+
+        mPlotRssi.addMarker(marker);
+
         // link speed
 
         mPlotLinkSpeed = new XYPlot(mActivity, "Link Speed", Plot.RenderMode.USE_BACKGROUND_THREAD);
@@ -424,6 +447,22 @@ public class GraphsFragment extends Fragment {
 
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
+
+        marker = new YValueMarker(53, "53",
+            new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
+
+        marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
+        marker.getLinePaint().setPathEffect(dpe);
+
+        mPlotLinkSpeed.addMarker(marker);
+
+        marker = new YValueMarker(19, "19",
+            new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
+
+        marker.getTextPaint().setTextSize(PixelUtils.dpToPix(10));
+        marker.getLinePaint().setPathEffect(dpe);
+
+        mPlotLinkSpeed.addMarker(marker);
 
         // Rx / Tx, streamer, ping
 
