@@ -127,6 +127,35 @@ public class GraphsFragment extends Fragment {
     private boolean mPingShouldResume = false;
     private SparseIntArray mPingNoAnswer = new SparseIntArray();
 
+    // cross product
+    private static float cross(PointF a, PointF b) {
+        return a.x * b.y - a.y * b.x;
+    }
+
+    // intersection point of two segments (or null if segments are collinear)
+    private static PointF intersection(PointF a0, PointF a1, PointF b0, PointF b1) {
+        PointF v0 = PixelUtils.sub(a1, a0);
+        PointF v1 = PixelUtils.sub(b1, b0);
+
+        float n = cross(PixelUtils.sub(a0, b0), v1);
+        float m = cross(v1, v0);
+
+        if (Math.abs(m) < 1e-8) {
+            return null;
+        }
+
+        float u = n / m;
+
+        if (Math.abs(u) < 1e-8) {
+            return null;
+        }
+
+        v1.x *= u;
+        v1.y *= u;
+
+        return PixelUtils.add(b0, v1);
+    }
+
     private void pauseTimer() {
         mTimerHandler.removeCallbacks(mTimerRunnable);
 
@@ -410,7 +439,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotRssi);
 
         setupPlot(mPlotRssi);
-        addSeries(mPlotRssi, "", new GYRFormatter(-65, -79));
+        addSeries(mPlotRssi, "", new GYRFormatter(-65, -80));
 
         mPlotRssi.setRangeLabel("dBm");
         mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
@@ -443,7 +472,7 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotLinkSpeed);
 
         setupPlot(mPlotLinkSpeed);
-        addSeries(mPlotLinkSpeed, "", new GYRFormatter(53, 19));
+        addSeries(mPlotLinkSpeed, "", new GYRFormatter(53, 20));
 
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
@@ -938,31 +967,162 @@ public class GraphsFragment extends Fragment {
 
             Path prevPath = null, prevPathFill = null;
 
-            final int thresholdGreen = ((GYRFormatter)formatter).getThresholdGreen();
-            final int thresholdYellow = ((GYRFormatter)formatter).getThresholdYellow();
+            final Number minX = getPlot().getCalculatedMinX();
+            final Number maxX = getPlot().getCalculatedMaxX();
+            final Number minY = getPlot().getCalculatedMinY();
+            final Number maxY = getPlot().getCalculatedMaxY();
+
+            final float thresholdGreenPix = ValPixConverter.valToPix(
+                0.0f,
+                ((GYRFormatter)formatter).getThresholdGreen(),
+                plotArea,
+                minX,
+                maxX,
+                minY,
+                maxY).y;
+
+            final float thresholdYellowPix = ValPixConverter.valToPix(
+                0.0f,
+                ((GYRFormatter)formatter).getThresholdYellow(),
+                plotArea,
+                minX,
+                maxX,
+                minY,
+                maxY).y;
 
             for (int i = 0; i < series.size(); ++i) {
                 Number x = series.getX(i);
                 Number y = series.getY(i);
-
 
                 if (y != null && x != null) {
                     thisPoint = ValPixConverter.valToPix(
                         x,
                         y,
                         plotArea,
-                        getPlot().getCalculatedMinX(),
-                        getPlot().getCalculatedMaxX(),
-                        getPlot().getCalculatedMinY(),
-                        getPlot().getCalculatedMaxY());
+                        minX,
+                        maxX,
+                        minY,
+                        maxY);
                 } else {
                     thisPoint = null;
                 }
 
                 if (thisPoint != null) {
-                    final int yVal = y.intValue();
+                    if (lastPoint != null) {
+                        for (int j = 0; j < 4; ++j) {
+                            final float threshold;
 
-                    if (yVal > thresholdGreen) {
+                            switch (j) {
+                                case 0:
+                                case 3:
+                                    threshold = thresholdGreenPix;
+
+                                    break;
+
+                                case 1:
+                                case 2:
+                                    threshold = thresholdYellowPix;
+
+                                    break;
+
+                                default:
+                                    throw new UnsupportedOperationException("Not implemented");
+                            }
+
+                            final PointF a, b;
+
+                            switch (j) {
+                                case 0:
+                                case 1:
+                                    a = lastPoint;
+                                    b = thisPoint;
+
+                                    break;
+
+                                case 2:
+                                case 3:
+                                    a = thisPoint;
+                                    b = lastPoint;
+
+                                    break;
+
+                                default:
+                                    throw new UnsupportedOperationException("Not implemented");
+                            }
+
+
+                            if (a.y < threshold && b.y >= threshold) {
+                                PointF p = intersection(
+                                    new PointF(lastPoint.x, threshold), new PointF(thisPoint.x, threshold),
+                                    lastPoint, thisPoint);
+
+                                if (p != null) {
+                                    switch (j) {
+                                        case 0:
+                                            {
+                                                if (pathGreen == null) {
+                                                    pathGreen = new Path();
+                                                    pathFillGreen = new Path();
+                                                }
+
+                                                path = pathGreen;
+                                                pathFill = pathFillGreen;
+                                            }
+
+                                            break;
+
+                                        case 1:
+                                        case 3:
+                                            {
+                                                if (pathYellow == null) {
+                                                    pathYellow = new Path();
+                                                    pathFillYellow = new Path();
+                                                }
+
+                                                path = pathYellow;
+                                                pathFill = pathFillYellow;
+                                            }
+
+                                            break;
+
+                                        case 2:
+                                            {
+                                                if (pathRed == null) {
+                                                    pathRed = new Path();
+                                                    pathFillRed = new Path();
+                                                }
+
+                                                path = pathRed;
+                                                pathFill = pathFillRed;
+                                            }
+
+                                            break;
+
+                                        default:
+                                            throw new UnsupportedOperationException("Not implemented");
+                                    }
+
+                                    if (prevPath != path) {
+                                        path.moveTo(lastPoint.x, lastPoint.y);
+
+                                        pathFill.moveTo(lastPoint.x, plotArea.bottom);
+                                        pathFill.lineTo(lastPoint.x, lastPoint.y);
+                                    }
+
+                                    appendToPath(path, p, lastPoint);
+                                    appendToPath(pathFill, p, lastPoint);
+
+                                    pathFill.lineTo(p.x, plotArea.bottom);
+
+                                    lastPoint = p;
+
+                                    prevPath = path;
+                                }
+                            }
+                        }
+                    }
+
+                    if (thisPoint.y < thresholdGreenPix) {
                         if (pathGreen == null) {
                             pathGreen = new Path();
                             pathFillGreen = new Path();
@@ -970,7 +1130,7 @@ public class GraphsFragment extends Fragment {
 
                         path = pathGreen;
                         pathFill = pathFillGreen;
-                    } else if (yVal > thresholdYellow) {
+                    } else if (thisPoint.y < thresholdYellowPix) {
                         if (pathYellow == null) {
                             pathYellow = new Path();
                             pathFillYellow = new Path();
