@@ -531,10 +531,10 @@ public class GraphsFragment extends Fragment {
 
         setupPlot(mPlotStreamer, false);
 
-        mSeriesStreamerDownloadingProgress = addSeries(mPlotStreamer, "Downloading Progress", Color.BLUE,
-            Color.argb(128, 100, 100, 200));
-        mSeriesStreamerBufferDepth = addSeries(mPlotStreamer, "Buffer Depth", Color.RED,
-            Color.argb(128, 200, 100, 100));
+        mSeriesStreamerDownloadingProgress = addSeries(mPlotStreamer, getString(R.string.label_downloading_progress),
+            Color.BLUE, Color.argb(128, 100, 100, 200));
+        mSeriesStreamerBufferDepth = addSeries(mPlotStreamer, getString(R.string.label_buffer_depth),
+            Color.RED, Color.argb(128, 200, 100, 100));
 
         mPlotStreamer.setRangeLabel("%");
         mPlotStreamer.setRangeBoundaries(0, 100, BoundaryMode.FIXED);
