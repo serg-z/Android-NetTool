@@ -43,9 +43,15 @@ import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.StepFormatter;
 import com.androidplot.xy.XYStepMode;
+import com.androidplot.xy.XYLegendWidget;
 
 import com.androidplot.ui.XPositionMetric;
 import com.androidplot.ui.XLayoutStyle;
+import com.androidplot.ui.YLayoutStyle;
+import com.androidplot.ui.SizeMetrics;
+import com.androidplot.ui.SizeMetric;
+import com.androidplot.ui.SizeLayoutType;
+import com.androidplot.ui.AnchorPosition;
 
 import android.support.v4.app.Fragment;
 
@@ -78,6 +84,8 @@ import com.androidplot.xy.LineAndPointRenderer;
 import com.androidplot.xy.YValueMarker;
 
 import com.androidplot.ui.SeriesRenderer;
+import com.androidplot.ui.DynamicTableModel;
+import com.androidplot.ui.TableOrder;
 
 import com.androidplot.util.ValPixConverter;
 import com.androidplot.util.PixelUtils;
@@ -538,6 +546,38 @@ public class GraphsFragment extends Fragment {
 
         mPlotStreamer.setRangeLabel("%");
         mPlotStreamer.setRangeBoundaries(0, 100, BoundaryMode.FIXED);
+
+        XYLegendWidget streamerLegendWidget = mPlotStreamer.getLegendWidget();
+
+        Paint textPaint = streamerLegendWidget.getTextPaint();
+        float textSize = textPaint.getTextSize();
+
+        streamerLegendWidget.setIconSizeMetrics(
+            new SizeMetrics(textSize, SizeLayoutType.ABSOLUTE, textSize, SizeLayoutType.ABSOLUTE));
+
+        SizeMetrics iconSizeMetrics = streamerLegendWidget.getIconSizeMetrics();
+        SizeMetric iconWidthMetric = iconSizeMetrics.getWidthMetric();
+        SizeMetric iconHeightMetric = iconSizeMetrics.getHeightMetric();
+
+        float iconWidth = iconWidthMetric.getPixelValue(iconWidthMetric.getValue());
+        float iconHeight = iconHeightMetric.getPixelValue(iconHeightMetric.getValue());
+
+        float textWidthDownloadingProgress = textPaint.measureText(
+            getText(R.string.label_downloading_progress).toString());
+        float textWidthBufferDepth = textPaint.measureText(getText(R.string.label_buffer_depth).toString());
+
+        float cellWidth =
+            Math.max(textWidthDownloadingProgress, textWidthBufferDepth) + iconWidth + PixelUtils.dpToPix(5);
+
+        mPlotStreamer.getLegendWidget().setTableModel(new StreamerTableModel(cellWidth));
+
+        mPlotStreamer.getLegendWidget().setSize(
+            new SizeMetrics(
+                Math.max(textSize, iconHeight) + PixelUtils.dpToPix(3), SizeLayoutType.ABSOLUTE,
+                cellWidth * 2, SizeLayoutType.ABSOLUTE));
+
+        mPlotStreamer.getLegendWidget().position(0, XLayoutStyle.RELATIVE_TO_CENTER,
+           0, YLayoutStyle.ABSOLUTE_FROM_BOTTOM, AnchorPosition.BOTTOM_MIDDLE);
 
         // ping plot
 
@@ -1224,6 +1264,29 @@ public class GraphsFragment extends Fragment {
 
             canvas.drawPath(pathFill, paintFill);
             canvas.drawPath(pathLine, paintLine);
+        }
+    }
+
+    // streamer plot's table model for legend
+
+    public class StreamerTableModel extends DynamicTableModel {
+        final private float mCellWidth;
+
+        public StreamerTableModel(float cellWidth) {
+            super(2, 1, TableOrder.ROW_MAJOR);
+
+            mCellWidth = cellWidth;
+        }
+
+        public RectF getCellRect(RectF tableRect, int numElements) {
+            RectF cellRect = new RectF(tableRect);
+
+            cellRect.left = tableRect.left;
+            cellRect.top = tableRect.top;
+            cellRect.bottom = tableRect.bottom;
+            cellRect.right = cellRect.left + mCellWidth;
+
+            return cellRect;
         }
     }
 }
