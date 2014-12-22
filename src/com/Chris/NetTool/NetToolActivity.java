@@ -422,6 +422,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         mDatagramReceiver = null;
 
+        streamerStop();
+
         Intent intent = getIntent();
         finish();
 
