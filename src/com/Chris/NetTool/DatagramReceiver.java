@@ -83,8 +83,6 @@ public class DatagramReceiver {
 
                 socket.setSoTimeout(10000);
 
-                byte[] data = new byte[1024];
-
                 boolean stop = false;
 
                 while (!stop) {
@@ -95,6 +93,8 @@ public class DatagramReceiver {
 
                         continue;
                     }
+
+                    byte[] data = new byte[1024];
 
                     DatagramPacket packet = new DatagramPacket(data, data.length);
 
