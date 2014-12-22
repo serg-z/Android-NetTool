@@ -68,7 +68,9 @@ public class Streamer {
 
     private StreamerBuffer mStreamerBuffer = new StreamerBuffer();
     private Object mConnectionThreadPauseLock = new Object();
+    private Object mConnectionThreadStopLock = new Object();
     private boolean mConnectionThreadPaused = false;
+    private boolean mConnectionThreadStopped = false;
     private boolean mStoppedByUser = false;
     private boolean mConnectionThreadRandomSeek = false;
 
@@ -215,7 +217,7 @@ public class Streamer {
 
     private void stopStreamer() {
         if (mConnectionThread != null && mConnectionThread.isAlive()) {
-            mConnectionThread.interrupt();
+            stopConnectionThread();
         } else if (mBufferSize > 0) {
             mTimerHandler.removeCallbacks(mTimerRunnable);
 
@@ -255,6 +257,14 @@ public class Streamer {
 
                     mConnectionThreadPauseLock.notifyAll();
                 }
+            }
+        }
+    }
+
+    private void stopConnectionThread() {
+        if (mConnectionThread != null) {
+            synchronized (mConnectionThreadStopLock) {
+                mConnectionThreadStopped = true;
             }
         }
     }
@@ -330,12 +340,15 @@ public class Streamer {
                 boolean stop = false;
 
                 while (totalReceivedSize != contentSize && !stop) {
-                    if (Thread.interrupted()) {
-                        Log.d(TAG, "Interrupting connection thread");
+                    // thread stopping logic
+                    synchronized (mConnectionThreadStopLock) {
+                        if (mConnectionThreadStopped) {
+                            Log.d(TAG, "Stopping connection thread");
 
-                        stop = true;
+                            stop = true;
 
-                        continue;
+                            continue;
+                        }
                     }
 
                     // thread pausing logic
