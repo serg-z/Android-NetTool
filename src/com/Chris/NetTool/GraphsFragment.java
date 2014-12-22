@@ -428,7 +428,7 @@ public class GraphsFragment extends Fragment {
 
         layout.addView(plotsLayoutV);
 
-        // rssi and link speed
+        // rssi, link speed, ping
 
         LinearLayout plotsLayoutH = new LinearLayout(mActivity);
 
@@ -442,7 +442,7 @@ public class GraphsFragment extends Fragment {
         mPlotRssi = new XYPlot(mActivity, "RSSI", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotRssi.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT, 0.5f));
+            LayoutParams.WRAP_CONTENT, 0.3f));
 
         plotsLayoutH.addView(mPlotRssi);
 
@@ -475,7 +475,7 @@ public class GraphsFragment extends Fragment {
         mPlotLinkSpeed = new XYPlot(mActivity, "Link Speed", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotLinkSpeed.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT, 0.5f));
+            LayoutParams.WRAP_CONTENT, 0.3f));
 
         plotsLayoutH.addView(mPlotLinkSpeed);
 
@@ -501,7 +501,42 @@ public class GraphsFragment extends Fragment {
 
         mPlotLinkSpeed.addMarker(marker);
 
-        // Rx / Tx, streamer, ping
+        // ping
+
+        mPlotPing = new XYPlot(mActivity, "Ping", Plot.RenderMode.USE_BACKGROUND_THREAD);
+
+        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.3f));
+
+        plotsLayoutH.addView(mPlotPing);
+
+        setupPlotPing(mPlotPing);
+
+        mSeriesPingSuccess = new SimpleXYSeries("Success");
+
+        mSeriesPingSuccess.useImplicitXVals();
+
+        StepFormatter stepFormatter = new StepFormatter(Color.GREEN, Color.GREEN);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingSuccess, stepFormatter);
+
+        mSeriesPingFail = new SimpleXYSeries("Fail");
+
+        mSeriesPingFail.useImplicitXVals();
+
+        stepFormatter = new StepFormatter(Color.BLACK, Color.BLACK);
+
+        stepFormatter.getLinePaint().setStrokeWidth(0);
+        stepFormatter.getLinePaint().setAntiAlias(false);
+        stepFormatter.setVertexPaint(null);
+
+        mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
+
+        // Rx / Tx, streamer
 
         plotsLayoutH = new LinearLayout(mActivity);
 
@@ -578,41 +613,6 @@ public class GraphsFragment extends Fragment {
 
         mPlotStreamer.getLegendWidget().position(0, XLayoutStyle.RELATIVE_TO_CENTER,
            0, YLayoutStyle.ABSOLUTE_FROM_BOTTOM, AnchorPosition.BOTTOM_MIDDLE);
-
-        // ping plot
-
-        mPlotPing = new XYPlot(mActivity, "Ping", Plot.RenderMode.USE_BACKGROUND_THREAD);
-
-        mPlotPing.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT, 0.3f));
-
-        plotsLayoutH.addView(mPlotPing);
-
-        setupPlotPing(mPlotPing);
-
-        mSeriesPingSuccess = new SimpleXYSeries("Success");
-
-        mSeriesPingSuccess.useImplicitXVals();
-
-        StepFormatter stepFormatter = new StepFormatter(Color.GREEN, Color.GREEN);
-
-        stepFormatter.getLinePaint().setStrokeWidth(0);
-        stepFormatter.getLinePaint().setAntiAlias(false);
-        stepFormatter.setVertexPaint(null);
-
-        mPlotPing.addSeries(mSeriesPingSuccess, stepFormatter);
-
-        mSeriesPingFail = new SimpleXYSeries("Fail");
-
-        mSeriesPingFail.useImplicitXVals();
-
-        stepFormatter = new StepFormatter(Color.BLACK, Color.BLACK);
-
-        stepFormatter.getLinePaint().setStrokeWidth(0);
-        stepFormatter.getLinePaint().setAntiAlias(false);
-        stepFormatter.setVertexPaint(null);
-
-        mPlotPing.addSeries(mSeriesPingFail, stepFormatter);
 
         return layout;
     }
