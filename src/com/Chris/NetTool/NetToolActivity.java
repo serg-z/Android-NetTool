@@ -28,7 +28,8 @@ import android.support.v4.app.FragmentTransaction;
 import java.util.Random;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
-    GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener, StreamerFragment.StreamerFragmentListener {
+    GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener,
+    StreamerFragment.StreamerFragmentListener {
 
     private static final String TAG = "NetToolActivity";
 
@@ -346,6 +347,16 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     }
 
     @Override
+    public void onStreamerFragmentDownloadingStarted() {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.clearPlotChunksTimeOfArrival();
+        }
+    }
+
+    @Override
     public void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress) {
         GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
             .findFragmentByTag(PagerFragment.tag_fragment_graphs);
@@ -362,6 +373,16 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         if (fragmentGraphs != null) {
             fragmentGraphs.setStreamerBufferDepth(bufferDepth);
+        }
+    }
+
+    @Override
+    public void onStreamerFragmentChunkTimeOfArrival(long time) {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.addChunkTimeOfArrival(time);
         }
     }
 

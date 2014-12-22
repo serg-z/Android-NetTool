@@ -3,6 +3,7 @@ package com.Chris.NetTool;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import android.util.Log;
 
@@ -30,6 +31,7 @@ public class Streamer {
         public void onStreamerBufferDepthChanged(int bufferDepth);
         public void onStreamerDownloadingFailed();
         public void onStreamerFinished(boolean stoppedByUser);
+        public void onStreamerChunkTimeOfArrival(long time);
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -43,7 +45,8 @@ public class Streamer {
         STREAM_DOWNLOADING_FINISHED,
         STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
-        STREAM_DOWNLOADING_FAILED
+        STREAM_DOWNLOADING_FAILED,
+        STREAM_CHUNK_TIME_OF_ARRIVAL
     }
 
     private final URL mUrl;
@@ -146,6 +149,15 @@ public class Streamer {
                 case STREAM_DOWNLOADING_FAILED:
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamerDownloadingFailed();
+                    }
+
+                    break;
+
+                case STREAM_CHUNK_TIME_OF_ARRIVAL:
+                    if (mStreamerListener != null) {
+                        long time = (Long)inputMessage.obj;
+
+                        mStreamerListener.onStreamerChunkTimeOfArrival(time);
                     }
 
                     break;
@@ -370,6 +382,8 @@ public class Streamer {
                         setConnectionThreadRandomSeek(false);
                     }
 
+                    long time = SystemClock.elapsedRealtime();
+
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
                     try {
@@ -451,6 +465,13 @@ public class Streamer {
                         // send "streaming downloading progress" message to Stream instance
 
                         mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_PROGRESS.ordinal(), streamingProgress)
+                            .sendToTarget();
+
+                        // send "chunk time of arrival" message
+
+                        time = SystemClock.elapsedRealtime() - time;
+
+                        mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL.ordinal(), time)
                             .sendToTarget();
 
                         Log.d(TAG, "=====");

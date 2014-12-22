@@ -8,4 +8,5 @@
 
     <string name="label_downloading_progress">Download</string>
     <string name="label_buffer_depth">Buffer</string>
+    <string name="label_plot_chunks_time_of_arrival">Chunks ToA</string>
 </resources>

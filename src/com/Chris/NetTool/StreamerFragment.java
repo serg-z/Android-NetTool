@@ -37,8 +37,10 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener {
 
     public interface StreamerFragmentListener {
+        void onStreamerFragmentDownloadingStarted();
         void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress);
         void onStreamerFragmentBufferDepthChanged(int bufferDepth);
+        void onStreamerFragmentChunkTimeOfArrival(long time);
     }
 
     private static final String TAG = "StreamerFragment";
@@ -489,6 +491,10 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         Toast.makeText(mActivity, R.string.stream_downloading_started, 1).show();
 
         setUIState(UIState.PLAYING);
+
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentDownloadingStarted();
+        }
     }
 
     @Override
@@ -534,6 +540,13 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         onStreamerDownloadingProgressChanged(0);
 
         setUIState(UIState.READY_TO_PLAY);
+    }
+
+    @Override
+    public void onStreamerChunkTimeOfArrival(long time) {
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentChunkTimeOfArrival(time);
+        }
     }
 
     @Override

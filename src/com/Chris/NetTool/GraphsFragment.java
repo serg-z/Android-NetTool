@@ -128,6 +128,8 @@ public class GraphsFragment extends Fragment {
     private SimpleXYSeries mSeriesStreamerDownloadingProgress, mSeriesStreamerBufferDepth;
     private int mStreamerDownloadingProgress = 0, mStreamerBufferDepth = 0;
 
+    private XYPlot mPlotChunksTimeOfArrival;
+
     private Activity mActivity;
 
     private long mLastRx = -1, mLastTx = -1;
@@ -247,6 +249,20 @@ public class GraphsFragment extends Fragment {
 
             mPlotStreamer.redraw();
         }
+    }
+
+    public void clearPlotChunksTimeOfArrival() {
+        if (mPlotChunksTimeOfArrival != null) {
+            mPlotChunksTimeOfArrival.clear();
+
+            addSeries(mPlotChunksTimeOfArrival, "", Color.BLUE, Color.argb(128, 100, 100, 200));
+
+            mPlotChunksTimeOfArrival.redraw();
+        }
+    }
+
+    public void addChunkTimeOfArrival(long time) {
+        addValueToPlotSeries(mPlotChunksTimeOfArrival, time);
     }
 
     private void addValueToPlotSeries(XYPlot plot, float value) {
@@ -613,6 +629,23 @@ public class GraphsFragment extends Fragment {
 
         mPlotStreamer.getLegendWidget().position(0, XLayoutStyle.RELATIVE_TO_CENTER,
            0, YLayoutStyle.ABSOLUTE_FROM_BOTTOM, AnchorPosition.BOTTOM_MIDDLE);
+
+        // chunks plot
+
+        mPlotChunksTimeOfArrival = new XYPlot(mActivity, getString(R.string.label_plot_chunks_time_of_arrival),
+            Plot.RenderMode.USE_BACKGROUND_THREAD);
+
+        mPlotChunksTimeOfArrival.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT, 0.3f));
+
+        plotsLayoutH.addView(mPlotChunksTimeOfArrival);
+
+        setupPlot(mPlotChunksTimeOfArrival);
+
+        clearPlotChunksTimeOfArrival();
+
+        mPlotChunksTimeOfArrival.setRangeLabel("ms");
+        mPlotChunksTimeOfArrival.setRangeBoundaries(0, 2000, BoundaryMode.FIXED);
 
         return layout;
     }
