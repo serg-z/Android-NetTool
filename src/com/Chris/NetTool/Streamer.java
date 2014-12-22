@@ -368,6 +368,18 @@ public class Streamer {
                         }
                     }
 
+                    // TODO: move into separate function
+                    // thread stopping logic
+                    synchronized (mConnectionThreadStopLock) {
+                        if (mConnectionThreadStopped) {
+                            Log.d(TAG, "Stopping connection thread");
+
+                            stop = true;
+
+                            continue;
+                        }
+                    }
+
                     if (mBufferSize > 0) {
                         int bufferCurrentSize = mStreamerBuffer.getSize();
 
