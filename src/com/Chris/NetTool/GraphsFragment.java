@@ -565,7 +565,7 @@ public class GraphsFragment extends Fragment {
 
         // streamer plot
 
-        mPlotStreamer = new XYPlot(mActivity, "Streamer", Plot.RenderMode.USE_BACKGROUND_THREAD);
+        mPlotStreamer = new XYPlot(mActivity, "Buffer Depth", Plot.RenderMode.USE_BACKGROUND_THREAD);
 
         mPlotStreamer.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.3f));
