@@ -86,7 +86,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         mVideoAddress.setSingleLine(true);
         mVideoAddress.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
 
-        mVideoAddress.setText("http://ravewireless.com/content/StandardCycleContent/NewFamily/LATAM_ContentFull/1/2001436/divx_LATAM-MadMenChristmas_eng_video_level4_vbv9600_1200kbps.mkv");
+        mVideoAddress.setText("http://172.16.255.254/content/StandardCycleContent/test.bin");
 
         layout.addView(mVideoAddress);
 
