@@ -348,12 +348,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     @Override
     public void onStreamerFragmentDownloadingStarted() {
-        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
-            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
-
-        if (fragmentGraphs != null) {
-            fragmentGraphs.clearPlotChunkDownloadTime();
-        }
     }
 
     @Override

@@ -259,16 +259,6 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    public void clearPlotChunkDownloadTime() {
-        if (mPlotChunkDownloadTime != null) {
-            mPlotChunkDownloadTime.clear();
-
-            addSeries(mPlotChunkDownloadTime, "", Color.BLUE, Color.argb(128, 100, 100, 200));
-
-            mPlotChunkDownloadTime.redraw();
-        }
-    }
-
     public void addChunkDownloadTime(long time) {
         addValueToPlotSeries(mPlotChunkDownloadTime, time);
     }
@@ -650,7 +640,7 @@ public class GraphsFragment extends Fragment {
 
         setupPlot(mPlotChunkDownloadTime);
 
-        clearPlotChunkDownloadTime();
+        addSeries(mPlotChunkDownloadTime, "", Color.BLUE, Color.argb(128, 100, 100, 200));
 
         mPlotChunkDownloadTime.setRangeLabel("ms");
         mPlotChunkDownloadTime.setRangeBoundaries(0, 2000, BoundaryMode.FIXED);
