@@ -672,6 +672,7 @@ public class GraphsFragment extends Fragment {
                     mPlotRxTx.redraw();
                     mPlotStreamer.redraw();
                     mPlotPing.redraw();
+                    mPlotChunksTimeOfArrival.redraw();
                 }
             },
             100);
