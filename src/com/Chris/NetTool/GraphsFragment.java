@@ -128,7 +128,7 @@ public class GraphsFragment extends Fragment {
     private SimpleXYSeries mSeriesStreamerDownloadingProgress, mSeriesStreamerBufferDepth;
     private int mStreamerDownloadingProgress = 0, mStreamerBufferDepth = 0;
 
-    private XYPlot mPlotChunksTimeOfArrival;
+    private XYPlot mPlotChunkDownloadTime;
 
     private Activity mActivity;
 
@@ -259,18 +259,18 @@ public class GraphsFragment extends Fragment {
         }
     }
 
-    public void clearPlotChunksTimeOfArrival() {
-        if (mPlotChunksTimeOfArrival != null) {
-            mPlotChunksTimeOfArrival.clear();
+    public void clearPlotChunkDownloadTime() {
+        if (mPlotChunkDownloadTime != null) {
+            mPlotChunkDownloadTime.clear();
 
-            addSeries(mPlotChunksTimeOfArrival, "", Color.BLUE, Color.argb(128, 100, 100, 200));
+            addSeries(mPlotChunkDownloadTime, "", Color.BLUE, Color.argb(128, 100, 100, 200));
 
-            mPlotChunksTimeOfArrival.redraw();
+            mPlotChunkDownloadTime.redraw();
         }
     }
 
-    public void addChunkTimeOfArrival(long time) {
-        addValueToPlotSeries(mPlotChunksTimeOfArrival, time);
+    public void addChunkDownloadTime(long time) {
+        addValueToPlotSeries(mPlotChunkDownloadTime, time);
     }
 
     private void addValueToPlotSeries(XYPlot plot, float value) {
@@ -640,20 +640,20 @@ public class GraphsFragment extends Fragment {
 
         // chunks plot
 
-        mPlotChunksTimeOfArrival = new XYPlot(mActivity, getString(R.string.label_plot_chunks_time_of_arrival),
+        mPlotChunkDownloadTime = new XYPlot(mActivity, getString(R.string.label_plot_chunk_download_time),
             Plot.RenderMode.USE_BACKGROUND_THREAD);
 
-        mPlotChunksTimeOfArrival.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        mPlotChunkDownloadTime.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT, 0.3f));
 
-        plotsLayoutH.addView(mPlotChunksTimeOfArrival);
+        plotsLayoutH.addView(mPlotChunkDownloadTime);
 
-        setupPlot(mPlotChunksTimeOfArrival);
+        setupPlot(mPlotChunkDownloadTime);
 
-        clearPlotChunksTimeOfArrival();
+        clearPlotChunkDownloadTime();
 
-        mPlotChunksTimeOfArrival.setRangeLabel("ms");
-        mPlotChunksTimeOfArrival.setRangeBoundaries(0, 2000, BoundaryMode.FIXED);
+        mPlotChunkDownloadTime.setRangeLabel("ms");
+        mPlotChunkDownloadTime.setRangeBoundaries(0, 2000, BoundaryMode.FIXED);
 
         return layout;
     }
@@ -672,7 +672,7 @@ public class GraphsFragment extends Fragment {
                     mPlotRxTx.redraw();
                     mPlotStreamer.redraw();
                     mPlotPing.redraw();
-                    mPlotChunksTimeOfArrival.redraw();
+                    mPlotChunkDownloadTime.redraw();
                 }
             },
             100);

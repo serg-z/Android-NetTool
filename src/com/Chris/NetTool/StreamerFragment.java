@@ -40,7 +40,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         void onStreamerFragmentDownloadingStarted();
         void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress);
         void onStreamerFragmentBufferDepthChanged(int bufferDepth);
-        void onStreamerFragmentChunkTimeOfArrival(long time);
+        void onStreamerFragmentChunkDownloadTime(long time);
     }
 
     private static final String TAG = "StreamerFragment";
@@ -543,9 +543,9 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     }
 
     @Override
-    public void onStreamerChunkTimeOfArrival(long time) {
+    public void onStreamerChunkDownloadTime(long time) {
         if (mStreamerFragmentCallback != null) {
-            mStreamerFragmentCallback.onStreamerFragmentChunkTimeOfArrival(time);
+            mStreamerFragmentCallback.onStreamerFragmentChunkDownloadTime(time);
         }
     }
 

@@ -31,7 +31,7 @@ public class Streamer {
         public void onStreamerBufferDepthChanged(int bufferDepth);
         public void onStreamerDownloadingFailed();
         public void onStreamerFinished(boolean stoppedByUser);
-        public void onStreamerChunkTimeOfArrival(long time);
+        public void onStreamerChunkDownloadTime(long time);
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -159,7 +159,7 @@ public class Streamer {
                     if (mStreamerListener != null) {
                         long time = (Long)inputMessage.obj;
 
-                        mStreamerListener.onStreamerChunkTimeOfArrival(time);
+                        mStreamerListener.onStreamerChunkDownloadTime(time);
                     }
 
                     break;

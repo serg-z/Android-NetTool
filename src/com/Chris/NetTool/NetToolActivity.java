@@ -352,7 +352,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .findFragmentByTag(PagerFragment.tag_fragment_graphs);
 
         if (fragmentGraphs != null) {
-            fragmentGraphs.clearPlotChunksTimeOfArrival();
+            fragmentGraphs.clearPlotChunkDownloadTime();
         }
     }
 
@@ -377,12 +377,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     }
 
     @Override
-    public void onStreamerFragmentChunkTimeOfArrival(long time) {
+    public void onStreamerFragmentChunkDownloadTime(long time) {
         GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
             .findFragmentByTag(PagerFragment.tag_fragment_graphs);
 
         if (fragmentGraphs != null) {
-            fragmentGraphs.addChunkTimeOfArrival(time);
+            fragmentGraphs.addChunkDownloadTime(time);
         }
     }
 
