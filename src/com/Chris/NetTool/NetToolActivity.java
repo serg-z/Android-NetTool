@@ -192,6 +192,9 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         if (fragmentSettings != null) {
             fragmentSettings.setPingServerAddress(address);
+
+            // start pinging
+            fragmentSettings.pingStart();
         }
     }
 
