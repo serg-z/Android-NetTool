@@ -183,6 +183,8 @@ public class GraphsFragment extends Fragment {
 
         String bssid = wifiInfo.getBSSID();
 
+        boolean freqNotFound = true;
+
         for (ScanResult r : mWifiManager.getScanResults()) {
             if (r.BSSID.equals(bssid)) {
                 String text = r.frequency + " MHz";
@@ -194,7 +196,13 @@ public class GraphsFragment extends Fragment {
                 }
 
                 ((TextView)mActivity.findViewById(R.id.text_frequency)).setText(text);
+
+                freqNotFound = false;
             }
+        }
+
+        if (freqNotFound) {
+            ((TextView)mActivity.findViewById(R.id.text_frequency)).setText("not found");
         }
 
         int rssi = wifiInfo.getRssi();
