@@ -129,6 +129,7 @@ public class GraphsFragment extends Fragment {
     private int mStreamerDownloadingProgress = 0, mStreamerBufferDepth = 0;
 
     private XYPlot mPlotChunkDownloadTime;
+    private boolean mPlotChunkAddZeroes = true;
 
     private Activity mActivity;
 
@@ -257,10 +258,18 @@ public class GraphsFragment extends Fragment {
 
             mPlotStreamer.redraw();
         }
+
+        if (mPlotChunkAddZeroes) {
+            addChunkDownloadTime(0);
+        }
     }
 
     public void addChunkDownloadTime(long time) {
         addValueToPlotSeries(mPlotChunkDownloadTime, time);
+    }
+
+    public void setPlotChunkAddZeroes(boolean enabled) {
+        mPlotChunkAddZeroes = enabled;
     }
 
     private void addValueToPlotSeries(XYPlot plot, float value) {

@@ -41,6 +41,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress);
         void onStreamerFragmentBufferDepthChanged(int bufferDepth);
         void onStreamerFragmentChunkDownloadTime(long time);
+        void onStreamerFragmentFinished();
     }
 
     private static final String TAG = "StreamerFragment";
@@ -540,6 +541,10 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         onStreamerDownloadingProgressChanged(0);
 
         setUIState(UIState.READY_TO_PLAY);
+
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentFinished();
+        }
     }
 
     @Override

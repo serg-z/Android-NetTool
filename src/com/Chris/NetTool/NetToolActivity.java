@@ -348,6 +348,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     @Override
     public void onStreamerFragmentDownloadingStarted() {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.setPlotChunkAddZeroes(false);
+        }
     }
 
     @Override
@@ -377,6 +383,16 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         if (fragmentGraphs != null) {
             fragmentGraphs.addChunkDownloadTime(time);
+        }
+    }
+
+    @Override
+    public void onStreamerFragmentFinished() {
+        GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+        if (fragmentGraphs != null) {
+            fragmentGraphs.setPlotChunkAddZeroes(true);
         }
     }
 
