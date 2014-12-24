@@ -109,7 +109,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         Log.d(TAG, stats);
 
         // show toast
-        Toast.makeText(this, stats, 1).show();
+        Toast.makeText(this, stats, Toast.LENGTH_SHORT).show();
 
         // add to log in settings
         SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
@@ -218,7 +218,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     @Override
     public void onDatagramReceived(String datagramMessage) {
-        Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, 1).show();
+        Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, Toast.LENGTH_SHORT).show();
 
         AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -322,7 +322,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 // delay in range [1, value]
                 final int randomDelay = (new Random()).nextInt(startStreamDelayMax) + 1;
 
-                Toast.makeText(this, "Starting streamer in " + randomDelay + "s", 1).show();
+                Toast.makeText(this, "Starting streamer in " + randomDelay + "s", Toast.LENGTH_SHORT).show();
 
                 final ToneGenerator toneGenerator;
 

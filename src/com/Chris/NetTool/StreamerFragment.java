@@ -505,7 +505,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamerDownloadingStarted() {
-        Toast.makeText(mActivity, R.string.stream_downloading_started, 1).show();
+        Toast.makeText(mActivity, R.string.stream_downloading_started, Toast.LENGTH_SHORT).show();
 
         setUIState(UIState.PLAYING);
 
@@ -516,7 +516,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamerDownloadingFinished() {
-        Toast.makeText(mActivity, R.string.stream_downloading_finished, 1).show();
+        Toast.makeText(mActivity, R.string.stream_downloading_finished, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -539,14 +539,14 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamerDownloadingFailed() {
-        Toast.makeText(mActivity, R.string.stream_downloading_failed, 1).show();
+        Toast.makeText(mActivity, R.string.stream_downloading_failed, Toast.LENGTH_SHORT).show();
 
         setUIState(UIState.READY_TO_PLAY);
     }
 
     @Override
     public void onStreamerFinished(boolean stoppedByUser) {
-        Toast.makeText(mActivity, R.string.streamer_finished, 1).show();
+        Toast.makeText(mActivity, R.string.streamer_finished, Toast.LENGTH_SHORT).show();
 
         if (!stoppedByUser && mCheckBoxRepeat.isChecked()) {
             streamStart();
