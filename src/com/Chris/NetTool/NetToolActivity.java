@@ -100,6 +100,24 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
             mDatagramReceiver.setListener(this);
         }
+
+        // dump wlan0's stats (if any)
+
+        String stats = "wlan0's stats:\n" + Utils.dumpStats() + "\n=====\n";
+
+        // to log
+        Log.d(TAG, stats);
+
+        // show toast
+        Toast.makeText(this, stats, 1).show();
+
+        // add to log in settings
+        SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
+            .findFragmentByTag(PagerFragment.tag_fragment_settings);
+
+        if (fragmentSettings != null) {
+            fragmentSettings.pingLog(stats);
+        }
     }
 
     @Override
