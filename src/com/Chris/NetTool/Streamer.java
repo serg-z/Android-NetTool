@@ -267,6 +267,8 @@ public class Streamer {
                 mConnectionThreadStopped = true;
             }
         }
+
+        setConnectionThreadPaused(false);
     }
 
     private synchronized void setConnectionThreadRandomSeek(boolean value) {
