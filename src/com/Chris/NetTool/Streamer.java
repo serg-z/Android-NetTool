@@ -32,6 +32,7 @@ public class Streamer {
         public void onStreamerDownloadingFailed();
         public void onStreamerFinished(boolean stoppedByUser);
         public void onStreamerChunkDownloadTime(long time);
+        public void onStreamerRandomSeekCompleted();
     }
 
     public class InvalidContentSizeException extends Exception {
@@ -46,7 +47,8 @@ public class Streamer {
         STREAM_DOWNLOADING_PROGRESS,
         DEPTH_BUFFER_SIZE_CHANGED,
         STREAM_DOWNLOADING_FAILED,
-        STREAM_CHUNK_TIME_OF_ARRIVAL
+        STREAM_CHUNK_TIME_OF_ARRIVAL,
+        STREAM_RANDOM_SEEK_COMPLETED
     }
 
     private final URL mUrl;
@@ -161,6 +163,13 @@ public class Streamer {
                         long time = (Long)inputMessage.obj;
 
                         mStreamerListener.onStreamerChunkDownloadTime(time);
+                    }
+
+                    break;
+
+                case STREAM_RANDOM_SEEK_COMPLETED:
+                    if (mStreamerListener != null) {
+                        mStreamerListener.onStreamerRandomSeekCompleted();
                     }
 
                     break;
@@ -436,6 +445,11 @@ public class Streamer {
                         Log.d(TAG, "*** CT: RANDOM SEEK TO " + totalReceivedSize);
 
                         setConnectionThreadRandomSeek(false);
+
+                        // send "random seek completed" message to Stream instance
+
+                        mHandler.obtainMessage(MessageId.STREAM_RANDOM_SEEK_COMPLETED.ordinal(), null)
+                            .sendToTarget();
                     }
 
                     long time = SystemClock.elapsedRealtime();

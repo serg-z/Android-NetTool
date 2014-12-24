@@ -370,6 +370,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                     showStreamerDownloadingProgress(0);
                     showStreamerBufferDepthProgress(0);
+
+                    setUIState(UIState.EVERYTHING_DISABLED);
                 }
             }
         }
@@ -566,6 +568,11 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         if (mStreamerFragmentCallback != null) {
             mStreamerFragmentCallback.onStreamerFragmentChunkDownloadTime(time);
         }
+    }
+
+    @Override
+    public void onStreamerRandomSeekCompleted() {
+        setUIState(UIState.PLAYING);
     }
 
     @Override
