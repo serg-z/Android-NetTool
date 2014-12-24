@@ -73,6 +73,7 @@ public class Streamer {
     private boolean mConnectionThreadStopped = false;
     private boolean mStoppedByUser = false;
     private boolean mConnectionThreadRandomSeek = false;
+    private boolean mPaused = false;
 
     private Handler mTimerHandler = new Handler();
 
@@ -215,6 +216,28 @@ public class Streamer {
         setConnectionThreadRandomSeek(true);
 
         setConnectionThreadPaused(false);
+    }
+
+    public void setPaused(boolean paused) {
+        if (mPaused == paused) {
+            return;
+        }
+
+        if (paused) {
+            setConnectionThreadPaused(true);
+
+            if (mBufferSize > 0) {
+                mTimerHandler.removeCallbacks(mTimerRunnable);
+            }
+        } else {
+            if (mBufferSize > 0) {
+                mTimerHandler.postDelayed(mTimerRunnable, 1000);
+            }
+
+            setConnectionThreadPaused(false);
+        }
+
+        mPaused = paused;
     }
 
     private void stopStreamer() {

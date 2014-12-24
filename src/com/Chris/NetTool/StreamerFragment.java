@@ -356,14 +356,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         if (view == mButtonPlay) {
             streamStart();
         } else if (view == mButtonPause) {
-            if (mCheckBoxUseVideoView.isChecked()) {
-                mVideoView.pause();
-
-                setUIState(UIState.PAUSED);
-            } else {
-            }
-
-            mVideoIsPaused = true;
+            streamPause();
         } else if (view == mButtonStop) {
             streamStop();
         } else if (view == mButtonRandomSeek) {
@@ -412,39 +405,44 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
             mVideoView.start();
         } else {
-            int bitrate = mSliderBitrate.getAdjustedProgress();
-            int bufferSize = mSliderBufferSize.getAdjustedProgress();
-            int chunkSize = mSliderChunkSize.getAdjustedProgress();
+            // just unpause the streamer or create another one if it's not paused
+            if (mVideoIsPaused) {
+                mStreamer.setPaused(false);
+            } else {
+                int bitrate = mSliderBitrate.getAdjustedProgress();
+                int bufferSize = mSliderBufferSize.getAdjustedProgress();
+                int chunkSize = mSliderChunkSize.getAdjustedProgress();
 
-            if (bufferSize != 0 && bufferSize < chunkSize) {
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
+                if (bufferSize != 0 && bufferSize < chunkSize) {
+                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
 
-                alertDialogBuilder
-                    .setIconAttribute(android.R.attr.alertDialogIcon)
-                    .setPositiveButton("OK", null)
-                    .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
-                    .setTitle("Invalid buffer size");
+                    alertDialogBuilder
+                        .setIconAttribute(android.R.attr.alertDialogIcon)
+                        .setPositiveButton("OK", null)
+                        .setMessage("Buffer size should be greater or equal to chunk size (or zero, if disabled)")
+                        .setTitle("Invalid buffer size");
 
-                AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
+                    AlertDialog alertDialog = alertDialogBuilder.create();
+                    alertDialog.show();
 
-                return;
-            }
-
-            if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
-                if (mStreamer != null) {
-                    mStreamer.stop();
-
-                    mStreamer = null;
+                    return;
                 }
 
-                mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
+                if (bitrate > 0 && bufferSize >= 0 && chunkSize > 0) {
+                    if (mStreamer != null) {
+                        mStreamer.stop();
 
-                mStreamer.setStreamerListener(this);
+                        mStreamer = null;
+                    }
+
+                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
+
+                    mStreamer.setStreamerListener(this);
+                }
             }
         }
 
-        if (mCheckBoxUseVideoView.isChecked() && mVideoIsPaused) {
+        if (mVideoIsPaused) {
             setUIState(UIState.PLAYING);
         } else {
             setUIState(UIState.EVERYTHING_DISABLED);
@@ -467,6 +465,20 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         }
 
         mVideoIsPaused = false;
+    }
+
+    public void streamPause() {
+        if (mCheckBoxUseVideoView.isChecked()) {
+            mVideoView.pause();
+        } else {
+            if (mStreamer != null) {
+                mStreamer.setPaused(true);
+            }
+        }
+
+        mVideoIsPaused = true;
+
+        setUIState(UIState.PAUSED);
     }
 
     private void removeVideoView() {
