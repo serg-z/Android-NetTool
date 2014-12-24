@@ -213,6 +213,8 @@ public class Streamer {
         }
 
         setConnectionThreadRandomSeek(true);
+
+        setConnectionThreadPaused(false);
     }
 
     private void stopStreamer() {
