@@ -216,6 +216,10 @@ public class Streamer {
         setConnectionThreadRandomSeek(true);
 
         setConnectionThreadPaused(false);
+
+        // restart emptying buffer
+        mTimerHandler.removeCallbacks(mTimerRunnable);
+        mTimerHandler.postDelayed(mTimerRunnable, 1000);
     }
 
     public void setPaused(boolean paused) {
