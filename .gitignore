@@ -4,5 +4,6 @@
 bin
 gen
 libs
+obj
 
 proguard-project.txt

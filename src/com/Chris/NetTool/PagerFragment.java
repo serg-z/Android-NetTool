@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import android.view.LayoutInflater;
@@ -66,24 +67,38 @@ public class PagerFragment extends Fragment {
 
         viewPager.setAdapter(adapter);
 
-        // version
+        // driver description and version
 
-        LinearLayout layoutBottom = new LinearLayout(mActivity);
+        RelativeLayout layoutBottom = new RelativeLayout(mActivity);
 
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        LinearLayout.LayoutParams bottomParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT);
 
-        layoutParams.gravity = Gravity.RIGHT;
+        bottomParams.setMargins(10, 0, 10, 5);
 
-        layoutBottom.setLayoutParams(layoutParams);
+        layoutBottom.setLayoutParams(bottomParams);
 
         layout.addView(layoutBottom);
 
-        layoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        // wlan0's driver description
+
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT);
 
-        layoutParams.rightMargin = 10;
-        layoutParams.gravity = Gravity.CENTER_VERTICAL;
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+
+        TextView textDriverDesc = new TextView(mActivity);
+
+        layoutBottom.addView(textDriverDesc, layoutParams);
+
+        textDriverDesc.setText("wlan0's driver: " + Utils.wlan0DriverDesc());
+
+        // version
+
+        layoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT);
+
+        layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
         TextView textVersion = new TextView(mActivity);
 
