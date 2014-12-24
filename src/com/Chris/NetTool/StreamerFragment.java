@@ -266,6 +266,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
             mProgressBarBufferDepth.setProgress(0);
         }
+
+        mVideoIsPaused = false;
     }
 
     private void setUIState(UIState state) {
