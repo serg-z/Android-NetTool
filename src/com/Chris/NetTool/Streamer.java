@@ -452,7 +452,7 @@ public class Streamer {
                             .sendToTarget();
                     }
 
-                    long time = SystemClock.elapsedRealtime();
+                    long time;
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
@@ -478,6 +478,8 @@ public class Streamer {
                         connection.setRequestProperty("Range", "bytes=" + rangeFrom + "-" + rangeTo);
 
                         if (contentSize == -1) {
+                            time = SystemClock.elapsedRealtime();
+
                             String[] sp = connection.getHeaderField("Content-Range").split("/");
 
                             if (sp.length == 2) {
@@ -490,6 +492,13 @@ public class Streamer {
                                 mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED.ordinal(), null)
                                     .sendToTarget();
 
+                                // send "chunk time of arrival" message
+
+                                time = SystemClock.elapsedRealtime() - time;
+
+                                mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL.ordinal(), time)
+                                    .sendToTarget();
+
                                 continue;
                             }
 
@@ -497,6 +506,8 @@ public class Streamer {
                                 throw new InvalidContentSizeException("Can't obtain content size");
                             }
                         }
+
+                        time = SystemClock.elapsedRealtime();
 
                         Matcher m = Pattern.compile("bytes\\s(\\d+)-(\\d+).*")
                             .matcher(connection.getHeaderField("Content-Range"));
