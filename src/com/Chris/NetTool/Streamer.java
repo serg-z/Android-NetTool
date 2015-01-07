@@ -460,8 +460,8 @@ public class Streamer {
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
-                    connection.setConnectTimeout(5000);
-                    connection.setReadTimeout(10000);
+                    connection.setConnectTimeout(60000);
+                    connection.setReadTimeout(60000);
 
                     try {
                         int rangeFrom;
