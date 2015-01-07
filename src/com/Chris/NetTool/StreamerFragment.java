@@ -546,7 +546,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamerFinished(boolean stoppedByUser) {
-        Toast.makeText(mActivity, R.string.streamer_finished, Toast.LENGTH_SHORT).show();
+        Toast.makeText(mActivity, stoppedByUser ? R.string.streamer_stopped : R.string.streamer_finished,
+            Toast.LENGTH_SHORT).show();
 
         if (!stoppedByUser && mCheckBoxRepeat.isChecked()) {
             streamStart();

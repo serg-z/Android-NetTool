@@ -5,6 +5,7 @@
     <string name="stream_downloading_finished">Stream downloading finished</string>
     <string name="stream_downloading_failed">Stream downloading failed</string>
     <string name="streamer_finished">Streamer finished</string>
+    <string name="streamer_stopped">Streamer stopped</string>
 
     <string name="label_downloading_progress">Download</string>
     <string name="label_buffer_depth">Buffer</string>
