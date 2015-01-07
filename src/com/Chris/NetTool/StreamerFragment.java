@@ -195,7 +195,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         mSliderBufferSize.setMin(0);
         mSliderBufferSize.setMax(360);
 
-        mSliderBufferSize.setAdjustedProgress(240);
+        mSliderBufferSize.setAdjustedProgress(30);
 
         mLayoutLeft.addView(mSliderBufferSize);
 
