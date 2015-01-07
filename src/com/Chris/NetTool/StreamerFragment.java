@@ -41,6 +41,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         void onStreamerFragmentDownloadingProgressChanged(int downloadingProgress);
         void onStreamerFragmentBufferDepthChanged(int bufferDepth);
         void onStreamerFragmentChunkDownloadTime(long time);
+        void onStreamerFragmentFailed();
         void onStreamerFragmentFinished();
     }
 
@@ -543,7 +544,13 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     public void onStreamerDownloadingFailed() {
         Toast.makeText(mActivity, R.string.stream_downloading_failed, Toast.LENGTH_SHORT).show();
 
+        onStreamerDownloadingProgressChanged(0);
+
         setUIState(UIState.READY_TO_PLAY);
+
+        if (mStreamerFragmentCallback != null) {
+            mStreamerFragmentCallback.onStreamerFragmentFailed();
+        }
     }
 
     @Override

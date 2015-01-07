@@ -152,6 +152,8 @@ public class Streamer {
                     break;
 
                 case STREAM_DOWNLOADING_FAILED:
+                    mStreamerBuffer.clear(true);
+
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamerDownloadingFailed();
                     }
@@ -566,8 +568,12 @@ public class Streamer {
             } catch (Exception e) {
                 e.printStackTrace();
 
+                Log.d(TAG, ">> Connection thread failed");
+
                 mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED.ordinal(), null)
                     .sendToTarget();
+
+                return;
             }
 
             Log.d(TAG, ">> Connection thread finished");

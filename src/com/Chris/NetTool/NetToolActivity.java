@@ -408,6 +408,11 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     }
 
     @Override
+    public void onStreamerFragmentFailed() {
+        onStreamerFragmentFinished();
+    }
+
+    @Override
     public void onStreamerFragmentFinished() {
         GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
             .findFragmentByTag(PagerFragment.tag_fragment_graphs);
