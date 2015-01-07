@@ -466,6 +466,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
         if (mStreamer != null) {
             mStreamer.stop();
+
+            setUIState(UIState.EVERYTHING_DISABLED);
         }
 
         mVideoIsPaused = false;
