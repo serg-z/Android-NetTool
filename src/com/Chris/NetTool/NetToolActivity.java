@@ -307,6 +307,20 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 }
             } else if (name.equals("restart") && value.equals("1")) {
                 restart();
+            } else if (name.equals("streamer_connect_timeout")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setStreamerConnectTimeout(Integer.valueOf(value));
+                }
+            } else if (name.equals("streamer_read_timeout")) {
+                StreamerFragment fragmentStreamer = (StreamerFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_streamer);
+
+                if (fragmentStreamer != null) {
+                    fragmentStreamer.setStreamerReadTimeout(Integer.valueOf(value));
+                }
             }
         }
 

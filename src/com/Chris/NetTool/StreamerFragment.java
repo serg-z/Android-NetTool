@@ -67,6 +67,10 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     private Streamer mStreamer;
 
+    // in milliseconds
+    private int mStreamerConnectTimeout = 60000;
+    private int mStreamerReadTimeout = 60000;
+
     private StreamerFragmentListener mStreamerFragmentCallback;
 
     @Override
@@ -324,10 +328,12 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                     mTextStatus.setText("Playing...");
                 } else {
                     mTextStatus.setText(String.format(
-                        "Streaming: bitrate=%d, buffer=%d, chunk=%d",
+                        "Streaming: bitrate=%d, buffer=%d, chunk=%d, connect_TO=%d, read_TO=%d",
                         mStreamer.getBitrate(),
                         mStreamer.getBufferSize(),
-                        mStreamer.getChunkSize()));
+                        mStreamer.getChunkSize(),
+                        mStreamerConnectTimeout,
+                        mStreamerReadTimeout));
                 }
 
                 break;
@@ -440,7 +446,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                         mStreamer = null;
                     }
 
-                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize);
+                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize, mStreamerConnectTimeout,
+                        mStreamerReadTimeout);
 
                     mStreamer.setStreamerListener(this);
                 }
@@ -654,5 +661,13 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     public void setUseVideoView(boolean useVideoView) {
         mCheckBoxUseVideoView.setChecked(useVideoView);
+    }
+
+    public void setStreamerConnectTimeout(int connectTimeout) {
+        mStreamerConnectTimeout = connectTimeout;
+    }
+
+    public void setStreamerReadTimeout(int readTimeout) {
+        mStreamerReadTimeout = readTimeout;
     }
 }

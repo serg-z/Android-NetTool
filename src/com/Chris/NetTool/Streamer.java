@@ -64,6 +64,10 @@ public class Streamer {
     private final int mChunkDataSize;
     private final int mBufferCapacity;
 
+    // in milliseconds
+    private final int mConnectTimeout;
+    private final int mReadTimeout;
+
     private StreamerListener mStreamerListener = null;
 
     private Thread mConnectionThread;
@@ -182,7 +186,7 @@ public class Streamer {
         }
     };
 
-    public Streamer(URL url, int bitrate, int chunkSize, int bufferSize) {
+    public Streamer(URL url, int bitrate, int chunkSize, int bufferSize, int connectTimeout, int readTimeout) {
         mUrl = url;
         mBitrate = bitrate;
         mChunkSize = chunkSize;
@@ -191,6 +195,9 @@ public class Streamer {
         mDataSizePerSecond = mBitrate * (1000 / 8);
         mChunkDataSize = mDataSizePerSecond * mChunkSize;
         mBufferCapacity = mDataSizePerSecond * mBufferSize;
+
+        mConnectTimeout = connectTimeout;
+        mReadTimeout = readTimeout;
 
         createAndStartConnectionThread();
 
@@ -372,8 +379,9 @@ public class Streamer {
 
         @Override
         public void run() {
-            Log.d(TAG, String.format("Connection thread started [bitrate=%d, buffer=%d, chunk=%d]",
-                mBitrate, mBufferSize, mChunkSize));
+            Log.d(TAG, String.format(
+                "Connection thread started [bitrate=%d, buffer=%d, chunk=%d, connect_TO=%d, read_TO=%d]",
+                mBitrate, mBufferSize, mChunkSize, mConnectTimeout, mReadTimeout));
 
             try {
                 int contentSize = -1;
@@ -460,8 +468,8 @@ public class Streamer {
 
                     HttpURLConnection connection = (HttpURLConnection)mUrl.openConnection();
 
-                    connection.setConnectTimeout(60000);
-                    connection.setReadTimeout(60000);
+                    connection.setConnectTimeout(mConnectTimeout);
+                    connection.setReadTimeout(mReadTimeout);
 
                     try {
                         int rangeFrom;
