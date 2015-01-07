@@ -381,6 +381,8 @@ public class Streamer {
 
                 boolean stop = false;
 
+                byte[] byteData = new byte[1024];
+
                 while (totalReceivedSize != contentSize && !stop) {
                     // thread stopping logic
                     synchronized (mConnectionThreadStopLock) {
@@ -535,7 +537,7 @@ public class Streamer {
 
                         InputStream inputStream = connection.getInputStream();
 
-                        while (inputStream.read() != -1) {
+                        while (inputStream.read(byteData) != -1) {
                         }
 
                         if (mBufferSize > 0) {
