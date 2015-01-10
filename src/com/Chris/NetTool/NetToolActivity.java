@@ -162,6 +162,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         if (mDatagramReceiver != null) {
             mDatagramReceiver.stop();
 
+            mDatagramReceiver.setListener(null);
+
             mDatagramReceiver = null;
         }
     }
@@ -469,6 +471,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     private void restart() {
         mDatagramReceiver.stop();
+
+        mDatagramReceiver.setListener(null);
 
         mDatagramReceiver = null;
 
