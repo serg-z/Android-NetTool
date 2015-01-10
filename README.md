@@ -43,7 +43,7 @@ List available targets
 
     android list target
 
-Note the id for target (default: Android 4.4.2)
+Note the ID for target (default: Android 4.4.2)
 
 Prepare project for building
 
