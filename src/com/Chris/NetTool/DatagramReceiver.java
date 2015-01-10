@@ -7,7 +7,10 @@ import android.os.Process;
 
 import java.net.DatagramSocket;
 import java.net.DatagramPacket;
+import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+
+import java.nio.channels.DatagramChannel;
 
 import android.util.Log;
 
@@ -72,14 +75,19 @@ public class DatagramReceiver {
 
         @Override
         public void run() {
-            Log.d(TAG, "Datagram thread started");
+            Log.d(TAG, "("+ this + ") Datagram thread started");
 
             Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
             DatagramSocket socket = null;
 
             try {
-                socket = new DatagramSocket(mPort);
+                DatagramChannel channel = DatagramChannel.open();
+
+                socket = channel.socket();
+
+                socket.setReuseAddress(true);
+                socket.bind(new InetSocketAddress(mPort));
 
                 socket.setSoTimeout(10000);
 
@@ -123,7 +131,7 @@ public class DatagramReceiver {
                 }
             }
 
-            Log.d(TAG, "Datagram thread finished");
+            Log.d(TAG, "(" + this + ") Datagram thread finished");
         }
     }
 }
