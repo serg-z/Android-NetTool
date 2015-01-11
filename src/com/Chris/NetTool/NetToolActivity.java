@@ -323,6 +323,13 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentStreamer != null) {
                     fragmentStreamer.setStreamerReadTimeout(Integer.valueOf(value));
                 }
+            } else if (name.equals("ping_packet_size")) {
+                GraphsFragment fragmentGraphs = (GraphsFragment)getSupportFragmentManager()
+                    .findFragmentByTag(PagerFragment.tag_fragment_graphs);
+
+                if (fragmentGraphs != null) {
+                    fragmentGraphs.setPingPacketSize(Integer.valueOf(value));
+                }
             }
         }
 

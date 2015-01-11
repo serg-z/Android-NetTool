@@ -137,6 +137,8 @@ public class GraphsFragment extends Fragment {
     private String mPingResumeAddress;
     private boolean mPingShouldResume = false;
     private SparseIntArray mPingNoAnswer = new SparseIntArray();
+    // ping will add 8 bytes on top of that value
+    private int mPingPacketSize = 64 - 8;
 
     // cross product
     private static float cross(PointF a, PointF b) {
@@ -745,6 +747,14 @@ public class GraphsFragment extends Fragment {
         }
     }
 
+    public void setPingPacketSize(int pingPacketSize) {
+        if (pingPacketSize < 0) {
+            throw new IllegalArgumentException("Ping packet size can't be negative");
+        }
+
+        mPingPacketSize = pingPacketSize;
+    }
+
     public void pingStart(String address) {
         mPingResumeAddress = address;
 
@@ -763,9 +773,7 @@ public class GraphsFragment extends Fragment {
         if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
             mPingNoAnswer.clear();
 
-            int packetSize = 64 - 8;
-
-            mPingTask.execute(address, String.valueOf(packetSize));
+            mPingTask.execute(address, String.valueOf(mPingPacketSize));
         }
     }
 
