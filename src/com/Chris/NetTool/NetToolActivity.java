@@ -481,9 +481,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         Intent intent = getIntent();
         finish();
 
-        // wait until datagram receiver is done
-        SystemClock.sleep(10000);
-
         startActivity(intent);
     }
 }
