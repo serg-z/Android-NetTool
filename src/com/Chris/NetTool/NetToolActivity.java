@@ -448,9 +448,16 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     private void showSettings() {
         FragmentManager fragmentManager = getSupportFragmentManager();
 
+        SettingsFragment fragmentSettings = (SettingsFragment)fragmentManager
+            .findFragmentByTag(PagerFragment.tag_fragment_settings);
+
+        if (fragmentSettings.isVisible()) {
+            return;
+        }
+
         fragmentManager.beginTransaction()
             .hide(fragmentManager.findFragmentByTag(PagerFragment.tag_fragment_pager))
-            .show(fragmentManager.findFragmentByTag(PagerFragment.tag_fragment_settings))
+            .show(fragmentSettings)
             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
             .addToBackStack(null)
             .commit();
