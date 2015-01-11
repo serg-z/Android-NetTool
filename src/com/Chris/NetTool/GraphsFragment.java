@@ -968,8 +968,7 @@ public class GraphsFragment extends Fragment {
         private int mThresholdYellow;
 
         public GYRFormatter(int thresholdGreen, int thresholdYellow) {
-            // TODO: change to null
-            super(Color.TRANSPARENT, null, Color.argb(128, 100, 100, 200), null);
+            super();
 
             mThresholdGreen = thresholdGreen;
             mThresholdYellow = thresholdYellow;
