@@ -763,7 +763,9 @@ public class GraphsFragment extends Fragment {
         if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
             mPingNoAnswer.clear();
 
-            mPingTask.execute(address);
+            int packetSize = 64 - 8;
+
+            mPingTask.execute(address, String.valueOf(packetSize));
         }
     }
 
@@ -895,8 +897,9 @@ public class GraphsFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
             try {
+                // params: 0 - address, 1 - packet size
                 mProcess = new ProcessBuilder()
-                    .command("/system/bin/ping", "-i 1", "-O", params[0])
+                    .command("/system/bin/ping", "-i 1", "-s", params[1], "-O", params[0])
                     .redirectErrorStream(true)
                     .start();
 
