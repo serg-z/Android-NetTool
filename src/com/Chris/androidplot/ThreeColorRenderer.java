@@ -1,5 +1,7 @@
 package com.Chris.androidplot;
 
+import com.Chris.util.Util;
+
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -16,35 +18,6 @@ import com.androidplot.util.ValPixConverter;
 import com.androidplot.util.PixelUtils;
 
 public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter> {
-    // cross product
-    private static float cross(PointF a, PointF b) {
-        return a.x * b.y - a.y * b.x;
-    }
-
-    // intersection point of two segments (or null if segments are collinear)
-    private static PointF intersection(PointF a0, PointF a1, PointF b0, PointF b1) {
-        PointF v0 = PixelUtils.sub(a1, a0);
-        PointF v1 = PixelUtils.sub(b1, b0);
-
-        float n = cross(PixelUtils.sub(a0, b0), v1);
-        float m = cross(v1, v0);
-
-        if (Math.abs(m) < 1e-8) {
-            return null;
-        }
-
-        float u = n / m;
-
-        if (Math.abs(u) < 1e-8) {
-            return null;
-        }
-
-        v1.x *= u;
-        v1.y *= u;
-
-        return PixelUtils.add(b0, v1);
-    }
-
     private Paint mPaintLineGreen;
     private Paint mPaintLineYellow;
     private Paint mPaintLineRed;
@@ -194,7 +167,7 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
 
 
                         if (a.y < threshold && b.y >= threshold) {
-                            PointF p = intersection(
+                            PointF p = Util.intersection(
                                 new PointF(lastPoint.x, threshold), new PointF(thisPoint.x, threshold),
                                 lastPoint, thisPoint);
 
