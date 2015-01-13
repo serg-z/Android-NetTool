@@ -4,4 +4,4 @@ export JAVA_HOME=
 export NDK_HOME=
 export ANDROID_HOME=
 
-export PATH=$JAVA_HOME:$NDK_HOME:$ANDROID_HOME:"$ANDROID_HOME/../platform-tools":$PATH
+export PATH=$JAVA_HOME:$NDK_HOME:$ANDROID_HOME:"$ANDROID_HOME/../platform-tools":"$ANDROID_HOME/../build-tools/21.1.2":$PATH
