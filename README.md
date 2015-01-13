@@ -57,7 +57,35 @@ Builds can be found in "bin" directory
 
 ## Building release version
 
-*(coming soon)*
+### Install Build-tools
+
+* Run Android SDK Manager
+* Install Android SDK Build-tools 21.1.2 from Tools
+* You'll need to update "PATH" variable in `android_paths` script to use another version of Build-tools
+
+### Generate keystore with release signing key in it
+
+Make sure you're not overwriting existing keystore file (NetTool-release.keystore in current directory)
+
+Run the command:
+
+    $JAVA_HOME/bin/keytool -genkey -v -keystore NetTool-release.keystore -alias NetTool-key -keyalg RSA -keysize 2048 -validity 10000
+
+1. Enter password for keystore. You'll need it to access keys stored in it.
+2. Enter information for key.
+3. Enter password for key.
+
+**NOTE: If you plan to publish the app on Google Play, you'd like to keep your release signing key to update the app in the future. It's impossible to update the app with different key.**
+
+More information at [Signing Your App Manually](http://developer.android.com/tools/publishing/app-signing.html#signing-manually)
+
+### Build, sign and zipalign APK
+
+    ./build_release <path to keystore>
+
+*During building, at signing stage, you'll be asked for keystore password and key password (if it's different from keystore's password)*
+
+NetTool-release.apk is located in "bin" directory.
 
 # Emulator
 
