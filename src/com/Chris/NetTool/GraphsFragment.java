@@ -2,6 +2,7 @@ package com.Chris.NetTool;
 
 import com.Chris.androidplot.ThreeColorFormatter;
 import com.Chris.androidplot.LogarithmFormatter;
+import com.Chris.androidplot.LogarithmGraphWidget;
 
 import android.app.Activity;
 
@@ -604,6 +605,10 @@ public class GraphsFragment extends Fragment {
             LayoutParams.WRAP_CONTENT, 0.3f));
 
         plotsLayoutH.addView(mPlotChunkDownloadTime);
+
+        mPlotChunkDownloadTime.getLayoutManager().remove(mPlotChunkDownloadTime.getGraphWidget());
+
+        mPlotChunkDownloadTime.setGraphWidget(new LogarithmGraphWidget(mPlotChunkDownloadTime));
 
         setupPlot(mPlotChunkDownloadTime);
 
