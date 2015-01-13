@@ -1,0 +1,18 @@
+#!/bin/bash
+
+KEYSTORE_PATH=$1
+
+if [ -z "$KEYSTORE_PATH" ]; then
+    echo "Please, specify keystore path in the first argument"
+
+    exit
+fi
+
+./update_git_version \
+    && ndk-build NDK_DEBUG=0 \
+    && ant release \
+    && echo "Signing with $KEYSTORE_PATH" \
+    && $JAVA_HOME/bin/jarsigner -sigalg SHA1withRSA -digestalg SHA1 \
+        -keystore $1 bin/NetTool-release-unsigned.apk NetTool-key \
+    && mv bin/NetTool-release-unsigned.apk bin/NetTool-release-signed.apk \
+    && zipalign 4 bin/NetTool-release-signed.apk bin/NetTool-release.apk
