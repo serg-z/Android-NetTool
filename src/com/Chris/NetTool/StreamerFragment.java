@@ -1,5 +1,7 @@
 package com.Chris.NetTool;
 
+import com.Chris.util.Util;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 
@@ -19,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 
 import android.media.MediaPlayer;
+import android.media.ToneGenerator;
 
 import android.text.InputType;
 
@@ -554,6 +557,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         onStreamerDownloadingProgressChanged(0);
 
         setUIState(UIState.READY_TO_PLAY);
+
+        Util.playTone(mActivity, ToneGenerator.TONE_CDMA_PRESSHOLDKEY_LITE, 200);
 
         if (mStreamerFragmentCallback != null) {
             mStreamerFragmentCallback.onStreamerFragmentFailed();
