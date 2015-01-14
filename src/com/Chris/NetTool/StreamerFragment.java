@@ -587,6 +587,10 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onStreamerChunkDownloadTime(long time) {
+        if (mStreamer != null && mStreamer.getBufferDepth() < 65) {
+            Util.playTone(mActivity, ToneGenerator.TONE_CDMA_NETWORK_CALLWAITING, 200);
+        }
+
         if (mStreamerFragmentCallback != null) {
             mStreamerFragmentCallback.onStreamerFragmentChunkDownloadTime(time);
         }
