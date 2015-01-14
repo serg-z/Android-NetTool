@@ -547,7 +547,7 @@ public class GraphsFragment extends Fragment {
 
         mPlotRxTx.setRangeLabel("Mbps");
 
-        mPlotRxTx.setRangeBoundaries(0, Math.log10(24), BoundaryMode.FIXED);
+        mPlotRxTx.setRangeBoundaries(0, Math.log10(50), BoundaryMode.FIXED);
 
         // streamer plot
 
