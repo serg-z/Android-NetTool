@@ -3,7 +3,6 @@ package com.Chris.NetTool;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.CountDownTimer;
-import android.os.SystemClock;
 
 import android.content.Context;
 import android.content.Intent;
