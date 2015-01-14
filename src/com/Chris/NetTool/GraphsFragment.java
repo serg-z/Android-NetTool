@@ -1,6 +1,8 @@
 package com.Chris.NetTool;
 
 import com.Chris.androidplot.ThreeColorFormatter;
+import com.Chris.androidplot.LogarithmFormatter;
+import com.Chris.androidplot.LogarithmGraphWidget;
 
 import android.app.Activity;
 
@@ -534,14 +536,18 @@ public class GraphsFragment extends Fragment {
 
         plotsLayoutH.addView(mPlotRxTx);
 
+        mPlotRxTx.getLayoutManager().remove(mPlotRxTx.getGraphWidget());
+
+        mPlotRxTx.setGraphWidget(new LogarithmGraphWidget(mPlotRxTx));
+
         setupPlot(mPlotRxTx, false);
 
-        mSeriesRx = addSeries(mPlotRxTx, "Rx", Color.BLUE, Color.argb(128, 100, 100, 200));
-        mSeriesTx = addSeries(mPlotRxTx, "Tx", Color.RED, Color.argb(128, 200, 100, 100));
+        mSeriesRx = addSeries(mPlotRxTx, "Rx", new LogarithmFormatter(Color.BLUE, Color.argb(128, 100, 100, 200)));
+        mSeriesTx = addSeries(mPlotRxTx, "Tx", new LogarithmFormatter(Color.RED, Color.argb(128, 200, 100, 100)));
 
         mPlotRxTx.setRangeLabel("Mbps");
-        // TODO: change to 0-40 on logarithmic scale
-        mPlotRxTx.setRangeBoundaries(0, 24, BoundaryMode.FIXED);
+
+        mPlotRxTx.setRangeBoundaries(0, Math.log10(24), BoundaryMode.FIXED);
 
         // streamer plot
 
@@ -604,12 +610,16 @@ public class GraphsFragment extends Fragment {
 
         plotsLayoutH.addView(mPlotChunkDownloadTime);
 
+        mPlotChunkDownloadTime.getLayoutManager().remove(mPlotChunkDownloadTime.getGraphWidget());
+
+        mPlotChunkDownloadTime.setGraphWidget(new LogarithmGraphWidget(mPlotChunkDownloadTime));
+
         setupPlot(mPlotChunkDownloadTime);
 
-        addSeries(mPlotChunkDownloadTime, "", Color.BLUE, Color.argb(128, 100, 100, 200));
+        addSeries(mPlotChunkDownloadTime, "", new LogarithmFormatter(Color.BLUE, Color.argb(128, 100, 100, 200)));
 
         mPlotChunkDownloadTime.setRangeLabel("ms");
-        mPlotChunkDownloadTime.setRangeBoundaries(0, 2000, BoundaryMode.FIXED);
+        mPlotChunkDownloadTime.setRangeBoundaries(0, Math.log10(2000), BoundaryMode.FIXED);
 
         return layout;
     }
