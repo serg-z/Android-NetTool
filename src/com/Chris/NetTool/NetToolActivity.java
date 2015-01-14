@@ -32,11 +32,17 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     private static final String TAG = "NetToolActivity";
 
+    private static boolean sBeepEnabled = false;
+
     private PowerManager.WakeLock mWakeLock = null;
     private DatagramReceiver mDatagramReceiver = null;
     private WifiManager.WifiLock mWifiLock = null;
     private WifiManager.MulticastLock mMulticastLock = null;
     private CountDownTimer mCountDownTimerStreamerStart = null;
+
+    static public boolean getBeepEnabled() {
+        return sBeepEnabled;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -329,6 +335,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
                 if (fragmentGraphs != null) {
                     fragmentGraphs.setPingPacketSize(Integer.valueOf(value));
                 }
+            } else if (name.equals("beeping_enabled")) {
+                sBeepEnabled = value.equals("true");
             }
         }
 

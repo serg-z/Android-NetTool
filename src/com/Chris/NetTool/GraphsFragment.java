@@ -209,7 +209,9 @@ public class GraphsFragment extends Fragment {
         addValueToPlotSeries(mPlotLinkSpeed, linkSpeed);
 
         if (linkSpeed < 10) {
-            Util.playTone(mActivity, ToneGenerator.TONE_CDMA_NETWORK_BUSY, 200);
+            if (NetToolActivity.getBeepEnabled()) {
+                Util.playTone(mActivity, ToneGenerator.TONE_CDMA_NETWORK_BUSY, 200);
+            }
         }
 
         if (mPlotRxTx != null) {
