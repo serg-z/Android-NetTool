@@ -2,12 +2,17 @@ package com.Chris.util;
 
 import android.app.Activity;
 
+import android.os.SystemClock;
+
 import android.graphics.PointF;
 
 import android.content.Context;
 
 import android.media.ToneGenerator;
 import android.media.AudioManager;
+
+import java.lang.Thread;
+import java.lang.Runnable;
 
 import com.androidplot.util.PixelUtils;
 
@@ -43,14 +48,24 @@ public final class Util {
         return PixelUtils.add(b0, v1);
     }
 
-    public static void playTone(Activity activity, int toneType, int durationMs) {
-        AudioManager audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
+    public static void playTone(final Activity activity, final int toneType, final int durationMs) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                AudioManager audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
 
-        final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
-        final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
-        final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
+                final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+                final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+                final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
 
-        new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume)
-            .startTone(toneType, durationMs);
+                ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume);
+
+                toneGenerator.startTone(toneType, durationMs);
+
+                SystemClock.sleep(durationMs + 100);
+
+                toneGenerator.release();
+            }
+        }).start();
     }
 }
