@@ -1,5 +1,7 @@
 package com.Chris.NetTool;
 
+import com.Chris.util.Util;
+
 import com.Chris.androidplot.ThreeColorFormatter;
 import com.Chris.androidplot.LogarithmFormatter;
 import com.Chris.androidplot.LogarithmGraphWidget;
@@ -23,6 +25,8 @@ import android.view.ViewGroup;
 import android.content.Context;
 
 import android.content.res.Configuration;
+
+import android.media.ToneGenerator;
 
 import android.net.DhcpInfo;
 import android.net.TrafficStats;
@@ -203,6 +207,10 @@ public class GraphsFragment extends Fragment {
 
         addValueToPlotSeries(mPlotRssi, rssi);
         addValueToPlotSeries(mPlotLinkSpeed, linkSpeed);
+
+        if (linkSpeed < 10) {
+            Util.playTone(mActivity, ToneGenerator.TONE_CDMA_NETWORK_BUSY, 200);
+        }
 
         if (mPlotRxTx != null) {
             addValueToSeries(mSeriesRx, rxPerSec);
