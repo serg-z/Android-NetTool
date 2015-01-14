@@ -619,7 +619,7 @@ public class GraphsFragment extends Fragment {
         addSeries(mPlotChunkDownloadTime, "", new LogarithmFormatter(Color.BLUE, Color.argb(128, 100, 100, 200)));
 
         mPlotChunkDownloadTime.setRangeLabel("ms");
-        mPlotChunkDownloadTime.setRangeBoundaries(0, Math.log10(2000), BoundaryMode.FIXED);
+        mPlotChunkDownloadTime.setRangeBoundaries(0, Math.log10(4000), BoundaryMode.FIXED);
 
         return layout;
     }
