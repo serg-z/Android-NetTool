@@ -155,6 +155,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         layoutH.addView(mCheckBoxRepeat);
 
         mCheckBoxRepeat.setText("Repeat");
+        mCheckBoxRepeat.setChecked(true);
 
         //
 
