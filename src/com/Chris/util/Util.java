@@ -1,6 +1,13 @@
 package com.Chris.util;
 
+import android.app.Activity;
+
 import android.graphics.PointF;
+
+import android.content.Context;
+
+import android.media.ToneGenerator;
+import android.media.AudioManager;
 
 import com.androidplot.util.PixelUtils;
 
@@ -34,5 +41,16 @@ public final class Util {
         v1.y *= u;
 
         return PixelUtils.add(b0, v1);
+    }
+
+    public static void playTone(Activity activity, int toneType, int durationMs) {
+        AudioManager audioManager = (AudioManager)activity.getSystemService(Context.AUDIO_SERVICE);
+
+        final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
+        final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
+        final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
+
+        new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume)
+            .startTone(toneType, durationMs);
     }
 }
