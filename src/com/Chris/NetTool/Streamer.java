@@ -80,6 +80,8 @@ public class Streamer {
     private boolean mStoppedByUser = false;
     private boolean mConnectionThreadRandomSeek = false;
     private boolean mPaused = false;
+    // TODO: encapsulate it into StreamerBuffer
+    private int mBufferDepth = 0;
 
     private Handler mTimerHandler = new Handler();
 
@@ -109,6 +111,8 @@ public class Streamer {
                     if (mStreamerListener != null) {
                         if (mStoppedByUser) {
                             mStreamerBuffer.clear(true);
+
+                            mBufferDepth = 0;
                         } else {
                             mStreamerListener.onStreamerDownloadingFinished();
                         }
@@ -140,9 +144,11 @@ public class Streamer {
                         int bufferSize = (Integer)inputMessage.obj;
                         int load = (int)((float)(bufferSize * 100) / mBufferCapacity);
 
-                        Log.d(TAG, String.format("Buffer load: %d%%", load));
+                        mBufferDepth = load;
 
-                        mStreamerListener.onStreamerBufferDepthChanged(load);
+                        Log.d(TAG, String.format("Buffer load: %d%%", mBufferDepth));
+
+                        mStreamerListener.onStreamerBufferDepthChanged(mBufferDepth);
 
                         // stop streamer and notify if
                         // buffer is empty and downloading is finished
@@ -157,6 +163,8 @@ public class Streamer {
 
                 case STREAM_DOWNLOADING_FAILED:
                     mStreamerBuffer.clear(true);
+
+                    mBufferDepth = 0;
 
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamerDownloadingFailed();
@@ -225,6 +233,8 @@ public class Streamer {
     public void randomSeek() {
         if (mBufferSize > 0) {
             mStreamerBuffer.clear(false);
+
+            mBufferDepth = 0;
         }
 
         if (mConnectionThread == null) {
@@ -269,6 +279,8 @@ public class Streamer {
             mTimerHandler.removeCallbacks(mTimerRunnable);
 
             mStreamerBuffer.clear(true);
+
+            mBufferDepth = 0;
         }
     }
 
@@ -290,6 +302,10 @@ public class Streamer {
 
     public int getBufferCapacity() {
         return mBufferCapacity;
+    }
+
+    public int getBufferDepth() {
+        return mBufferDepth;
     }
 
     private void setConnectionThreadPaused(boolean paused) {
