@@ -1,7 +1,6 @@
 package com.Chris.NetTool;
 
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.os.CountDownTimer;
 
 import android.content.Context;
@@ -34,7 +33,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     private static boolean sBeepEnabled = false;
 
-    private PowerManager.WakeLock mWakeLock = null;
     private DatagramReceiver mDatagramReceiver = null;
     private WifiManager.WifiLock mWifiLock = null;
     private WifiManager.MulticastLock mMulticastLock = null;
@@ -55,6 +53,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (savedInstanceState == null) {
             PagerFragment fragmentPager = new PagerFragment();
@@ -81,11 +80,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         super.onStart();
 
         Log.d(TAG, "Started");
-
-        mWakeLock = ((PowerManager)getSystemService(Context.POWER_SERVICE))
-            .newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, getClass().getName());
-
-        mWakeLock.acquire();
 
         // acquire wifi lock
         mWifiLock = ((WifiManager)getSystemService(Context.WIFI_SERVICE))
@@ -144,12 +138,6 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         super.onStop();
 
         Log.d(TAG, "Stop");
-
-        if (mWakeLock != null) {
-            mWakeLock.release();
-
-            mWakeLock = null;
-        }
 
         if (mWifiLock != null) {
             mWifiLock.release();
