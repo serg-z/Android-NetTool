@@ -2,6 +2,7 @@ package com.Chris.NetTool;
 
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     StreamerFragment.StreamerFragmentListener {
 
     private static final String TAG = "NetToolActivity";
+    private static final int sDimDelay = 30000;
 
     private static boolean sBeepEnabled = false;
 
@@ -37,6 +39,26 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     private WifiManager.WifiLock mWifiLock = null;
     private WifiManager.MulticastLock mMulticastLock = null;
     private CountDownTimer mCountDownTimerStreamerStart = null;
+    private boolean mBrightnessIsDefault = true;
+
+    private Handler mTimerHandler = new Handler();
+
+    private Runnable mTimerRunnableDim = new Runnable() {
+        @Override
+        public void run() {
+            WindowManager.LayoutParams attr = getWindow().getAttributes();
+
+            // set brightness to minimum value
+            attr.screenBrightness = 0.0f;
+
+            getWindow().setAttributes(attr);
+
+            mBrightnessIsDefault = false;
+
+            // queue this runnable to be run again
+            mTimerHandler.postDelayed(this, sDimDelay);
+        }
+    };
 
     static public boolean getBeepEnabled() {
         return sBeepEnabled;
@@ -122,6 +144,10 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         if (fragmentSettings != null) {
             fragmentSettings.pingLog(stats);
         }
+
+        // start dim runnable which will dim the display if there is no user interaction for defined period of time
+
+        mTimerHandler.postDelayed(mTimerRunnableDim, sDimDelay);
     }
 
     @Override
@@ -164,6 +190,10 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
             mDatagramReceiver = null;
         }
+
+        // don't run dim runnable while the app is in background
+
+        mTimerHandler.removeCallbacks(mTimerRunnableDim);
     }
 
     @Override
@@ -171,6 +201,27 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         super.onDestroy();
 
         Log.d(TAG, "Destroy, finishing=" + isFinishing());
+    }
+
+    @Override
+    public void onUserInteraction() {
+        // restart dim timer
+
+        mTimerHandler.removeCallbacks(mTimerRunnableDim);
+        mTimerHandler.postDelayed(mTimerRunnableDim, sDimDelay);
+
+        // put the brightness back to default value
+
+        if (!mBrightnessIsDefault) {
+            WindowManager.LayoutParams attr = getWindow().getAttributes();
+
+            // using value less than 0 will put brightness into using preferred value mode
+            attr.screenBrightness = -1.0f;
+
+            getWindow().setAttributes(attr);
+
+            mBrightnessIsDefault = true;
+        }
     }
 
     @Override
