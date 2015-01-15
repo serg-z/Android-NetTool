@@ -53,7 +53,12 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        getWindow().addFlags(
+              WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+        );
 
         if (savedInstanceState == null) {
             PagerFragment fragmentPager = new PagerFragment();
