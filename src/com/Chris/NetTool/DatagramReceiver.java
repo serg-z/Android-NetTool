@@ -21,8 +21,8 @@ public class DatagramReceiver {
         public void onDatagramReceived(String datagramMessage);
     }
 
-    private enum MessageId {
-        RECEIVED
+    private static final class MessageId {
+        public static final int RECEIVED = 1;
     }
 
     private Thread mDatagramThread = null;
@@ -31,10 +31,10 @@ public class DatagramReceiver {
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
-            final MessageId messageId = MessageId.values()[inputMessage.what];
+            final int messageId = inputMessage.what;
 
             switch (messageId) {
-                case RECEIVED:
+                case MessageId.RECEIVED:
                     String datagramMessage = (String)inputMessage.obj;
 
                     Log.d(TAG, "Datagram received: " + datagramMessage);
@@ -118,7 +118,7 @@ public class DatagramReceiver {
 
                     String dataString = new String(packet.getData(), "UTF-8").trim();
 
-                    mHandler.obtainMessage(MessageId.RECEIVED.ordinal(), dataString)
+                    mHandler.obtainMessage(MessageId.RECEIVED, dataString)
                         .sendToTarget();
 
                     Log.d(TAG, "** DATAGRAM END OF LOOP");
