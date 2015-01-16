@@ -41,14 +41,16 @@ public class Streamer {
         }
     }
 
-    private enum MessageId {
-        STREAM_DOWNLOADING_STARTED,
-        STREAM_DOWNLOADING_FINISHED,
-        STREAM_DOWNLOADING_PROGRESS,
-        DEPTH_BUFFER_SIZE_CHANGED,
-        STREAM_DOWNLOADING_FAILED,
-        STREAM_CHUNK_TIME_OF_ARRIVAL,
-        STREAM_RANDOM_SEEK_COMPLETED
+    private static final class MessageId {
+        private MessageId() {}
+
+        public static final int STREAM_DOWNLOADING_STARTED    = 1;
+        public static final int STREAM_DOWNLOADING_FINISHED   = 2;
+        public static final int STREAM_DOWNLOADING_PROGRESS   = 3;
+        public static final int DEPTH_BUFFER_SIZE_CHANGED     = 4;
+        public static final int STREAM_DOWNLOADING_FAILED     = 5;
+        public static final int STREAM_CHUNK_TIME_OF_ARRIVAL  = 6;
+        public static final int STREAM_RANDOM_SEEK_COMPLETED  = 7;
     }
 
     private final URL mUrl;
@@ -97,17 +99,17 @@ public class Streamer {
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
-            final MessageId messageId = MessageId.values()[inputMessage.what];
+            final int messageId = inputMessage.what;
 
             switch (messageId) {
-                case STREAM_DOWNLOADING_STARTED:
+                case MessageId.STREAM_DOWNLOADING_STARTED:
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamerDownloadingStarted();
                     }
 
                     break;
 
-                case STREAM_DOWNLOADING_FINISHED:
+                case MessageId.STREAM_DOWNLOADING_FINISHED:
                     if (mStreamerListener != null) {
                         if (mStoppedByUser) {
                             mStreamerBuffer.clear(true);
@@ -127,7 +129,7 @@ public class Streamer {
 
                     break;
 
-                case STREAM_DOWNLOADING_PROGRESS:
+                case MessageId.STREAM_DOWNLOADING_PROGRESS:
                     if (mStreamerListener != null) {
                         if (!mStoppedByUser)
                         {
@@ -139,7 +141,7 @@ public class Streamer {
 
                     break;
 
-                case DEPTH_BUFFER_SIZE_CHANGED:
+                case MessageId.DEPTH_BUFFER_SIZE_CHANGED:
                     if (mStreamerListener != null) {
                         int bufferSize = (Integer)inputMessage.obj;
                         int load = (int)((float)(bufferSize * 100) / mBufferCapacity);
@@ -161,7 +163,7 @@ public class Streamer {
 
                     break;
 
-                case STREAM_DOWNLOADING_FAILED:
+                case MessageId.STREAM_DOWNLOADING_FAILED:
                     mStreamerBuffer.clear(true);
 
                     mBufferDepth = 0;
@@ -172,7 +174,7 @@ public class Streamer {
 
                     break;
 
-                case STREAM_CHUNK_TIME_OF_ARRIVAL:
+                case MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL:
                     if (mStreamerListener != null) {
                         long time = (Long)inputMessage.obj;
 
@@ -181,7 +183,7 @@ public class Streamer {
 
                     break;
 
-                case STREAM_RANDOM_SEEK_COMPLETED:
+                case MessageId.STREAM_RANDOM_SEEK_COMPLETED:
                     if (mStreamerListener != null) {
                         mStreamerListener.onStreamerRandomSeekCompleted();
                     }
@@ -350,7 +352,7 @@ public class Streamer {
 
             Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
 
-            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), mSize)
+            mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED, mSize)
                 .sendToTarget();
         }
 
@@ -368,7 +370,7 @@ public class Streamer {
             Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
 
             if (sendMessage) {
-                mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED.ordinal(), mSize)
+                mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED, mSize)
                     .sendToTarget();
             }
 
@@ -476,7 +478,7 @@ public class Streamer {
 
                         // send "random seek completed" message to Stream instance
 
-                        mHandler.obtainMessage(MessageId.STREAM_RANDOM_SEEK_COMPLETED.ordinal(), null)
+                        mHandler.obtainMessage(MessageId.STREAM_RANDOM_SEEK_COMPLETED, null)
                             .sendToTarget();
                     }
 
@@ -520,14 +522,14 @@ public class Streamer {
 
                                 // send "stream started" message to Stream instance
 
-                                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED.ordinal(), null)
+                                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED, null)
                                     .sendToTarget();
 
                                 // send "chunk time of arrival" message
 
                                 time = SystemClock.elapsedRealtime() - time;
 
-                                mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL.ordinal(), time)
+                                mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL, time)
                                     .sendToTarget();
 
                                 continue;
@@ -576,14 +578,14 @@ public class Streamer {
 
                         // send "streaming downloading progress" message to Stream instance
 
-                        mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_PROGRESS.ordinal(), streamingProgress)
+                        mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_PROGRESS, streamingProgress)
                             .sendToTarget();
 
                         // send "chunk time of arrival" message
 
                         time = SystemClock.elapsedRealtime() - time;
 
-                        mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL.ordinal(), time)
+                        mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL, time)
                             .sendToTarget();
 
                         Log.d(TAG, "=====");
@@ -596,7 +598,7 @@ public class Streamer {
 
                 Log.d(TAG, ">> Connection thread failed");
 
-                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED.ordinal(), null)
+                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED, null)
                     .sendToTarget();
 
                 return;
@@ -604,7 +606,7 @@ public class Streamer {
 
             Log.d(TAG, ">> Connection thread finished");
 
-            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FINISHED.ordinal(), null)
+            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FINISHED, null)
                 .sendToTarget();
         }
     }
