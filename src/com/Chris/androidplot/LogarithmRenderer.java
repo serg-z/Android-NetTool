@@ -14,14 +14,14 @@ import com.androidplot.xy.LineAndPointRenderer;
 import com.androidplot.util.ValPixConverter;
 
 public class LogarithmRenderer extends LineAndPointRenderer<LogarithmFormatter> {
+    private Path mPath = new Path();
+
     public LogarithmRenderer(XYPlot plot) {
         super(plot);
     }
 
     @Override
     protected void drawSeries(Canvas canvas, RectF plotArea, XYSeries series, LineAndPointFormatter formatter) {
-        Path path = null;
-
         PointF thisPoint, firstPoint = null, lastPoint = null;
 
         Paint linePaint = formatter.getLinePaint();
@@ -53,19 +53,17 @@ public class LogarithmRenderer extends LineAndPointRenderer<LogarithmFormatter> 
                 if (firstPoint == null) {
                     firstPoint = thisPoint;
 
-                    path = new Path();
-
-                    path.moveTo(firstPoint.x, firstPoint.y);
+                    mPath.moveTo(firstPoint.x, firstPoint.y);
                 }
 
                 if (lastPoint != null) {
-                    appendToPath(path, thisPoint, lastPoint);
+                    appendToPath(mPath, thisPoint, lastPoint);
                 }
 
                 lastPoint = thisPoint;
             } else {
                 if (lastPoint != null) {
-                    renderPath(canvas, plotArea, path, firstPoint, lastPoint, formatter);
+                    renderPath(canvas, plotArea, mPath, firstPoint, lastPoint, formatter);
                 }
 
                 firstPoint = null;
@@ -74,7 +72,8 @@ public class LogarithmRenderer extends LineAndPointRenderer<LogarithmFormatter> 
         }
 
         if (firstPoint != null) {
-            renderPath(canvas, plotArea, path, firstPoint, lastPoint, formatter);
+            // mPath will be rewinded at the end of "renderPath"
+            renderPath(canvas, plotArea, mPath, firstPoint, lastPoint, formatter);
         }
     }
 }
