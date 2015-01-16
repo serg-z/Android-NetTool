@@ -127,6 +127,17 @@ public class PagerFragment extends Fragment {
                 .add(android.R.id.content, fragmentSettings, tag_fragment_settings)
                 .hide(fragmentSettings)
                 .commit();
+        } else {
+            // hide settings fragment
+
+            SettingsFragment fragmentSettings = (SettingsFragment)((FragmentActivity)mActivity).getSupportFragmentManager()
+                .findFragmentByTag(tag_fragment_settings);
+
+            if (fragmentSettings != null) {
+                ((FragmentActivity)mActivity).getSupportFragmentManager().beginTransaction()
+                    .hide(fragmentSettings)
+                    .commit();
+            }
         }
 
         return layout;
