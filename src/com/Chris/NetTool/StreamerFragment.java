@@ -50,11 +50,14 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
     private static final String TAG = "StreamerFragment";
 
-    private enum UIState {
-        EVERYTHING_DISABLED,
-        READY_TO_PLAY,
-        PLAYING,
-        PAUSED
+
+    private static final class UIState {
+        private UIState () {}
+
+        public static final int EVERYTHING_DISABLED = 1;
+        public static final int READY_TO_PLAY       = 2;
+        public static final int PLAYING             = 3;
+        public static final int PAUSED              = 4;
     }
 
     private Activity mActivity;
@@ -279,9 +282,9 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         mVideoIsPaused = false;
     }
 
-    private void setUIState(UIState state) {
+    private void setUIState(int state) {
         switch (state) {
-            case EVERYTHING_DISABLED:
+            case UIState.EVERYTHING_DISABLED:
                 mButtonPlay.setEnabled(false);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
@@ -298,7 +301,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 break;
 
-            case READY_TO_PLAY:
+            case UIState.READY_TO_PLAY:
                 mButtonPlay.setEnabled(true);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
@@ -315,7 +318,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 break;
 
-            case PLAYING:
+            case UIState.PLAYING:
                 mButtonPlay.setEnabled(false);
                 mButtonPause.setEnabled(true);
                 mButtonStop.setEnabled(true);
@@ -342,7 +345,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 break;
 
-            case PAUSED:
+            case UIState.PAUSED:
                 mButtonPlay.setEnabled(true);
                 mButtonPause.setEnabled(false);
                 mButtonStop.setEnabled(false);
