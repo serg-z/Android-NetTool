@@ -31,7 +31,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     StreamerFragment.StreamerFragmentListener {
 
     private static final String TAG = "NetToolActivity";
-    private static final int sDimDelay = 30000;
+    // delay before screen will go to lowered brightness (5 minutes in milliseconds)
+    private static final int sDimDelay = 5 * 60 * 1000;
 
     private static boolean sBeepEnabled = false;
 
@@ -48,8 +49,8 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
         public void run() {
             WindowManager.LayoutParams attr = getWindow().getAttributes();
 
-            // set brightness to minimum value
-            attr.screenBrightness = 0.0f;
+            // set brightness to minimum value (20%)
+            attr.screenBrightness = 0.2f;
 
             getWindow().setAttributes(attr);
 
