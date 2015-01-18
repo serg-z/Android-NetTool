@@ -210,7 +210,7 @@ public class GraphsFragment extends Fragment {
 
         if (linkSpeed < 10) {
             if (NetToolActivity.getBeepEnabled()) {
-                Util.playTone(mActivity, ToneGenerator.TONE_CDMA_NETWORK_BUSY, 200);
+                Util.playTone(mActivity, ToneGenerator.TONE_CDMA_ANSWER, 200);
             }
         }
 
