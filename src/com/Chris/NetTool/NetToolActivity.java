@@ -25,6 +25,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 import java.util.Random;
+import java.util.List;
+import java.util.ArrayList;
 
 public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener,
@@ -41,6 +43,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
     private WifiManager.MulticastLock mMulticastLock = null;
     private CountDownTimer mCountDownTimerStreamerStart = null;
     private boolean mBrightnessIsDefault = true;
+    private List<Integer> mDatagramIds = new ArrayList<Integer>();
 
     private Handler mTimerHandler = new Handler();
 
@@ -270,6 +273,41 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
     @Override
     public void onDatagramReceived(String datagramMessage) {
+        // search for message id
+        for (String line : datagramMessage.split("\n")) {
+            final String[] lineArray = line.trim().split("=");
+
+            if (lineArray.length != 2) {
+                Log.d(TAG, "Erroneous line: " + line);
+
+                continue;
+            }
+
+            final String name = lineArray[0];
+            final String value = lineArray[1];
+
+            if (name.equals("message_id")) {
+                final int message_id = Integer.valueOf(value);
+
+                // ignore "-1" ID
+                if (message_id == -1) {
+                    break;
+                }
+
+                // reject the message if it's already added to the list
+                if (mDatagramIds.contains(message_id)) {
+                    Log.d(TAG, "Datagram ID is already recorded: " + message_id);
+
+                    return;
+                }
+
+                // add the message to the list and proceed with it
+                mDatagramIds.add(message_id);
+
+                break;
+            }
+        }
+
         Toast.makeText(this, "DATAGRAM:\n" + datagramMessage, Toast.LENGTH_SHORT).show();
 
         AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
