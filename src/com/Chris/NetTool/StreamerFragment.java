@@ -67,7 +67,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     private Slider mSliderBitrate, mSliderBufferSize, mSliderChunkSize;
     private VerticalProgressBar mProgressBarBufferDepth;
     private boolean mVideoIsPaused = false;
-    private CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView;
+    private CheckBox mCheckBoxRepeat, mCheckBoxUseVideoView, mCheckBoxWholeRange;
     private TextView mTextStatus;
     private LinearLayout mLayoutLeft;
 
@@ -187,6 +187,21 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
         //
 
+        layoutH = new LinearLayout(mActivity);
+
+        layoutH.setOrientation(LinearLayout.HORIZONTAL);
+        layoutH.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        mLayoutLeft.addView(layoutH);
+
+        mCheckBoxWholeRange = new CheckBox(mActivity);
+
+        layoutH.addView(mCheckBoxWholeRange);
+
+        mCheckBoxWholeRange.setText("Request Whole Range of Data");
+
+        //
+
         mSliderBitrate = new Slider(mActivity);
 
         mSliderBitrate.setLabel("Bitrate (Kbps)");
@@ -292,6 +307,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(false);
+                mCheckBoxWholeRange.setEnabled(false);
 
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
@@ -309,6 +325,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 mCheckBoxUseVideoView.setEnabled(true);
                 mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxWholeRange.setEnabled(true);
 
                 mSliderBitrate.setEnabled(true);
                 mSliderBufferSize.setEnabled(true);
@@ -326,6 +343,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxWholeRange.setEnabled(false);
 
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
@@ -353,6 +371,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
                 mCheckBoxUseVideoView.setEnabled(false);
                 mCheckBoxRepeat.setEnabled(true);
+                mCheckBoxWholeRange.setEnabled(false);
 
                 mSliderBitrate.setEnabled(false);
                 mSliderBufferSize.setEnabled(false);
@@ -453,8 +472,8 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
                         mStreamer = null;
                     }
 
-                    mStreamer = new Streamer(url, bitrate, chunkSize, bufferSize, mStreamerConnectTimeout,
-                        mStreamerReadTimeout);
+                    mStreamer = new Streamer(url, mCheckBoxWholeRange.isChecked() ? 0 : bitrate, chunkSize,
+                        bufferSize, mStreamerConnectTimeout, mStreamerReadTimeout);
 
                     mStreamer.setStreamerListener(this);
                 }
