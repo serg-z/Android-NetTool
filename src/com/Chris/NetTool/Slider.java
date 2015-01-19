@@ -115,6 +115,7 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
 
         // step labels
 
+        /*
         if (isStepEffective()) {
             x = getThumbOffset();
 
@@ -133,6 +134,7 @@ public class Slider extends SeekBar implements SeekBar.OnSeekBarChangeListener {
                 x += interval;
             }
         }
+        */
     }
 
     @Override
