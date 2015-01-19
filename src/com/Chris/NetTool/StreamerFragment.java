@@ -206,7 +206,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
 
         mSliderBitrate.setLabel("Bitrate (Kbps)");
         mSliderBitrate.setMin(400);
-        mSliderBitrate.setMax(1600);
+        mSliderBitrate.setMax(5000);
         mSliderBitrate.setStep(100);
 
         mSliderBitrate.setAdjustedProgress(1300);
