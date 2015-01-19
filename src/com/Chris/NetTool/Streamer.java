@@ -199,8 +199,15 @@ public class Streamer {
     public Streamer(URL url, int bitrate, int chunkSize, int bufferSize, int connectTimeout, int readTimeout) {
         mUrl = url;
         mBitrate = bitrate;
-        mChunkSize = chunkSize;
-        mBufferSize = bufferSize;
+
+        // if bitrate equals to 0 then we're downloading whole range of data and there's no need in chunk and buffer
+        if (mBitrate == 0) {
+            mChunkSize = 0;
+            mBufferSize = 0;
+        } else {
+            mChunkSize = chunkSize;
+            mBufferSize = bufferSize;
+        }
 
         mDataSizePerSecond = mBitrate * (1000 / 8);
         mChunkDataSize = mDataSizePerSecond * mChunkSize;
@@ -501,16 +508,33 @@ public class Streamer {
                             rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
                         }
 
-                        Log.d(TAG, String.format("Requesting %d-%d (bytes: %d)", rangeFrom, rangeTo,
-                            rangeTo - rangeFrom + 1));
+                        // request whole range of data if the bitrate equals to 0
+                        boolean wholeRange = mBitrate == 0;
+
+                        if (wholeRange) {
+                            Log.d(TAG, "Requesting whole range");
+                        } else {
+                            Log.d(TAG, String.format("Requesting %d-%d (bytes: %d)",
+                                rangeFrom, rangeTo, rangeTo - rangeFrom + 1));
+                        }
 
                         connection.setChunkedStreamingMode(0);
 
                         connection.setRequestProperty("Accept-Encoding", "identity");
                         connection.setRequestProperty("Cache-Control", "max-age=0");
-                        connection.setRequestProperty("Range", "bytes=" + rangeFrom + "-" + rangeTo);
 
-                        if (contentSize == -1) {
+                        if (wholeRange) {
+                            connection.setRequestProperty("Range", "bytes=0-");
+                        } else {
+                            connection.setRequestProperty("Range", "bytes=" + rangeFrom + "-" + rangeTo);
+                        }
+
+                        if (wholeRange) {
+                            // send "stream started" message to Stream instance
+
+                            mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED, null)
+                                .sendToTarget();
+                        } else if (contentSize == -1) {
                             time = SystemClock.elapsedRealtime();
 
                             String[] sp = connection.getHeaderField("Content-Range").split("/");
@@ -542,21 +566,25 @@ public class Streamer {
 
                         time = SystemClock.elapsedRealtime();
 
-                        Matcher m = Pattern.compile("bytes\\s(\\d+)-(\\d+).*")
-                            .matcher(connection.getHeaderField("Content-Range"));
+                        int receivedSize;
 
-                        int receivedSize = 0;
-
-                        if (m.matches()) {
-                            int receivedFrom = Integer.valueOf(m.group(1));
-                            int receivedTo = Integer.valueOf(m.group(2));
-
-                            receivedSize = receivedTo - receivedFrom + 1;
-
-                            Log.d(TAG, String.format("Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
-                                receivedSize));
+                        if (wholeRange) {
+                            receivedSize = 0;
                         } else {
-                            throw new InvalidContentSizeException("Can't obtain content size");
+                            Matcher m = Pattern.compile("bytes\\s(\\d+)-(\\d+).*")
+                                .matcher(connection.getHeaderField("Content-Range"));
+
+                            if (m.matches()) {
+                                int receivedFrom = Integer.valueOf(m.group(1));
+                                int receivedTo = Integer.valueOf(m.group(2));
+
+                                receivedSize = receivedTo - receivedFrom + 1;
+
+                                Log.d(TAG, String.format("Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
+                                    receivedSize));
+                            } else {
+                                throw new InvalidContentSizeException("Can't obtain content size");
+                            }
                         }
 
                         Log.d(TAG, "** STREAMER: READING DATA");
@@ -566,15 +594,22 @@ public class Streamer {
                         while (inputStream.read(byteData) != -1) {
                         }
 
+                        // buffer size will be 0 if the Streamer set to request whole range
                         if (mBufferSize > 0) {
                             mStreamerBuffer.put(receivedSize);
                         }
 
                         Log.d(TAG, "** STREAMER: FINISHED READING DATA");
 
-                        totalReceivedSize += receivedSize;
+                        int streamingProgress;
 
-                        int streamingProgress = (int)((float)(totalReceivedSize * 100) / contentSize);
+                        if (wholeRange) {
+                            streamingProgress = 100;
+                        } else {
+                            totalReceivedSize += receivedSize;
+
+                            streamingProgress = (int)((float)(totalReceivedSize * 100) / contentSize);
+                        }
 
                         // send "streaming downloading progress" message to Stream instance
 
@@ -587,6 +622,12 @@ public class Streamer {
 
                         mHandler.obtainMessage(MessageId.STREAM_CHUNK_TIME_OF_ARRIVAL, time)
                             .sendToTarget();
+
+                        // whole range is received - stopping
+
+                        if (wholeRange) {
+                            stop = true;
+                        }
 
                         Log.d(TAG, "=====");
                     } finally {
