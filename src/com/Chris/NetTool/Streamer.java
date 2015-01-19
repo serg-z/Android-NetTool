@@ -592,6 +592,64 @@ public class Streamer {
                         InputStream inputStream = connection.getInputStream();
 
                         while (inputStream.read(byteData) != -1) {
+                            // thread stopping logic
+                            synchronized (mConnectionThreadStopLock) {
+                                if (mConnectionThreadStopped) {
+                                    Log.d(TAG, "Stopping connection thread");
+
+                                    stop = true;
+
+                                    break;
+                                }
+                            }
+
+                            // thread pausing logic
+                            synchronized (mConnectionThreadPauseLock) {
+                                // TODO: remove logging
+                                if (mConnectionThreadPaused) {
+                                    while (mConnectionThreadPaused) {
+                                        try {
+                                            Log.d(TAG, "*** CT: PAUSE");
+                                            mConnectionThreadPauseLock.wait();
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    Log.d(TAG, "*** CT: CONTINUE");
+                                }
+                            }
+
+                            // TODO: move into separate function
+                            // thread stopping logic
+                            synchronized (mConnectionThreadStopLock) {
+                                if (mConnectionThreadStopped) {
+                                    Log.d(TAG, "Stopping connection thread");
+
+                                    stop = true;
+
+                                    break;
+                                }
+                            }
+
+                            // random seek logic
+                            // TODO: remove logging
+                            if (getConnectionThreadRandomSeek()) {
+                                if (contentSize != -1) {
+                                    totalReceivedSize = (new Random()).nextInt(contentSize);
+
+                                    Log.d(TAG, "*** CT: RANDOM SEEK TO " + totalReceivedSize);
+                                } else {
+                                    Log.d(TAG, "*** CT: Reset random seek flag");
+                                }
+
+                                setConnectionThreadRandomSeek(false);
+
+                                // send "random seek completed" message to Stream instance
+
+                                mHandler.obtainMessage(MessageId.STREAM_RANDOM_SEEK_COMPLETED, null)
+                                    .sendToTarget();
+                            }
                         }
 
                         // buffer size will be 0 if the Streamer set to request whole range
