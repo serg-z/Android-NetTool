@@ -194,7 +194,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
         mSliderBitrate.setMax(1600);
         mSliderBitrate.setStep(100);
 
-        mSliderBitrate.setAdjustedProgress(1400);
+        mSliderBitrate.setAdjustedProgress(1300);
 
         mLayoutLeft.addView(mSliderBitrate);
 
