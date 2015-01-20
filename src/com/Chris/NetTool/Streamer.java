@@ -357,7 +357,7 @@ public class Streamer {
         public synchronized void put(int size) {
             mSize += size;
 
-            Log.d(TAG, String.format("PUT %d (%d)", size, mSize));
+            Log.d(TAG, String.format("StreamBuffer: Put %d (%d)", size, mSize));
 
             mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED, mSize)
                 .sendToTarget();
@@ -374,7 +374,7 @@ public class Streamer {
 
             mSize -= Math.min(mSize, size);
 
-            Log.d(TAG, String.format("TAKE %d (%d)", size, mSize));
+            Log.d(TAG, String.format("StreamerBuffer: Take %d (%d)", size, mSize));
 
             if (sendMessage) {
                 mHandler.obtainMessage(MessageId.DEPTH_BUFFER_SIZE_CHANGED, mSize)
@@ -405,7 +405,7 @@ public class Streamer {
         @Override
         public void run() {
             Log.d(TAG, String.format(
-                "Connection thread started [bitrate=%d, buffer=%d, chunk=%d, connect_TO=%d, read_TO=%d]",
+                "ConnectionThread: Started [bitrate=%d, buffer=%d, chunk=%d, connect_TO=%d, read_TO=%d]",
                 mBitrate, mBufferSize, mChunkSize, mConnectTimeout, mReadTimeout));
 
             try {
@@ -420,7 +420,7 @@ public class Streamer {
                     // thread stopping logic
                     synchronized (mConnectionThreadStopLock) {
                         if (mConnectionThreadStopped) {
-                            Log.d(TAG, "Stopping connection thread");
+                            Log.d(TAG, "ConnectionThread: Stopping");
 
                             stop = true;
 
@@ -430,18 +430,17 @@ public class Streamer {
 
                     // thread pausing logic
                     synchronized (mConnectionThreadPauseLock) {
-                        // TODO: remove logging
                         if (mConnectionThreadPaused) {
                             while (mConnectionThreadPaused) {
                                 try {
-                                    Log.d(TAG, "*** CT: PAUSE");
+                                    Log.d(TAG, "ConnectionThread: Pause");
                                     mConnectionThreadPauseLock.wait();
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }
 
-                            Log.d(TAG, "*** CT: CONTINUE");
+                            Log.d(TAG, "ConnectionThread: Continue");
                         }
                     }
 
@@ -449,7 +448,7 @@ public class Streamer {
                     // thread stopping logic
                     synchronized (mConnectionThreadStopLock) {
                         if (mConnectionThreadStopped) {
-                            Log.d(TAG, "Stopping connection thread");
+                            Log.d(TAG, "ConnectionThread: Stopping");
 
                             stop = true;
 
@@ -461,7 +460,7 @@ public class Streamer {
                         int bufferCurrentSize = mStreamerBuffer.getSize();
 
                         if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
-                            Log.d(TAG, String.format("Waiting buffer %d + %d (= %d) >= %d",
+                            Log.d(TAG, String.format("ConnectionThread: Waiting buffer %d + %d (= %d) >= %d",
                                 bufferCurrentSize, mChunkDataSize, bufferCurrentSize + mChunkDataSize,
                                 mBufferCapacity));
 
@@ -470,16 +469,16 @@ public class Streamer {
                             continue;
                         }
 
-                        Log.d(TAG, String.format("Buffer available (empty: %d)",
+                        Log.d(TAG, String.format("ConnectionThread: Buffer available (empty: %d)",
                             mBufferCapacity - mStreamerBuffer.getSize()));
                     }
 
                     // random seek logic
-                    // TODO: remove logging
                     if (getConnectionThreadRandomSeek() && contentSize != -1) {
                         totalReceivedSize = (new Random()).nextInt(contentSize);
 
-                        Log.d(TAG, "*** CT: RANDOM SEEK TO " + totalReceivedSize);
+                        Log.d(TAG, String.format("ConnectionThread: Random seek to %d (%d%%)",
+                            totalReceivedSize, (int)((totalReceivedSize * 100.0f) / contentSize)));
 
                         setConnectionThreadRandomSeek(false);
 
@@ -512,9 +511,9 @@ public class Streamer {
                         boolean wholeRange = mBitrate == 0;
 
                         if (wholeRange) {
-                            Log.d(TAG, "Requesting whole range");
+                            Log.d(TAG, "ConnectionThread: Requesting whole range");
                         } else {
-                            Log.d(TAG, String.format("Requesting %d-%d (bytes: %d)",
+                            Log.d(TAG, String.format("ConnectionThread: Requesting %d-%d (bytes: %d)",
                                 rangeFrom, rangeTo, rangeTo - rangeFrom + 1));
                         }
 
@@ -542,7 +541,7 @@ public class Streamer {
                             if (sp.length == 2) {
                                 contentSize = Integer.valueOf(sp[1].trim());
 
-                                Log.d(TAG, "Content size: " + contentSize);
+                                Log.d(TAG, "ConnectionThread: Content size: " + contentSize);
 
                                 // send "stream started" message to Stream instance
 
@@ -580,14 +579,14 @@ public class Streamer {
 
                                 receivedSize = receivedTo - receivedFrom + 1;
 
-                                Log.d(TAG, String.format("Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
+                                Log.d(TAG, String.format("ConnectionThread: Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
                                     receivedSize));
                             } else {
                                 throw new InvalidContentSizeException("Can't obtain content size");
                             }
                         }
 
-                        Log.d(TAG, "** STREAMER: READING DATA");
+                        Log.d(TAG, "ConnectionThread: Reading data");
 
                         InputStream inputStream = connection.getInputStream();
 
@@ -595,7 +594,7 @@ public class Streamer {
                             // thread stopping logic
                             synchronized (mConnectionThreadStopLock) {
                                 if (mConnectionThreadStopped) {
-                                    Log.d(TAG, "Stopping connection thread");
+                                    Log.d(TAG, "ConnectionThread: Stopping");
 
                                     stop = true;
 
@@ -605,18 +604,17 @@ public class Streamer {
 
                             // thread pausing logic
                             synchronized (mConnectionThreadPauseLock) {
-                                // TODO: remove logging
                                 if (mConnectionThreadPaused) {
                                     while (mConnectionThreadPaused) {
                                         try {
-                                            Log.d(TAG, "*** CT: PAUSE");
+                                            Log.d(TAG, "ConnectionThread: Pause");
                                             mConnectionThreadPauseLock.wait();
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
                                         }
                                     }
 
-                                    Log.d(TAG, "*** CT: CONTINUE");
+                                    Log.d(TAG, "ConnectionThread: Continue");
                                 }
                             }
 
@@ -624,7 +622,7 @@ public class Streamer {
                             // thread stopping logic
                             synchronized (mConnectionThreadStopLock) {
                                 if (mConnectionThreadStopped) {
-                                    Log.d(TAG, "Stopping connection thread");
+                                    Log.d(TAG, "ConnectionThread: Stopping");
 
                                     stop = true;
 
@@ -633,14 +631,14 @@ public class Streamer {
                             }
 
                             // random seek logic
-                            // TODO: remove logging
                             if (getConnectionThreadRandomSeek()) {
                                 if (contentSize != -1) {
                                     totalReceivedSize = (new Random()).nextInt(contentSize);
 
-                                    Log.d(TAG, "*** CT: RANDOM SEEK TO " + totalReceivedSize);
+                                    Log.d(TAG, String.format("ConnectionThread: Random seek to %d (%d%%)",
+                                        totalReceivedSize, (int)((totalReceivedSize * 100.0f) / contentSize)));
                                 } else {
-                                    Log.d(TAG, "*** CT: Reset random seek flag");
+                                    Log.d(TAG, "ConnectionThread: Reset random seek flag");
                                 }
 
                                 setConnectionThreadRandomSeek(false);
@@ -657,7 +655,7 @@ public class Streamer {
                             mStreamerBuffer.put(receivedSize);
                         }
 
-                        Log.d(TAG, "** STREAMER: FINISHED READING DATA");
+                        Log.d(TAG, "ConnectionThread: Finished reading data");
 
                         int streamingProgress;
 
@@ -686,8 +684,6 @@ public class Streamer {
                         if (wholeRange) {
                             stop = true;
                         }
-
-                        Log.d(TAG, "=====");
                     } finally {
                         connection.disconnect();
                     }
@@ -695,7 +691,7 @@ public class Streamer {
             } catch (Exception e) {
                 e.printStackTrace();
 
-                Log.d(TAG, ">> Connection thread failed");
+                Log.d(TAG, "ConnectionThread: Failed");
 
                 mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED, null)
                     .sendToTarget();
@@ -703,7 +699,7 @@ public class Streamer {
                 return;
             }
 
-            Log.d(TAG, ">> Connection thread finished");
+            Log.d(TAG, "ConnectionThread: Finished");
 
             mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FINISHED, null)
                 .sendToTarget();
