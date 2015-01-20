@@ -314,7 +314,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
 
         final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
         final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
-        final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
+        final int beepVolume = (int)((notificationVolume * 100.0f) / notificationMaxVolume);
 
         new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume)
             .startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 200);

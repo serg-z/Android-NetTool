@@ -56,7 +56,7 @@ public final class Util {
 
                 final int notificationMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION);
                 final int notificationVolume = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);
-                final int beepVolume = (int)(((float)notificationVolume * 100) / notificationMaxVolume);
+                final int beepVolume = (int)((notificationVolume * 100.0f) / notificationMaxVolume);
 
                 ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, beepVolume);
 
