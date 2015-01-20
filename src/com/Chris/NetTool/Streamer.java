@@ -664,7 +664,7 @@ public class Streamer {
                         } else {
                             totalReceivedSize += receivedSize;
 
-                            streamingProgress = (int)((float)(totalReceivedSize * 100) / contentSize);
+                            streamingProgress = (int)((totalReceivedSize * 100.0f) / contentSize);
                         }
 
                         // send "streaming downloading progress" message to Stream instance
