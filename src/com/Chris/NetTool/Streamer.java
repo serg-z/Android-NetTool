@@ -64,7 +64,7 @@ public class Streamer {
     // sizes in bytes
     private final int mDataSizePerSecond;
     private final int mChunkDataSize;
-    private final int mBufferCapacity;
+    private final long mBufferCapacity;
 
     // in milliseconds
     private final int mConnectTimeout;
@@ -143,7 +143,7 @@ public class Streamer {
 
                 case MessageId.DEPTH_BUFFER_SIZE_CHANGED:
                     if (mStreamerListener != null) {
-                        int bufferSize = (Integer)inputMessage.obj;
+                        long bufferSize = (Long)inputMessage.obj;
                         int load = (int)((bufferSize * 100.0f) / mBufferCapacity);
 
                         mBufferDepth = load;
@@ -309,7 +309,7 @@ public class Streamer {
         return mBufferSize;
     }
 
-    public int getBufferCapacity() {
+    public long getBufferCapacity() {
         return mBufferCapacity;
     }
 
@@ -352,9 +352,9 @@ public class Streamer {
     }
 
     private class StreamerBuffer {
-        private int mSize = 0;
+        private long mSize = 0L;
 
-        public synchronized void put(int size) {
+        public synchronized void put(long size) {
             mSize += size;
 
             Log.d(TAG, String.format("StreamBuffer: Put %d (%d)", size, mSize));
@@ -363,12 +363,12 @@ public class Streamer {
                 .sendToTarget();
         }
 
-        public synchronized void take(int size) {
+        public synchronized void take(long size) {
             take(size, true);
         }
 
-        private synchronized void take(int size, boolean sendMessage) {
-            if (mSize == 0 || size <= 0) {
+        private synchronized void take(long size, boolean sendMessage) {
+            if (mSize == 0L || size <= 0L) {
                 return;
             }
 
@@ -384,7 +384,7 @@ public class Streamer {
             setConnectionThreadPaused(false);
         }
 
-        public synchronized int getSize() {
+        public synchronized long getSize() {
             return mSize;
         }
 
@@ -409,8 +409,8 @@ public class Streamer {
                 mBitrate, mBufferSize, mChunkSize, mConnectTimeout, mReadTimeout));
 
             try {
-                int contentSize = -1;
-                int totalReceivedSize = 0;
+                long contentSize = -1L;
+                long totalReceivedSize = 0L;
 
                 boolean stop = false;
 
@@ -457,7 +457,7 @@ public class Streamer {
                     }
 
                     if (mBufferSize > 0) {
-                        int bufferCurrentSize = mStreamerBuffer.getSize();
+                        long bufferCurrentSize = mStreamerBuffer.getSize();
 
                         if (bufferCurrentSize + mChunkDataSize > mBufferCapacity) {
                             Log.d(TAG, String.format("ConnectionThread: Waiting buffer %d + %d (= %d) >= %d",
@@ -474,8 +474,8 @@ public class Streamer {
                     }
 
                     // random seek logic
-                    if (getConnectionThreadRandomSeek() && contentSize != -1) {
-                        totalReceivedSize = (new Random()).nextInt(contentSize);
+                    if (getConnectionThreadRandomSeek() && contentSize != -1L) {
+                        totalReceivedSize = (long)((new Random()).nextInt(100) * 0.01f * contentSize);
 
                         Log.d(TAG, String.format("ConnectionThread: Random seek to %d (%d%%)",
                             totalReceivedSize, (int)((totalReceivedSize * 100.0f) / contentSize)));
@@ -496,15 +496,15 @@ public class Streamer {
                     connection.setReadTimeout(mReadTimeout);
 
                     try {
-                        int rangeFrom;
-                        int rangeTo;
+                        long rangeFrom;
+                        long rangeTo;
 
-                        if (contentSize == -1) {
-                            rangeFrom = 0;
-                            rangeTo = 0;
+                        if (contentSize == -1L) {
+                            rangeFrom = 0L;
+                            rangeTo = 0L;
                         } else {
                             rangeFrom = totalReceivedSize;
-                            rangeTo = Math.min(contentSize - 1, rangeFrom + mChunkDataSize - 1);
+                            rangeTo = Math.min(contentSize - 1L, rangeFrom + mChunkDataSize - 1L);
                         }
 
                         // request whole range of data if the bitrate equals to 0
@@ -533,13 +533,13 @@ public class Streamer {
 
                             mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_STARTED, null)
                                 .sendToTarget();
-                        } else if (contentSize == -1) {
+                        } else if (contentSize == -1L) {
                             time = SystemClock.elapsedRealtime();
 
                             String[] sp = connection.getHeaderField("Content-Range").split("/");
 
                             if (sp.length == 2) {
-                                contentSize = Integer.valueOf(sp[1].trim());
+                                contentSize = Long.valueOf(sp[1].trim());
 
                                 Log.d(TAG, "ConnectionThread: Content size: " + contentSize);
 
@@ -558,29 +558,29 @@ public class Streamer {
                                 continue;
                             }
 
-                            if (contentSize == -1) {
+                            if (contentSize == -1L) {
                                 throw new InvalidContentSizeException("Can't obtain content size");
                             }
                         }
 
                         time = SystemClock.elapsedRealtime();
 
-                        int receivedSize;
+                        long receivedSize;
 
                         if (wholeRange) {
-                            receivedSize = 0;
+                            receivedSize = 0L;
                         } else {
                             Matcher m = Pattern.compile("bytes\\s(\\d+)-(\\d+).*")
                                 .matcher(connection.getHeaderField("Content-Range"));
 
                             if (m.matches()) {
-                                int receivedFrom = Integer.valueOf(m.group(1));
-                                int receivedTo = Integer.valueOf(m.group(2));
+                                long receivedFrom = Long.valueOf(m.group(1));
+                                long receivedTo = Long.valueOf(m.group(2));
 
-                                receivedSize = receivedTo - receivedFrom + 1;
+                                receivedSize = receivedTo - receivedFrom + 1L;
 
-                                Log.d(TAG, String.format("ConnectionThread: Received: %d-%d (bytes: %d)", receivedFrom, receivedTo,
-                                    receivedSize));
+                                Log.d(TAG, String.format("ConnectionThread: Received: %d-%d (bytes: %d)",
+                                    receivedFrom, receivedTo, receivedSize));
                             } else {
                                 throw new InvalidContentSizeException("Can't obtain content size");
                             }
@@ -632,8 +632,8 @@ public class Streamer {
 
                             // random seek logic
                             if (getConnectionThreadRandomSeek()) {
-                                if (contentSize != -1) {
-                                    totalReceivedSize = (new Random()).nextInt(contentSize);
+                                if (contentSize != -1L) {
+                                    totalReceivedSize = (long)((new Random()).nextInt(100) * 0.01f * contentSize);
 
                                     Log.d(TAG, String.format("ConnectionThread: Random seek to %d (%d%%)",
                                         totalReceivedSize, (int)((totalReceivedSize * 100.0f) / contentSize)));
