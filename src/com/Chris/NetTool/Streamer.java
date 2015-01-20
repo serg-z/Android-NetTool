@@ -144,7 +144,7 @@ public class Streamer {
                 case MessageId.DEPTH_BUFFER_SIZE_CHANGED:
                     if (mStreamerListener != null) {
                         int bufferSize = (Integer)inputMessage.obj;
-                        int load = (int)((float)(bufferSize * 100) / mBufferCapacity);
+                        int load = (int)((bufferSize * 100.0f) / mBufferCapacity);
 
                         mBufferDepth = load;
 
