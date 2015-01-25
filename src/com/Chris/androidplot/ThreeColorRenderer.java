@@ -17,6 +17,16 @@ import com.androidplot.xy.LineAndPointRenderer;
 import com.androidplot.util.ValPixConverter;
 import com.androidplot.util.PixelUtils;
 
+/*
+ * ThreeColorRenderer is used to render three-colored plots
+ * (currently the colors are set to green, yellow and red - from
+ * the top to the bottom).
+ *
+ * The path is broken into separate paths (one for each color)
+ * depending on it's intersection with threshold line. Afterwards
+ * each path is rendered with it's own line and fill color.
+ */
+
 public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter> {
     private Paint mPaintLineGreen;
     private Paint mPaintLineYellow;
@@ -87,6 +97,8 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
         final Number minY = getPlot().getCalculatedMinY();
         final Number maxY = getPlot().getCalculatedMaxY();
 
+        // convert thresholds retrieved from formatter to pixel units
+
         final float thresholdGreenPix = ValPixConverter.valToPix(
             0.0f,
             ((ThreeColorFormatter)formatter).getThresholdGreen(),
@@ -105,10 +117,12 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
             minY,
             maxY).y;
 
+        // loop through values of series
         for (int i = 0; i < series.size(); ++i) {
             Number x = series.getX(i);
             Number y = series.getY(i);
 
+            // convert coordinates of point to pixel units
             if (y != null && x != null) {
                 thisPoint = ValPixConverter.valToPix(
                     x,
@@ -122,11 +136,19 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
                 thisPoint = null;
             }
 
+            // we can draw this point
             if (thisPoint != null) {
+                // the path wasn't broken and we have second point for line
                 if (lastPoint != null) {
+                    // loop through possible variations of intersection:
+                    // 0 - line from lastPoint to thisPoint with threshold green
+                    // 1 - line from lastPoint to thisPoint with threshold yellow
+                    // 2 - line from thisPoint to lastPoint with threshold yellow
+                    // 3 - line from thisPoint to lastPoint with threshold green
                     for (int j = 0; j < 4; ++j) {
                         final float threshold;
 
+                        // which threshold should we use for intersection check
                         switch (j) {
                             case 0:
                             case 3:
@@ -146,6 +168,7 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
 
                         final PointF a, b;
 
+                        // which way the line goes
                         switch (j) {
                             case 0:
                             case 1:
@@ -166,12 +189,16 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
                         }
 
 
+                        // detect intersection and cut the path into two pieces - one segment with already defined
+                        // color and another for further intersection check
                         if (a.y < threshold && b.y >= threshold) {
+                            // get intersection point where the segment should split into two
                             PointF p = Util.intersection(
                                 new PointF(lastPoint.x, threshold), new PointF(thisPoint.x, threshold),
                                 lastPoint, thisPoint);
 
                             if (p != null) {
+                                // select suitable path where new segment will be added
                                 switch (j) {
                                     case 0:
                                         {
@@ -217,6 +244,7 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
                                         throw new UnsupportedOperationException("Not implemented");
                                 }
 
+                                // add vertical line from bottom to current position if the path wasn't used before
                                 if (prevPath != path) {
                                     path.moveTo(lastPoint.x, lastPoint.y);
 
@@ -224,6 +252,8 @@ public class ThreeColorRenderer extends LineAndPointRenderer<ThreeColorFormatter
                                     pathFill.lineTo(lastPoint.x, lastPoint.y);
                                 }
 
+                                // add new segment to path and close fill path with vertical line going from
+                                // segment's end to the bottom
                                 appendToPath(path, p, lastPoint);
                                 appendToPath(pathFill, p, lastPoint);
 

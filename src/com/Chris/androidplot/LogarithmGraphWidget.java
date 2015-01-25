@@ -15,8 +15,18 @@ import com.androidplot.ui.YLayoutStyle;
 
 import com.androidplot.util.PixelUtils;
 
+/*
+ * Extension of AndroidPlot's XYGraphWidget.
+ *
+ * Reimplements way of drawing ticks on Y-axis (range) and converts
+ * labels on those ticks from logarithmic value to it's power of 10,
+ * i.e. to pow(10, x).
+ */
+
 public class LogarithmGraphWidget extends XYGraphWidget {
     protected XYPlot mPlot;
+
+    /* Constructor's implementation copied from super class. */
 
     public LogarithmGraphWidget(XYPlot plot) {
         super(
@@ -51,6 +61,11 @@ public class LogarithmGraphWidget extends XYGraphWidget {
         setMarginLeft(PixelUtils.dpToPix(margin)); // DEFAULT_GRAPH_WIDGET_LEFT_MARGIN_DP
         setMarginRight(PixelUtils.dpToPix(margin)); // DEFAULT_GRAPH_WIDGET_RIGHT_MARGIN_DP
     }
+
+     /*
+      * This function converts number on tick of Y axis from logarithm
+      * to power of 10 and calls parent's draw function.
+      */
 
     public void drawRangeTick(Canvas canvas, float yPix, Number yVal, Paint labelPaint, Paint linePaint,
             boolean drawLineOnly) {

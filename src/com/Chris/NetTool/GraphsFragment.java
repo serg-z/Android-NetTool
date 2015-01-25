@@ -82,14 +82,23 @@ import com.androidplot.ui.TableOrder;
 
 import com.androidplot.util.PixelUtils;
 
+/*
+ * A Fragment represents a behavior or a portion of user interface in an Activity.
+ *
+ * GraphsFragment is the fragment which contains all the plots and Wi-Fi related information.
+ */
+
 public class GraphsFragment extends Fragment {
     private static final String TAG = "GraphsFragment";
+    // maximum count of X values on the plots
     private static final int HISTORY_SIZE = 120;
 
+    /* Interface used to notify others about obtained Wi-Fi information */
     public interface OnWifiInfoListener {
         public void onServerAddressObtained(int address);
     }
 
+    /* Interface used to controll ping */
     public interface OnPingListener {
         public void onPingStart(String address);
         public void onPingStop();
@@ -101,11 +110,13 @@ public class GraphsFragment extends Fragment {
 
     private Handler mTimerHandler = new Handler();
 
+    /* This runnable runs every second and updates the UI (Wi-Fi info and plots) */
     private Runnable mTimerRunnable = new Runnable() {
         @Override
         public void run() {
             updateUI();
 
+            // post this runnable to be run again
             mTimerHandler.postDelayed(this, 1000);
         }
     };
@@ -136,9 +147,13 @@ public class GraphsFragment extends Fragment {
     // ping will add 8 bytes on top of that value
     private int mPingPacketSize = 64 - 8;
 
+    /* Prevents runnable, which updates the UI, from running */
+
     private void pauseTimer() {
+        // pause runnable
         mTimerHandler.removeCallbacks(mTimerRunnable);
 
+        // reset previous rx/tx results
         mLastRx = -1;
         mLastTx = -1;
     }
@@ -148,6 +163,7 @@ public class GraphsFragment extends Fragment {
     }
 
     private void updateUI() {
+        // get Wi-Fi connection and DHCP info
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
         DhcpInfo dhcpInfo = mWifiManager.getDhcpInfo();
 
@@ -155,12 +171,17 @@ public class GraphsFragment extends Fragment {
 
         boolean freqNotFound = true;
 
+        // loop through Wi-Fi scan results...
         for (ScanResult r : mWifiManager.getScanResults()) {
+            // ...and search for current connection's BSSID
             if (r.BSSID.equals(bssid)) {
+                // get from it frequency
                 String text = r.frequency + " MHz";
 
+                // convert it to corresponding channel number
                 Integer channel = Frequencies.sChannels.get(r.frequency);
 
+                // if it's defined - append it to the text after frequency
                 if (channel != null) {
                     text += " (ch " + channel + ")";
                 }
@@ -177,6 +198,8 @@ public class GraphsFragment extends Fragment {
             ((TextView)mActivity.findViewById(R.id.text_frequency)).setText("not found");
         }
 
+        // read Wi-Fi connection information and put it into text views
+
         int rssi = wifiInfo.getRssi();
         int linkSpeed = wifiInfo.getLinkSpeed();
         int serverAddress = dhcpInfo.serverAddress;
@@ -190,12 +213,17 @@ public class GraphsFragment extends Fragment {
         ((TextView)mActivity.findViewById(R.id.text_rssi)).setText(rssi + " dBm");
         ((TextView)mActivity.findViewById(R.id.text_link_speed)).setText(linkSpeed + " " + WifiInfo.LINK_SPEED_UNITS);
 
+        // set internally used ping server address variable to server address (what will cause notification of
+        // mWifiInfoCallback)
+
         setPingServerAddress(serverAddress);
 
         // get rx & tx, exclude mobile data
 
         long rx = TrafficStats.getTotalRxBytes() - TrafficStats.getMobileRxBytes();
         long tx = TrafficStats.getTotalTxBytes() - TrafficStats.getMobileTxBytes();
+
+        // calculate rx/tx per second using previous results
 
         long rxPerSec = 0, txPerSec = 0;
 
@@ -210,18 +238,24 @@ public class GraphsFragment extends Fragment {
         mLastRx = rx;
         mLastTx = tx;
 
+        // convert values from bytes per second to Mbps
+
         rxPerSec *= 8e-6;
         txPerSec *= 8e-6;
+
+        // update plots
 
         addValueToPlotSeries(mPlotRssi, rssi);
         addValueToPlotSeries(mPlotLinkSpeed, linkSpeed);
 
+        // make a noise if link speed is below defined threshold
         if (linkSpeed < 10) {
             if (NetToolActivity.getBeepEnabled()) {
                 Util.playTone(mActivity, ToneGenerator.TONE_CDMA_ANSWER, 200);
             }
         }
 
+        // update rx/tx plot
         if (mPlotRxTx != null) {
             addValueToSeries(mSeriesRx, rxPerSec);
             addValueToSeries(mSeriesTx, txPerSec);
@@ -229,6 +263,7 @@ public class GraphsFragment extends Fragment {
             mPlotRxTx.redraw();
         }
 
+        // udpate streamer plot
         if (mPlotStreamer != null) {
             addValueToSeries(mSeriesStreamerDownloadingProgress, mStreamerDownloadingProgress);
             addValueToSeries(mSeriesStreamerBufferDepth, mStreamerBufferDepth);
@@ -236,6 +271,7 @@ public class GraphsFragment extends Fragment {
             mPlotStreamer.redraw();
         }
 
+        // if streamer is not running then we should add zeroes to "chunk download time" plot every second
         if (mPlotChunkAddZeroes) {
             addChunkDownloadTime(0);
         }
@@ -249,6 +285,7 @@ public class GraphsFragment extends Fragment {
         mPlotChunkAddZeroes = enabled;
     }
 
+    /* Gets first series object from the plot, adds a value to it and redraws the plot */
     private void addValueToPlotSeries(XYPlot plot, float value) {
         if (plot != null) {
             SimpleXYSeries series = (SimpleXYSeries)plot.getSeriesSet().iterator().next();
@@ -259,6 +296,7 @@ public class GraphsFragment extends Fragment {
         }
     }
 
+    /* Adds value to series keeping it's size within defined limit */
     private void addValueToSeries(SimpleXYSeries series, float value) {
         if (series != null) {
             if (series.size() > HISTORY_SIZE) {
@@ -272,6 +310,12 @@ public class GraphsFragment extends Fragment {
     private void setupPlot(XYPlot plot) {
         setupPlot(plot, true);
     }
+
+    /*
+     * Sets up plot with predefined paddings, margins, removes the legend if required, removes domain label (label
+     * on X axis, removes the border, removes decimal places on axis ticks' labels and sets plot size to predefined
+     * value.
+     */
 
     private void setupPlot(XYPlot plot, boolean removeLegend) {
         plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
@@ -291,6 +335,11 @@ public class GraphsFragment extends Fragment {
 
         plot.setDomainBoundaries(0, HISTORY_SIZE, BoundaryMode.FIXED);
     }
+
+    /*
+     * Special version of "setupPlot" for ping plot.
+     * This one, in addition, sets up plot into step mode.
+     */
 
     private void setupPlotPing(XYPlot plot) {
         plot.setGridPadding(0.0f, 10.0f, 5.0f, 0.0f);
@@ -316,6 +365,8 @@ public class GraphsFragment extends Fragment {
         plot.setTicksPerDomainLabel(30);
     }
 
+    /* Creates and adds series to plot and sets label and formatter on it */
+
     private SimpleXYSeries addSeries(XYPlot plot, String label, LineAndPointFormatter formatter) {
         SimpleXYSeries series = new SimpleXYSeries(label);
 
@@ -326,9 +377,19 @@ public class GraphsFragment extends Fragment {
         return series;
     }
 
+    /*
+     * Creates and adds series to plot and sets label and LineAndPointFormatter with specified line and fill colors 
+     * on it
+     */
+
     private SimpleXYSeries addSeries(XYPlot plot, String label, int lineColor, int fillColor) {
         return addSeries(plot, label, new LineAndPointFormatter(lineColor, null, fillColor, null));
     }
+
+    /*
+     * Adds row of two TextViews (one for label and another for value) to table layout and sets an ID on "value"
+     * text view
+     */
 
     private void addRow(TableLayout table, String label, int id) {
         TableRow tr = new TableRow(mActivity);
@@ -356,8 +417,10 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Created");
 
+        // get parent activity
         mActivity = getActivity();
 
+        // get Wi-Fi manager used for retrieving Wi-Fi connection and scans information
         mWifiManager = (WifiManager)mActivity.getSystemService(Context.WIFI_SERVICE);
     }
 
@@ -367,6 +430,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Destroy");
 
+        // pause UI updating
         pauseTimer();
 
         mWifiManager = null;
@@ -382,12 +446,14 @@ public class GraphsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "View Created");
 
+        // create main layout
+
         LinearLayout layout = new LinearLayout(mActivity);
 
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
-        // wi-fi info
+        // wi-fi info text layout
 
         LinearLayout lh = new LinearLayout(mActivity);
 
@@ -410,6 +476,8 @@ public class GraphsFragment extends Fragment {
         lh.addView(tableLayout0);
         lh.addView(tableLayout1);
 
+        // add label/value rows
+
         addRow(tableLayout0, "Local IP", R.id.text_local_ip);
         addRow(tableLayout0, "SSID", R.id.text_ssid);
         addRow(tableLayout0, "Server IP", R.id.text_server_address);
@@ -420,7 +488,7 @@ public class GraphsFragment extends Fragment {
         addRow(tableLayout1, "RSSI", R.id.text_rssi);
         addRow(tableLayout1, "Freq.", R.id.text_frequency);
 
-        // create plots
+        // create plots and add them to layout
 
         LinearLayout plotsLayoutV = new LinearLayout(mActivity);
 
@@ -447,10 +515,13 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotRssi);
 
         setupPlot(mPlotRssi);
+        // draw in three colors
         addSeries(mPlotRssi, "", new ThreeColorFormatter(-65, -80));
 
         mPlotRssi.setRangeLabel("dBm");
         mPlotRssi.setRangeBoundaries(-100, -40, BoundaryMode.FIXED);
+
+        // add dashed line markers to show thresholds
 
         DashPathEffect dpe = new DashPathEffect(new float[]{ PixelUtils.dpToPix(2), PixelUtils.dpToPix(2) }, 0);
 
@@ -480,10 +551,13 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotLinkSpeed);
 
         setupPlot(mPlotLinkSpeed);
+        // draw in three colors
         addSeries(mPlotLinkSpeed, "", new ThreeColorFormatter(53, 20));
 
         mPlotLinkSpeed.setRangeLabel(WifiInfo.LINK_SPEED_UNITS);
         mPlotLinkSpeed.setRangeBoundaries(0, 135, BoundaryMode.FIXED);
+
+        // add dashed line markers to show thresholds
 
         marker = new YValueMarker(53, "53",
             new XPositionMetric(PixelUtils.dpToPix(5), XLayoutStyle.ABSOLUTE_FROM_RIGHT), Color.BLACK, Color.BLACK);
@@ -511,6 +585,8 @@ public class GraphsFragment extends Fragment {
         plotsLayoutH.addView(mPlotPing);
 
         setupPlotPing(mPlotPing);
+
+        // ping plot will have two series - green for "success" values and black for "fail"
 
         mSeriesPingSuccess = new SimpleXYSeries("Success");
 
@@ -556,6 +632,7 @@ public class GraphsFragment extends Fragment {
 
         mPlotRxTx.getLayoutManager().remove(mPlotRxTx.getGraphWidget());
 
+        // draw the plot in logarithm scale
         mPlotRxTx.setGraphWidget(new LogarithmGraphWidget(mPlotRxTx));
 
         setupPlot(mPlotRxTx, false);
@@ -586,6 +663,9 @@ public class GraphsFragment extends Fragment {
         mPlotStreamer.setRangeLabel("%");
         mPlotStreamer.setRangeBoundaries(0, 100, BoundaryMode.FIXED);
 
+        // modify streamer plot's legend to make it more compact using for this purpose specially written
+        // "StreamerTableModel" class
+
         XYLegendWidget streamerLegendWidget = mPlotStreamer.getLegendWidget();
 
         Paint textPaint = streamerLegendWidget.getTextPaint();
@@ -601,20 +681,26 @@ public class GraphsFragment extends Fragment {
         float iconWidth = iconWidthMetric.getPixelValue(iconWidthMetric.getValue());
         float iconHeight = iconHeightMetric.getPixelValue(iconHeightMetric.getValue());
 
+        // measure widths of labels
+
         float textWidthDownloadingProgress = textPaint.measureText(
             getText(R.string.label_downloading_progress).toString());
         float textWidthBufferDepth = textPaint.measureText(getText(R.string.label_buffer_depth).toString());
 
+        // calculate suitable cell width
         float cellWidth =
             Math.max(textWidthDownloadingProgress, textWidthBufferDepth) + iconWidth + PixelUtils.dpToPix(5);
 
+        // create and set new model
         mPlotStreamer.getLegendWidget().setTableModel(new StreamerTableModel(cellWidth));
 
+        // resize the legend widget to minimal possible size
         mPlotStreamer.getLegendWidget().setSize(
             new SizeMetrics(
                 Math.max(textSize, iconHeight) + PixelUtils.dpToPix(3), SizeLayoutType.ABSOLUTE,
                 cellWidth * 2, SizeLayoutType.ABSOLUTE));
 
+        // center-align legend widget
         mPlotStreamer.getLegendWidget().position(0, XLayoutStyle.RELATIVE_TO_CENTER,
            0, YLayoutStyle.ABSOLUTE_FROM_BOTTOM, AnchorPosition.BOTTOM_MIDDLE);
 
@@ -628,8 +714,10 @@ public class GraphsFragment extends Fragment {
 
         plotsLayoutH.addView(mPlotChunkDownloadTime);
 
+        // remove previous graph widget to use our own with reimplemented Y-axis ticks rendering
         mPlotChunkDownloadTime.getLayoutManager().remove(mPlotChunkDownloadTime.getGraphWidget());
 
+        // draw the plot in logarithm scale
         mPlotChunkDownloadTime.setGraphWidget(new LogarithmGraphWidget(mPlotChunkDownloadTime));
 
         setupPlot(mPlotChunkDownloadTime);
@@ -637,10 +725,15 @@ public class GraphsFragment extends Fragment {
         addSeries(mPlotChunkDownloadTime, "", new LogarithmFormatter(Color.BLUE, Color.argb(128, 100, 100, 200)));
 
         mPlotChunkDownloadTime.setRangeLabel("ms");
+        // set range boundaries as base 10 logarithms
         mPlotChunkDownloadTime.setRangeBoundaries(0, Math.log10(4000), BoundaryMode.FIXED);
 
         return layout;
     }
+
+    /*
+     * This will be called on "configChanges" events (see AndroidManifest.xml"), e.g. on orientation change
+     */
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -648,6 +741,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Configuration changed");
 
+        // redraw all plots after small delay
         mTimerHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -665,6 +759,8 @@ public class GraphsFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
+        // check activity for casting into listener types and set callback variables to it
 
         try {
             mWifiInfoCallback = (OnWifiInfoListener)activity;
@@ -691,6 +787,7 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Pause");
 
+        // pause UI updates
         pauseTimer();
     }
 
@@ -700,8 +797,10 @@ public class GraphsFragment extends Fragment {
 
         Log.d(TAG, "Resume");
 
+        // resume UI updates
         resumeTimer();
 
+        // restart ping if it was running before app pausing
         if (mPingShouldResume) {
             pingStart(mPingResumeAddress);
 
@@ -713,6 +812,7 @@ public class GraphsFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
+        // if ping is running - set the flag to resume it later
         if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.RUNNING) {
             mPingShouldResume = true;
         }
@@ -721,10 +821,12 @@ public class GraphsFragment extends Fragment {
     }
 
     public void setStreamerDownloadingProgress(int downloadingProgress) {
+        // this value will be added to corresponding plot every second
         mStreamerDownloadingProgress = downloadingProgress;
     }
 
     public void setStreamerBufferDepth(int bufferDepth) {
+        // this value will be added to corresponding plot every second
         mStreamerBufferDepth = bufferDepth;
     }
 
@@ -732,6 +834,7 @@ public class GraphsFragment extends Fragment {
         if (mPingAddress != address) {
             mPingAddress = address;
 
+            // notify listener
             mWifiInfoCallback.onServerAddressObtained(mPingAddress);
         }
     }
@@ -747,18 +850,21 @@ public class GraphsFragment extends Fragment {
     public void pingStart(String address) {
         mPingResumeAddress = address;
 
+        // stop ping if it's already running
         if (mPingTask != null && mPingTask.getStatus() == AsyncTask.Status.FINISHED) {
             mPingTask.stop();
 
             mPingTask = null;
         }
 
+        // create ping task and set listener (to fragment)
         if (mPingTask == null) {
             mPingTask = new PingTask();
 
             mPingTask.mFragment = this;
         }
 
+        // run the ping task
         if (mPingTask.getStatus() != AsyncTask.Status.RUNNING) {
             mPingNoAnswer.clear();
 
@@ -774,6 +880,8 @@ public class GraphsFragment extends Fragment {
         }
     }
 
+    /* Takes ping's log line and converts it to values for plotting */
+
     private void parsePingLog(String line) {
         // add line to ping log text in settings
         mLogCallback.onPrependLog(line);
@@ -788,12 +896,14 @@ public class GraphsFragment extends Fragment {
         int pingResult = -1;
         float pingTime = 0.0f;
 
+        // successful ping log pattern
         Matcher m = Pattern.compile("^\\d+\\sbytes\\sfrom\\s.*icmp_seq=(\\d+).*\\stime=([\\d\\.]+).*").matcher(line);
 
         if (m.matches()) {
             pingResult = 1;
 
             int icmpSeq = Integer.valueOf(m.group(1));
+            // convert to seconds
             pingTime = Float.parseFloat(m.group(2)) / 1000.0f;
 
             // update tracked "no answer yet" bar, if there any with such icmp_seq
@@ -813,6 +923,7 @@ public class GraphsFragment extends Fragment {
                 }
             }
         } else {
+            // "no answer yet for" pattern
             m = Pattern.compile("^no\\sanswer\\syet\\sfor\\sicmp_seq=(\\d+).*").matcher(line);
 
             if (m.matches()) {
@@ -823,6 +934,7 @@ public class GraphsFragment extends Fragment {
                 // add for future tracking
                 mPingNoAnswer.append(icmpSeq, mSeriesPingFail.size());
             } else {
+                // "Network is unreachable" and "Destination Host Unreachable" patterns
                 final boolean match =
                     Pattern.compile("^.*Network\\sis\\sunreachable$").matcher(line).matches()
                     || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches();
@@ -832,6 +944,8 @@ public class GraphsFragment extends Fragment {
                 }
             }
         }
+
+        // update plots with new values
 
         if (pingResult == 1) {
             addValueToSeries(mSeriesPingSuccess, pingTime);
@@ -862,12 +976,18 @@ public class GraphsFragment extends Fragment {
         mPlotPing.redraw();
     }
 
+    /*
+     * PingTask allows to run ping command and get results from it asynchronously.
+     */
+
     private class PingTask extends AsyncTask<String, Void, Void> {
         private PipedOutputStream mPipedOut;
         private PipedInputStream mPipedIn;
         private LineNumberReader mReader;
         private Process mProcess;
         private GraphsFragment mFragment;
+
+        /* Prepare for command execution */
 
         @Override
         protected void onPreExecute() {
@@ -894,6 +1014,8 @@ public class GraphsFragment extends Fragment {
         @Override
         protected Void doInBackground(String... params) {
             try {
+                // build and start the process
+
                 // params: 0 - address, 1 - packet size
                 mProcess = new ProcessBuilder()
                     .command("/system/bin/ping", "-i 1", "-s", params[1], "-O", params[0])
@@ -907,7 +1029,9 @@ public class GraphsFragment extends Fragment {
                     byte[] buffer = new byte[1024];
                     int count;
 
+                    // read output of process
                     while ((count = in.read(buffer)) != -1) {
+                        // redirect output and notify about progress UI thread
                         mPipedOut.write(buffer, 0, count);
                         publishProgress();
 
@@ -936,6 +1060,7 @@ public class GraphsFragment extends Fragment {
         @Override
         protected void onProgressUpdate(Void... values) {
             try {
+                // read and process the output of ping
                 while (mReader.ready()) {
                     String line = mReader.readLine();
 
@@ -956,6 +1081,7 @@ public class GraphsFragment extends Fragment {
         final private float mCellWidth;
 
         public StreamerTableModel(float cellWidth) {
+            // 2 columns and 1 row
             super(2, 1, TableOrder.ROW_MAJOR);
 
             mCellWidth = cellWidth;

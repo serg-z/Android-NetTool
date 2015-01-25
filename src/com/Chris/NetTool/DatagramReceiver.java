@@ -14,8 +14,16 @@ import java.nio.channels.DatagramChannel;
 
 import android.util.Log;
 
+/*
+ * DatagramReceiver is used for receiving broadcasted on network messages and notifying the listener about it.
+ *
+ * The connection runs in separate thread.
+ */
+
 public class DatagramReceiver {
     private static final String TAG = "DatagramReceiver";
+
+    /* Interface for listener */
 
     public interface DatagramReceiverListener {
         public void onDatagramReceived(String datagramMessage);
@@ -28,18 +36,23 @@ public class DatagramReceiver {
     private Thread mDatagramThread = null;
     private DatagramReceiverListener mListener = null;
 
+    /* Run new message handler on main looper to make possible inter-thread communication through messages */
+
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message inputMessage) {
             final int messageId = inputMessage.what;
 
             switch (messageId) {
+                // new message received
                 case MessageId.RECEIVED:
+                    // get the text from message
                     String datagramMessage = (String)inputMessage.obj;
 
                     Log.d(TAG, "Datagram received: " + datagramMessage);
 
                     if (mListener != null) {
+                        // send it to the listener
                         mListener.onDatagramReceived(datagramMessage);
                     }
 
@@ -49,6 +62,7 @@ public class DatagramReceiver {
     };
 
     public DatagramReceiver(int port) {
+        // start datagram thread
         mDatagramThread = new Thread(new DatagramThread(port));
 
         mDatagramThread.start();
@@ -64,6 +78,8 @@ public class DatagramReceiver {
             mDatagramThread.interrupt();
         }
     }
+
+    /* DatagramThread is used to hold datagram connection and read it's messages asynchronously from main thread */
 
     private class DatagramThread implements Runnable {
         private int mPort;
@@ -83,17 +99,22 @@ public class DatagramReceiver {
             DatagramSocket socket = null;
 
             try {
+                // open connection on channel to make possible port reusing
                 DatagramChannel channel = DatagramChannel.open();
 
                 socket = channel.socket();
 
+                // reuse address to make possible two DatagramThreads running concurrently
+                // (before one of them finishes)
                 socket.setReuseAddress(true);
                 socket.bind(new InetSocketAddress(mPort));
 
+                // timeout of reading operations' blocks
                 socket.setSoTimeout(10000);
 
                 boolean stop = false;
 
+                // loop continuously, while not stopped by thread's interruption
                 while (!stop) {
                     if (Thread.interrupted()) {
                         Log.d(TAG, "Interrupting datagram thread");
@@ -103,6 +124,7 @@ public class DatagramReceiver {
                         continue;
                     }
 
+                    // data is fixed sized byte array
                     byte[] data = new byte[1024];
 
                     DatagramPacket packet = new DatagramPacket(data, data.length);
@@ -110,6 +132,7 @@ public class DatagramReceiver {
                     Log.d(TAG, "** DATAGRAM WAITING");
 
                     try {
+                        // read datagram packet from socket
                         socket.receive(packet);
                     } catch (SocketTimeoutException e) {
                         Log.d(TAG, "Datagram socket timeout");
@@ -117,8 +140,10 @@ public class DatagramReceiver {
                         continue;
                     }
 
+                    // convert the data to utf-8 string and cut the whitespace
                     String dataString = new String(packet.getData(), "UTF-8").trim();
 
+                    // send the message to handler which will pass it to listener
                     mHandler.obtainMessage(MessageId.RECEIVED, dataString)
                         .sendToTarget();
 

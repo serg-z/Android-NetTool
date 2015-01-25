@@ -5,6 +5,10 @@ import android.util.SparseIntArray;
 import java.util.Map;
 import java.util.Collections;
 
+/*
+ * Static constant map used to convert Wi-Fi frequencies to channels.
+ */
+
 public class Frequencies {
     public static final SparseIntArray sChannels = new SparseIntArray() {
         {
