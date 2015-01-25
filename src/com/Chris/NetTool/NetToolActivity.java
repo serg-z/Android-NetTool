@@ -28,7 +28,7 @@ import java.util.Random;
 import java.util.List;
 import java.util.ArrayList;
 
-public class NetToolActivity extends FragmentActivity implements SettingsFragment.OnPingListener,
+public class NetToolActivity extends FragmentActivity implements GraphsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener,
     StreamerFragment.StreamerFragmentListener {
 

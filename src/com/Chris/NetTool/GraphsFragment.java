@@ -90,8 +90,14 @@ public class GraphsFragment extends Fragment {
         public void onServerAddressObtained(int address);
     }
 
+    public interface OnPingListener {
+        public void onPingStart(String address);
+        public void onPingStop();
+        public void onPingLog(String line);
+    }
+
     private OnWifiInfoListener mWifiInfoCallback;
-    private SettingsFragment.OnPingListener mPingCallback;
+    private OnPingListener mPingCallback;
 
     private Handler mTimerHandler = new Handler();
 
@@ -665,7 +671,7 @@ public class GraphsFragment extends Fragment {
         }
 
         try {
-            mPingCallback = (SettingsFragment.OnPingListener)activity;
+            mPingCallback = (OnPingListener)activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnPingListener");
         }

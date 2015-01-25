@@ -22,17 +22,11 @@ import android.support.v4.app.Fragment;
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {
     private Activity mActivity;
-    private OnPingListener mPingCallback;
+    private GraphsFragment.OnPingListener mPingCallback;
 
     private Button mButtonPingStart, mButtonPingStop, mButtonShareLog;
     private EditText mEditPingAddress;
     private TextView mTextViewLog;
-
-    public interface OnPingListener {
-        public void onPingStart(String address);
-        public void onPingStop();
-        public void onPingLog(String line);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -116,7 +110,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         super.onAttach(activity);
 
         try {
-            mPingCallback = (OnPingListener)activity;
+            mPingCallback = (GraphsFragment.OnPingListener)activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnPingListener");
         }
