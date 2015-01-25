@@ -29,7 +29,7 @@ public class Streamer {
         public void onStreamerDownloadingFinished();
         public void onStreamerDownloadingProgressChanged(int downloadingProgress);
         public void onStreamerBufferDepthChanged(int bufferDepth);
-        public void onStreamerDownloadingFailed();
+        public void onStreamerDownloadingFailed(String message);
         public void onStreamerFinished(boolean stoppedByUser);
         public void onStreamerChunkDownloadTime(long time);
         public void onStreamerRandomSeekCompleted();
@@ -169,7 +169,7 @@ public class Streamer {
                     mBufferDepth = 0;
 
                     if (mStreamerListener != null) {
-                        mStreamerListener.onStreamerDownloadingFailed();
+                        mStreamerListener.onStreamerDownloadingFailed((String)inputMessage.obj);
                     }
 
                     break;
@@ -693,7 +693,7 @@ public class Streamer {
 
                 Log.d(TAG, "ConnectionThread: Failed");
 
-                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED, null)
+                mHandler.obtainMessage(MessageId.STREAM_DOWNLOADING_FAILED, e.toString())
                     .sendToTarget();
 
                 return;

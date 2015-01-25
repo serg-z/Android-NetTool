@@ -78,6 +78,7 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     private int mStreamerReadTimeout = 60000;
 
     private StreamerFragmentListener mStreamerFragmentCallback;
+    private SettingsFragment.OnLogListener mLogCallback;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -276,6 +277,12 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
             mStreamerFragmentCallback = (StreamerFragmentListener)activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement StreamerFragmentListener");
+        }
+
+        try {
+            mLogCallback = (SettingsFragment.OnLogListener)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnLogListener");
         }
     }
 
@@ -574,8 +581,12 @@ public class StreamerFragment extends Fragment implements View.OnClickListener, 
     }
 
     @Override
-    public void onStreamerDownloadingFailed() {
-        Toast.makeText(mActivity, R.string.stream_downloading_failed, Toast.LENGTH_SHORT).show();
+    public void onStreamerDownloadingFailed(String message) {
+        final String logMessage = getString(R.string.stream_downloading_failed) + "\n" + message;
+
+        Toast.makeText(mActivity, logMessage, Toast.LENGTH_SHORT).show();
+
+        mLogCallback.onPrependLog(logMessage);
 
         onStreamerDownloadingProgressChanged(0);
 
