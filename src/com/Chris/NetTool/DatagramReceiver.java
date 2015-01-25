@@ -60,6 +60,7 @@ public class DatagramReceiver {
 
     public void stop() {
         if (mDatagramThread != null && mDatagramThread.isAlive()) {
+            // TODO: don't use interrupt for stopping
             mDatagramThread.interrupt();
         }
     }
