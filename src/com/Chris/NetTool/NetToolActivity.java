@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class NetToolActivity extends FragmentActivity implements GraphsFragment.OnPingListener,
     GraphsFragment.OnWifiInfoListener, DatagramReceiver.DatagramReceiverListener,
-    StreamerFragment.StreamerFragmentListener {
+    StreamerFragment.StreamerFragmentListener, SettingsFragment.OnLogListener {
 
     private static final String TAG = "NetToolActivity";
     // delay before screen will go to lowered brightness (5 minutes in milliseconds)
@@ -249,7 +249,7 @@ public class NetToolActivity extends FragmentActivity implements GraphsFragment.
     }
 
     @Override
-    public void onPingLog(String line) {
+    public void onPrependLog(String line) {
         SettingsFragment fragmentSettings = (SettingsFragment)getSupportFragmentManager()
             .findFragmentByTag(PagerFragment.tag_fragment_settings);
 

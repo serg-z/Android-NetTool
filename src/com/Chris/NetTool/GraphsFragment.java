@@ -93,11 +93,11 @@ public class GraphsFragment extends Fragment {
     public interface OnPingListener {
         public void onPingStart(String address);
         public void onPingStop();
-        public void onPingLog(String line);
     }
 
     private OnWifiInfoListener mWifiInfoCallback;
     private OnPingListener mPingCallback;
+    private SettingsFragment.OnLogListener mLogCallback;
 
     private Handler mTimerHandler = new Handler();
 
@@ -675,6 +675,12 @@ public class GraphsFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnPingListener");
         }
+
+        try {
+            mLogCallback = (SettingsFragment.OnLogListener)activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnLogListener");
+        }
     }
 
     @Override
@@ -768,7 +774,7 @@ public class GraphsFragment extends Fragment {
 
     private void parsePingLog(String line) {
         // add line to ping log text in settings
-        mPingCallback.onPingLog(line);
+        mLogCallback.onPrependLog(line);
 
         // ignore "PING ... bytes of data" line
         if (Pattern.compile("^PING.*bytes of data\\.").matcher(line).matches()) {

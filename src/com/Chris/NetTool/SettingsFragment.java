@@ -28,6 +28,10 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private EditText mEditPingAddress;
     private TextView mTextViewLog;
 
+    public interface OnLogListener {
+        public void onPrependLog(String line);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
