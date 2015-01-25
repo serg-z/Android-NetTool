@@ -168,6 +168,8 @@ public class GraphsFragment extends Fragment {
                 ((TextView)mActivity.findViewById(R.id.text_frequency)).setText(text);
 
                 freqNotFound = false;
+
+                // TODO: break from loop
             }
         }
 
