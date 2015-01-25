@@ -24,9 +24,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     private Activity mActivity;
     private OnPingListener mPingCallback;
 
-    private Button mButtonPingStart, mButtonPingStop, mButtonPingLogShare;
+    private Button mButtonPingStart, mButtonPingStop, mButtonShareLog;
     private EditText mEditPingAddress;
-    private TextView mPingLog;
+    private TextView mTextViewLog;
 
     public interface OnPingListener {
         public void onPingStart(String address);
@@ -85,28 +85,28 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         mButtonPingStop.setText("Stop");
         mButtonPingStop.setOnClickListener(this);
 
-        // ping log
+        // log text view
 
-        mPingLog = new TextView(mActivity);
+        mTextViewLog = new TextView(mActivity);
 
-        mPingLog.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+        mTextViewLog.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
             LayoutParams.WRAP_CONTENT));
 
-        layout.addView(mPingLog);
+        layout.addView(mTextViewLog);
 
-        mPingLog.setLines(20);
+        mTextViewLog.setLines(20);
 
-        // ping share
+        // log share button
 
-        mButtonPingLogShare = new Button(mActivity);
+        mButtonShareLog = new Button(mActivity);
 
-        mButtonPingLogShare.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        mButtonShareLog.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT));
 
-        layout.addView(mButtonPingLogShare);
+        layout.addView(mButtonShareLog);
 
-        mButtonPingLogShare.setText("Share ping log");
-        mButtonPingLogShare.setOnClickListener(this);
+        mButtonShareLog.setText("Share NetTool log");
+        mButtonShareLog.setOnClickListener(this);
 
         return layout;
     }
@@ -128,14 +128,15 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
             pingStart();
         } else if (view == mButtonPingStop) {
             pingStop();
-        } else if (view == mButtonPingLogShare) {
+        } else if (view == mButtonShareLog) {
             Intent intent = new Intent(Intent.ACTION_SEND);
 
             intent.setType("text/plain");
-            intent.putExtra(Intent.EXTRA_SUBJECT, "Ping Log");
-            intent.putExtra(Intent.EXTRA_TEXT, mPingLog.getText());
 
-            mActivity.startActivity(Intent.createChooser(intent, "Share ping log"));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "NetTool Log");
+            intent.putExtra(Intent.EXTRA_TEXT, mTextViewLog.getText());
+
+            mActivity.startActivity(Intent.createChooser(intent, "Share NetTool log"));
         }
     }
 
@@ -147,8 +148,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         mEditPingAddress.setText(address);
     }
 
-    public void pingLog(String line) {
-        mPingLog.setText(line + "\n" + mPingLog.getText());
+    public void prependLog(String line) {
+        mTextViewLog.setText(line + "\n" + mTextViewLog.getText());
     }
 
     public void pingStart() {

@@ -146,7 +146,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .findFragmentByTag(PagerFragment.tag_fragment_settings);
 
         if (fragmentSettings != null) {
-            fragmentSettings.pingLog(stats);
+            fragmentSettings.prependLog(stats);
         }
 
         // start dim runnable which will dim the display if there is no user interaction for defined period of time
@@ -254,7 +254,7 @@ public class NetToolActivity extends FragmentActivity implements SettingsFragmen
             .findFragmentByTag(PagerFragment.tag_fragment_settings);
 
         if (fragmentSettings != null) {
-            fragmentSettings.pingLog(line);
+            fragmentSettings.prependLog(line);
         }
     }
 
