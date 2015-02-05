@@ -10,14 +10,16 @@ mkdir libs
 
 * Get JDK from Oracle's website, tar.gz version will work fine
 * Get Android SDK (stand-alone Android SDK Tools)
+* Get [Android NDK](https://developer.android.com/tools/sdk/ndk/index.html)
 * Get AndroidPlot library's JAR file from [it's site](http://androidplot.com/download/), put it into project's "libs" directory
 
-Unpack JDK and Android SDK
-Copy path to root JDK directory and Android SDK's "tools" directory into `android_paths` script, it should look something like that:
+Unpack JDK and Android SDK/NDK
+Copy paths to root JDK directory, Android SDK's "tools" directory and android NDK's directory into `android_paths` script, it should look something like that:
 
 ``` bash
-export JAVA_HOME="/home/user/Dev/jdk1.8.0_25"
-export ANDROID_HOME="/home/user/Dev/android-sdk_r23.0.2-linux/android-sdk-linux/tools"
+export JAVA_HOME="/home/user/Dev/jdk1.8.0_31"
+export NDK_HOME="/home/user/Dev/android-ndk-r10d"
+export ANDROID_HOME="/home/user/Dev/android-sdk_r24.0.2-linux/android-sdk-linux/tools"
 ```
 
 Update PATH variable before working with Android SDK calling this command:
@@ -26,25 +28,31 @@ Update PATH variable before working with Android SDK calling this command:
 source android_paths
 ```
 
-Copy Android support library
-
-``` bash
-cp $ANDROID_HOME/../extras/android/support/v4/android-support-v4.jar libs/
-```
-
 # Android SDK Manager
 
 To launch Android SDK Manager run command:
 
 ``` bash
-android
+android &
 ```
 
-From Android 4.4.2 (API 19) install
+Click there "Deselect All" to skip unwanted packages for now. Select and install "Extras / Android Support Library".
+
+Copy Android support library into project's directory
+
+``` bash
+cp $ANDROID_HOME/../extras/android/support/v4/android-support-v4.jar libs/
+```
+
+From Android 5.0.1 (API 21) install
 
 * SDK Platform
 * To work with emulator - Intel x86 Atom System Image
 * Another Android SDK Platforms if required
+
+Install "Tools / Android SDK Build-tools 21.1.2"
+
+*You'll need to update "PATH" variable in `android_paths` script to use another version of Build-tools*
 
 Close SDK Manager
 
@@ -54,7 +62,7 @@ List available targets
 android list target
 ```
 
-Note the ID for target (default: Android 4.4.2)
+Note the ID for target (default: Android 5.0.1)
 
 Prepare project for building
 
@@ -62,21 +70,17 @@ Prepare project for building
 android update project -t <id> -p .
 ```
 
+# Building
+
 Builds can be found in "bin" directory
 
-## Building debug version
+## Debug version
 
 ``` bash
 ./build_debug
 ```
 
-## Building release version
-
-### Install Build-tools
-
-* Run Android SDK Manager
-* Install Android SDK Build-tools 21.1.2 from Tools
-* You'll need to update "PATH" variable in `android_paths` script to use another version of Build-tools
+## Release version
 
 ### Generate keystore with release signing key in it
 
