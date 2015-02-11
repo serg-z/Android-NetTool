@@ -937,7 +937,8 @@ public class GraphsFragment extends Fragment {
                 // "Network is unreachable" and "Destination Host Unreachable" patterns
                 final boolean match =
                     Pattern.compile("^.*Network\\sis\\sunreachable$").matcher(line).matches()
-                    || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches();
+                    || Pattern.compile("^.*Destination\\sHost\\sUnreachable$").matcher(line).matches()
+                    || Pattern.compile("^.*Destination\\sNet\\sProhibited$").matcher(line).matches();
 
                 if (match) {
                     pingResult = 0;
