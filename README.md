@@ -1,3 +1,8 @@
+# Android NetTool
+
+[![Graphs and stats page](http://i.imgur.com/NrVFhLvm.png)](http://i.imgur.com/NrVFhLv.png)
+[![Streamer page](http://i.imgur.com/pfp1k1lm.png)](http://i.imgur.com/pfp1k1l.png)
+
 # Building
 
 ## Getting libraries and SDKs
