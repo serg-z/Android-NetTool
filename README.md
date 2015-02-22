@@ -1,7 +1,7 @@
 # Android NetTool
 
-[![Graphs and stats page](http://i.imgur.com/NrVFhLvm.png)](http://i.imgur.com/NrVFhLv.png)
-[![Streamer page](http://i.imgur.com/pfp1k1lm.png)](http://i.imgur.com/pfp1k1l.png)
+[![Graphs and stats page](http://i.imgur.com/ND9wER0m.png)](http://i.imgur.com/ND9wER0.png)
+[![Streamer page](http://i.imgur.com/ecNdufZm.png)](http://i.imgur.com/ecNdufZ.png)
 
 # Building
 
