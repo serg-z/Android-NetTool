@@ -142,3 +142,37 @@ To install APK onto one of the listed devices run
 ``` bash
 adb -s <device name> install -r <apk path>
 ```
+
+# Sending datagrams with configuration messages
+
+Datagrams can be sent to all devices connected to the network using auxiliary scripts located in "datagram_utils" directory. The directory contains:
+
+* broadcast_series.sh
+* broadcast_to_peds.sh
+* datagram_test.conf
+
+## Configuration message file and datagram_test.conf
+
+The configuration message is contained in text file. The example of such message can be found in "datagram_text.conf" file. Every available option is listed there and prepended with description. Lines can be commented out using "#" (number sign, hash) symbol.
+
+## Script broadcast_to_peds.sh
+
+`broadcast_to_peds.sh` is the script which actually sends the configuration file using "socat", what implies that "socat" has to be installed on the system where the script is used. Configuration file path is specified in first argument. Before sending commented and empty lines of the message will be removed using "sed". Also, the message will be prepended with "message_id" option (which is taken from second argument and defaults to "-1" if not provided). After that the message is UDP broadcasted using "socat" on "255.255.255.255:55555" address and port.
+
+``` bash
+broadcast_to_peds.sh filepath [message id]
+```
+
+## Script broadcast_series.sh
+
+Because the UDP datagram may be missed by the device for various reasons, there exists another auxiliary script - `broadcast_series.sh`.
+
+The purpose of this script is sending one single message repeatedly for specified number of times and with specified delay. Default number of repeats is 5 and default delay is 200 ms.
+
+This script calls `broadcast_to_peds.sh` and provides message id to it. The message id in this case is result of running `date +%s` command. Each message from the sequence has same message id. The app, before processing received message, checks the id and discards the message if it was processed before.
+
+``` bash
+broadcast_series.sh filepath [number of repeats] [delay]
+```
+
+**It's recommended to use `broadcast_series.sh` script for sending messages.**
